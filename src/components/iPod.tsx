@@ -39,6 +39,28 @@ const IPod: React.FC<IPodProps> = ({
   const [myFiveSongsCount, setMyFiveSongsCount] = useState(0);
   const [isSharedView, setIsSharedView] = useState(false);
 
+  // Check if we're on a shared route immediately
+  useEffect(() => {
+    const currentPath = window.location.pathname;
+    const isMyFiveRoute = currentPath.includes('/my-five/');
+    
+    if (isMyFiveRoute) {
+      console.log('Detected shared route, setting up shared view');
+      setIsSharedView(true);
+      setCurrentScreen('menu');
+      setIsInMyFiveView(true);
+      setSelectedMenuItem(0);
+    }
+  }, []); // Run once on mount
+
+  // Update songs count when shared songs change
+  useEffect(() => {
+    if (isSharedView && sharedUserSongs.length > 0) {
+      console.log('Updating shared songs count:', sharedUserSongs.length);
+      setMyFiveSongsCount(sharedUserSongs.length);
+    }
+  }, [sharedUserSongs, isSharedView]);
+
   useEffect(() => {
     const loadMenuItems = async () => {
       const items = await getMenuItems();
@@ -46,6 +68,9 @@ const IPod: React.FC<IPodProps> = ({
     };
 
     const loadMyFiveSongs = async () => {
+      // Only load user's own songs if not in shared view
+      if (isSharedView) return;
+      
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
@@ -81,25 +106,7 @@ const IPod: React.FC<IPodProps> = ({
     });
 
     return () => subscription.unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    const currentPath = window.location.pathname;
-    const isMyFiveRoute = currentPath.includes('/my-five/');
-    
-    if (isMyFiveRoute && (sharedUserProfile || sharedUserSongs.length > 0)) {
-      console.log('Setting up shared view with:', { 
-        profile: sharedUserProfile, 
-        songsCount: sharedUserSongs.length,
-        songs: sharedUserSongs 
-      });
-      setIsSharedView(true);
-      setCurrentScreen('menu');
-      setIsInMyFiveView(true);
-      setSelectedMenuItem(0);
-      setMyFiveSongsCount(sharedUserSongs.length);
-    }
-  }, [sharedUserProfile, sharedUserSongs]);
+  }, [isSharedView]);
 
   const triggerHapticFeedback = () => {
     // Check if vibration API is available (mobile devices)
