@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { useSignUp } from '../hooks/useSignUp';
@@ -29,7 +30,7 @@ const SignIn = () => {
     checkAuth();
   }, []);
 
-  const handleSubmit = async (formData: { fullName: string; email: string; password: string }, profilePicture?: File | null) => {
+  const handleSubmit = async (formData: { fullName: string; username: string; email: string; password: string }, profilePicture?: File | null) => {
     setUserEmail(formData.email);
     const result = await signUp(formData, profilePicture);
     

@@ -8,6 +8,7 @@ import ProfilePictureUpload from './ProfilePictureUpload';
 
 interface FormData {
   fullName: string;
+  username: string;
   email: string;
   password: string;
 }
@@ -22,6 +23,7 @@ interface SignInFormProps {
 const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProps) => {
   const [formData, setFormData] = useState<FormData>({
     fullName: '',
+    username: '',
     email: '',
     password: ''
   });
@@ -54,6 +56,7 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
         if (profile) {
           setFormData({
             fullName: profile.full_name || '',
+            username: profile.username || '',
             email: profile.email || '',
             password: '' // Don't pre-fill password
           });
@@ -153,6 +156,7 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
             .from('profiles')
             .update({
               full_name: formData.fullName,
+              username: formData.username,
               email: formData.email,
               profile_picture_url: profilePictureUrl
             })
@@ -171,9 +175,10 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
             updateData.password = formData.password;
           }
           
-          // Update user metadata with full name and profile picture URL
+          // Update user metadata with full name, username and profile picture URL
           updateData.data = {
             full_name: formData.fullName,
+            username: formData.username,
             profile_picture_url: profilePictureUrl
           };
           
@@ -246,6 +251,21 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
                   required
                   className="mt-1"
                   disabled={isLoading}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="username">Username</Label>
+                <Input
+                  id="username"
+                  name="username"
+                  type="text"
+                  value={formData.username}
+                  onChange={handleInputChange}
+                  required
+                  className="mt-1"
+                  disabled={isLoading}
+                  placeholder="Choose a unique username"
                 />
               </div>
               

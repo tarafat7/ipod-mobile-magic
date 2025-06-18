@@ -5,6 +5,7 @@ import { useToast } from './use-toast';
 
 interface FormData {
   fullName: string;
+  username: string;
   email: string;
   password: string;
 }
@@ -41,6 +42,27 @@ export const useSignUp = () => {
     }
   };
 
+  const checkUsernameAvailability = async (username: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('username', username)
+        .single();
+
+      if (error && error.code === 'PGRST116') {
+        // No rows found, username is available
+        return true;
+      }
+
+      // Username exists
+      return false;
+    } catch (error) {
+      console.error('Error checking username availability:', error);
+      return false;
+    }
+  };
+
   const signUp = async (formData: FormData, profilePicture?: File | null) => {
     setIsLoading(true);
     setError(null);
@@ -49,8 +71,16 @@ export const useSignUp = () => {
       console.log('Starting signup process with data:', { 
         email: formData.email, 
         fullName: formData.fullName,
+        username: formData.username,
         hasProfilePicture: !!profilePicture
       });
+
+      // Check if username is available
+      const isUsernameAvailable = await checkUsernameAvailability(formData.username);
+      if (!isUsernameAvailable) {
+        setError('This username is already taken. Please choose another one.');
+        return null;
+      }
 
       // Generate a device ID if one doesn't exist
       let deviceId = localStorage.getItem('fivepod_device_id');
@@ -62,7 +92,8 @@ export const useSignUp = () => {
 
       // Prepare user metadata
       const userMetadata: any = {
-        full_name: formData.fullName
+        full_name: formData.fullName,
+        username: formData.username
       };
 
       // Sign up with Supabase first
