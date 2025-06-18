@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -103,7 +102,7 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          // Update profile
+          // Update profile in profiles table
           await supabase
             .from('profiles')
             .update({
@@ -112,15 +111,25 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
             })
             .eq('id', user.id);
           
-          // Update auth email if changed
+          // Update auth user metadata and email
+          const updateData: any = {};
+          
+          // Update email if changed
           if (formData.email !== user.email) {
-            await supabase.auth.updateUser({ email: formData.email });
+            updateData.email = formData.email;
           }
           
           // Update password if provided
           if (formData.password) {
-            await supabase.auth.updateUser({ password: formData.password });
+            updateData.password = formData.password;
           }
+          
+          // Update user metadata with full name
+          updateData.data = {
+            full_name: formData.fullName
+          };
+          
+          await supabase.auth.updateUser(updateData);
           
           // Redirect back to main page
           window.location.href = '/';
