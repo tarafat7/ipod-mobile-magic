@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { SkipForward, SkipBack } from 'lucide-react';
 
@@ -10,13 +11,6 @@ interface ClickWheelProps {
 
 const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCenterClick, onMenuClick }) => {
   const wheelRef = useRef<HTMLDivElement>(null);
-
-  const triggerHapticFeedback = () => {
-    // Check if vibration API is available (mobile devices)
-    if ('vibrate' in navigator) {
-      navigator.vibrate(10); // Short 10ms vibration
-    }
-  };
 
   const handleTouchStart = (e: React.TouchEvent) => {
     e.preventDefault();
@@ -31,9 +25,6 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCe
       clientX: touch.clientX,
       clientY: touch.clientY,
     } as React.MouseEvent;
-    
-    // Trigger haptic feedback on touch move
-    triggerHapticFeedback();
     
     onWheelMove(mouseEvent);
   };

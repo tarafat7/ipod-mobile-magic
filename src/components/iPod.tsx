@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import Screen from './Screen';
 import ClickWheel from './ClickWheel';
@@ -10,6 +11,13 @@ const IPod = () => {
   const [selectedSong, setSelectedSong] = useState(0);
   const [currentTime, setCurrentTime] = useState('0:00');
   const [lastAngle, setLastAngle] = useState<number | null>(null);
+
+  const triggerHapticFeedback = () => {
+    // Check if vibration API is available (mobile devices)
+    if ('vibrate' in navigator) {
+      navigator.vibrate(10); // Short 10ms vibration
+    }
+  };
 
   const handleWheelMove = (e: React.MouseEvent) => {
     const wheelElement = e.currentTarget as HTMLElement;
@@ -35,6 +43,9 @@ const IPod = () => {
       
       // Determine direction: positive = clockwise, negative = counter-clockwise
       const isClockwise = angleDiff > 0;
+      
+      // Trigger haptic feedback when an item changes
+      triggerHapticFeedback();
       
       if (currentScreen === 'menu') {
         if (isClockwise) {
