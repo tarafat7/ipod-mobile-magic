@@ -95,8 +95,11 @@ export const useCenterButtonActions = ({
   };
 
   const handleCenterClick = () => {
+    console.log('Center button clicked - currentScreen:', currentScreen, 'isInMyFiveView:', isInMyFiveView, 'isInSettingsView:', isInSettingsView);
+    
     if (currentScreen === 'menu') {
       if (isInMyFiveView) {
+        console.log('In My Five view - selectedMyFiveSong:', selectedMyFiveSong);
         if (isSharedView && sharedUserSongs[selectedMyFiveSong]) {
           window.open(sharedUserSongs[selectedMyFiveSong].spotifyUrl, '_blank');
         } else {
@@ -106,6 +109,8 @@ export const useCenterButtonActions = ({
       } else if (isInSettingsView) {
         const settingsItems = ['Share Profile', 'Edit Account', 'Edit My Five', 'Logout', 'Delete Account'];
         const selectedSettingsAction = settingsItems[selectedSettingsItem];
+        
+        console.log('Settings action selected:', selectedSettingsAction);
         
         switch (selectedSettingsAction) {
           case 'Share Profile':
@@ -126,9 +131,12 @@ export const useCenterButtonActions = ({
         }
       } else {
         const selectedItem = menuItems[selectedMenuItem];
+        console.log('Main menu item selected:', selectedItem, 'at index:', selectedMenuItem);
+        
         if (selectedItem === 'Sign In') {
           handleSignInClick();
         } else if (selectedItem === 'My Five') {
+          console.log('Setting isInMyFiveView to true');
           setIsInMyFiveView(true);
           setSelectedMyFiveSong(0);
         } else if (selectedItem === 'Friends') {
