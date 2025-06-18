@@ -12,7 +12,7 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onCenterClick, onM
   const wheelRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="relative mx-auto w-60 h-60 md:w-56 md:h-56 flex-shrink-0">
+    <div className="relative w-72 h-72 md:w-64 md:h-64 flex-shrink-0">
       <div 
         ref={wheelRef}
         className="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-300 rounded-full shadow-lg border border-gray-400 cursor-pointer"
@@ -20,7 +20,7 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onCenterClick, onM
       >
         
         {/* MENU Text */}
-        <div className="absolute top-6 left-1/2 transform -translate-x-1/2">
+        <div className="absolute top-8 left-1/2 transform -translate-x-1/2">
           <button 
             className="text-gray-700 hover:text-gray-900 transition-colors font-medium text-sm tracking-wider"
             onClick={onMenuClick}
@@ -30,24 +30,24 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onCenterClick, onM
         </div>
         
         {/* Control Buttons */}
-        <button className="absolute right-6 top-1/2 transform -translate-y-1/2 w-6 h-6 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-colors">
+        <button className="absolute right-8 top-1/2 transform -translate-y-1/2 w-6 h-6 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-colors">
           <SkipForward size={16} />
         </button>
         
-        <button className="absolute bottom-6 left-1/2 transform -translate-x-1/2 w-6 h-6 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-colors">
+        <button className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-6 h-6 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-colors">
           <div className="flex space-x-1">
             <div className="w-1 h-1 bg-gray-700 rounded-full"></div>
             <div className="w-1 h-1 bg-gray-700 rounded-full"></div>
           </div>
         </button>
         
-        <button className="absolute left-6 top-1/2 transform -translate-y-1/2 w-6 h-6 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-colors">
+        <button className="absolute left-8 top-1/2 transform -translate-y-1/2 w-6 h-6 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-colors">
           <SkipBack size={16} />
         </button>
 
         {/* Center Button */}
         <button 
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-300 rounded-full shadow-inner border border-gray-400 hover:shadow-lg transition-all duration-200 active:scale-95"
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-28 h-28 bg-gradient-to-br from-gray-100 to-gray-300 rounded-full shadow-inner border border-gray-400 hover:shadow-lg transition-all duration-200 active:scale-95"
           onClick={onCenterClick}
         >
         </button>

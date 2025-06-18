@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import Screen from './Screen';
 import ClickWheel from './ClickWheel';
@@ -63,12 +64,14 @@ const IPod = () => {
             currentTime={currentTime}
           />
 
-          {/* Click Wheel - Responsive sizing and positioning */}
-          <ClickWheel 
-            onWheelMove={handleWheelMove}
-            onCenterClick={handleCenterClick}
-            onMenuClick={handleMenuClick}
-          />
+          {/* Click Wheel - Centered in remaining space */}
+          <div className="flex-1 flex items-center justify-center">
+            <ClickWheel 
+              onWheelMove={handleWheelMove}
+              onCenterClick={handleCenterClick}
+              onMenuClick={handleMenuClick}
+            />
+          </div>
         </div>
 
         {/* Subtle highlight effect for sheen - only on desktop */}
