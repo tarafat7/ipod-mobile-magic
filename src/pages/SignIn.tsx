@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -42,9 +41,7 @@ const SignIn = () => {
   };
 
   const handleReturnToiPod = () => {
-    // This will close the current tab/window and return to the iPod
-    window.close();
-    // Fallback: redirect to the main app
+    // Redirect to the main iPod page
     window.location.href = '/';
   };
 
