@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { getMenuItems } from '../../data/iPodData';
 import { supabase } from '../../integrations/supabase/client';
@@ -64,8 +65,35 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
     setHoveredSettingsItem(item);
   };
 
+  const handleShareProfile = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const shareUrl = `${window.location.origin}/my-five/${user.id}`;
+      const shareData = {
+        title: 'Check out my Five!',
+        text: 'Here are the 5 songs on repeat for me right now',
+        url: shareUrl
+      };
+
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(shareUrl);
+        alert('Link copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Error sharing profile:', error);
+    }
+  };
+
   const handleSettingsAction = async (action: string) => {
     switch (action) {
+      case 'Share Profile':
+        await handleShareProfile();
+        break;
       case 'Edit Account':
         window.location.href = '/signin?mode=edit';
         break;
