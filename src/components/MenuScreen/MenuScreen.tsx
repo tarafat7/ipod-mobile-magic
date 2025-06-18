@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { getMenuItems } from '../../data/iPodData';
 import { supabase } from '../../integrations/supabase/client';
@@ -99,7 +98,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
   };
 
   const handleSettingsItemHover = (item: string | null) => {
-    console.log('MenuScreen - handleSettingsItemHover called with:', item);
+    console.log('MenuScreen - Received hover event:', item);
     setHoveredSettingsItem(item);
   };
 
@@ -161,7 +160,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
   };
 
   return (
-    <div className={`h-full flex transition-all duration-300 ${isInSettingsView ? 'settings-view' : ''}`}>
+    <div className="h-full flex">
       {!isInMyFiveView && (
         <MenuPanel
           menuItems={menuItems}

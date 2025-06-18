@@ -40,11 +40,11 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
   sharedUserProfile = null,
   sharedUserSongs = []
 }) => {
-  console.log('ContentPanel render - hoveredSettingsItem:', hoveredSettingsItem, 'isInSettingsView:', isInSettingsView);
+  console.log('ContentPanel - hoveredSettingsItem:', hoveredSettingsItem);
 
   if (isInMyFiveView) {
     return (
-      <div className="w-full bg-gray-50 transition-all duration-300 transform translate-x-0">
+      <div className="w-full bg-gray-50">
         <MyFiveFullView 
           selectedSongIndex={selectedMyFiveSong}
           isSharedView={isSharedView}
@@ -58,16 +58,16 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
   if (isInSettingsView) {
     // Show account preview when hovering over "Edit Account"
     if (hoveredSettingsItem === 'Edit Account') {
-      console.log('Showing AccountPreview for Edit Account hover');
+      console.log('ContentPanel - Showing AccountPreview for Edit Account');
       return (
-        <div className="w-1/2 bg-gray-50 transition-all duration-300 transform translate-x-0">
+        <div className="w-1/2 bg-gray-50">
           <AccountPreview />
         </div>
       );
     }
     
     return (
-      <div className="w-1/2 bg-gray-50 transition-all duration-300 transform translate-x-0">
+      <div className="w-1/2 bg-gray-50">
         <div className="h-full flex flex-col items-center justify-center p-4 text-center">
           <Settings size={32} className="text-gray-600 mb-3" />
           <h3 className="font-bold text-lg mb-1">Settings</h3>
@@ -129,7 +129,7 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
   };
 
   return (
-    <div className="w-1/2 bg-gray-50 transition-all duration-300 transform translate-x-0">
+    <div className="w-1/2 bg-gray-50">
       {renderContent()}
     </div>
   );
