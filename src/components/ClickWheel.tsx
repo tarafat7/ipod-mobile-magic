@@ -12,13 +12,37 @@ interface ClickWheelProps {
 const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCenterClick, onMenuClick }) => {
   const wheelRef = useRef<HTMLDivElement>(null);
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    e.preventDefault();
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    e.preventDefault();
+    // Convert touch to mouse event for wheel move handling
+    const touch = e.touches[0];
+    const mouseEvent = {
+      currentTarget: e.currentTarget,
+      clientX: touch.clientX,
+      clientY: touch.clientY,
+    } as React.MouseEvent;
+    onWheelMove(mouseEvent);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    e.preventDefault();
+    onWheelLeave();
+  };
+
   return (
-    <div className="relative w-72 h-72 md:w-64 md:h-64 flex-shrink-0">
+    <div className="relative w-80 h-80 md:w-72 md:h-72 flex-shrink-0">
       <div 
         ref={wheelRef}
-        className="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-300 rounded-full shadow-lg border border-gray-400 cursor-pointer"
+        className="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-300 rounded-full shadow-lg border border-gray-400 cursor-pointer touch-none"
         onMouseMove={onWheelMove}
         onMouseLeave={onWheelLeave}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         
         {/* MENU Text */}
