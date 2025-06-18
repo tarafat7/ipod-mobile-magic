@@ -155,15 +155,14 @@ export const useCenterButtonActions = ({
       // Handle main menu selection
       const selectedItem = menuItems[selectedMenuItem];
       console.log('Main menu - selected item:', selectedItem);
-      
-      if (selectedItem === 'My Five') {
-        console.log('ACTIVATING MY FIVE VIEW');
-        setIsInMyFiveView(true);
-        setSelectedMyFiveSong(0);
-        return;
-      }
 
       switch (selectedItem) {
+        case 'My Five':
+          console.log('ACTIVATING MY FIVE VIEW');
+          setIsInMyFiveView(true);
+          setSelectedMyFiveSong(0);
+          break;
+          
         case 'Sign In':
           window.open('/signin', '_blank');
           break;
