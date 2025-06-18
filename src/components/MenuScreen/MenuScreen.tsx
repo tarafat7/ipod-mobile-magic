@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { getMenuItems } from '../../data/iPodData';
 import { supabase } from '../../integrations/supabase/client';
@@ -26,6 +25,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
 }) => {
   const [menuItems, setMenuItems] = useState<string[]>([]);
   const [isSignedIn, setIsSignedIn] = useState(false);
+  const [hoveredSettingsItem, setHoveredSettingsItem] = useState<string | null>(null);
 
   useEffect(() => {
     const loadMenuItems = async () => {
@@ -58,6 +58,10 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
 
   const handleSettingsItemClick = (index: number) => {
     onSettingsItemChange(index);
+  };
+
+  const handleSettingsItemHover = (item: string | null) => {
+    setHoveredSettingsItem(item);
   };
 
   const handleSettingsAction = async (action: string) => {
@@ -103,6 +107,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
           onSettingsAction={handleSettingsAction}
           onMenuItemClick={handleMenuItemClick}
           onSettingsItemClick={handleSettingsItemClick}
+          onSettingsItemHover={handleSettingsItemHover}
         />
       )}
       <ContentPanel
@@ -112,6 +117,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
         isSignedIn={isSignedIn}
         isInMyFiveView={isInMyFiveView}
         selectedMyFiveSong={selectedMyFiveSong}
+        hoveredSettingsItem={hoveredSettingsItem}
       />
     </div>
   );

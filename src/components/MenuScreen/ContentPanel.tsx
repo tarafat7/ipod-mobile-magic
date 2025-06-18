@@ -1,9 +1,9 @@
-
 import React from 'react';
 import FriendsScreen from '../FriendsScreen';
 import SettingsScreen from '../SettingsScreen';
 import MyFivePreview from '../MyFivePreview';
 import MyFiveFullView from '../MyFiveFullView';
+import AccountPreview from '../AccountPreview';
 import { User, Settings } from 'lucide-react';
 
 interface ContentPanelProps {
@@ -13,6 +13,7 @@ interface ContentPanelProps {
   isSignedIn: boolean;
   isInMyFiveView?: boolean;
   selectedMyFiveSong?: number;
+  hoveredSettingsItem?: string | null;
 }
 
 const ContentPanel: React.FC<ContentPanelProps> = ({
@@ -21,7 +22,8 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
   isInSettingsView,
   isSignedIn,
   isInMyFiveView = false,
-  selectedMyFiveSong = 0
+  selectedMyFiveSong = 0,
+  hoveredSettingsItem = null
 }) => {
   if (isInMyFiveView) {
     return (
@@ -32,6 +34,15 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
   }
 
   if (isInSettingsView) {
+    // Show account preview when hovering over "Edit Account"
+    if (hoveredSettingsItem === 'Edit Account') {
+      return (
+        <div className="w-1/2 bg-gray-50 transition-all duration-300">
+          <AccountPreview />
+        </div>
+      );
+    }
+    
     return (
       <div className="w-1/2 bg-gray-50 transition-all duration-300">
         <div className="h-full flex flex-col items-center justify-center p-4 text-center">

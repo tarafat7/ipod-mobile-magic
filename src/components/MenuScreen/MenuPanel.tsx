@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 
 interface MenuPanelProps {
   menuItems: string[];
@@ -11,6 +11,7 @@ interface MenuPanelProps {
   onSettingsAction: (action: string) => void;
   onMenuItemClick: (index: number) => void;
   onSettingsItemClick: (index: number) => void;
+  onSettingsItemHover?: (item: string | null) => void;
 }
 
 const settingsMenuItems = [
@@ -30,7 +31,8 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   onSettingsClick,
   onSettingsAction,
   onMenuItemClick,
-  onSettingsItemClick
+  onSettingsItemClick,
+  onSettingsItemHover
 }) => {
   const currentMenuItems = isInSettingsView ? settingsMenuItems : menuItems;
   const currentSelectedIndex = isInSettingsView ? selectedSettingsItem : selectedMenuItem;
@@ -48,6 +50,18 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
       if (item === 'Settings' && isSignedIn) {
         onSettingsClick();
       }
+    }
+  };
+
+  const handleItemHover = (item: string) => {
+    if (isInSettingsView && onSettingsItemHover) {
+      onSettingsItemHover(item);
+    }
+  };
+
+  const handleItemLeave = () => {
+    if (isInSettingsView && onSettingsItemHover) {
+      onSettingsItemHover(null);
     }
   };
 
@@ -84,6 +98,8 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
                 backgroundColor: currentSelectedIndex === index ? '#3398d8' : 'transparent'
               }}
               onClick={() => handleItemClick(item, index)}
+              onMouseEnter={() => handleItemHover(item)}
+              onMouseLeave={handleItemLeave}
             >
               <span>{item}</span>
               {currentSelectedIndex === index && isInSettingsView && (
