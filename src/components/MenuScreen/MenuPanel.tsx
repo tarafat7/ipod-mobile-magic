@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { supabase } from '../../integrations/supabase/client';
 
@@ -19,7 +20,6 @@ const settingsMenuItems = [
   'Share Profile',
   'Edit Account', 
   'Edit My Five',
-  'Product Feedback',
   'Logout',
   'Delete Account'
 ];
@@ -39,18 +39,13 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
 }) => {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   
-  // Determine which menu items to show
-  let currentMenuItems;
-  let currentSelectedIndex;
+  // Modify menu items for shared view
+  const displayMenuItems = isSharedView && !isSignedIn 
+    ? ['Sign In', ...menuItems.filter(item => item !== 'Sign In')] 
+    : (isInSettingsView ? settingsMenuItems : menuItems);
   
-  if (isInSettingsView) {
-    currentMenuItems = settingsMenuItems;
-    currentSelectedIndex = selectedSettingsItem;
-  } else {
-    // For main menu, use the regular menu items (which should include Sign In when not signed in)
-    currentMenuItems = menuItems;
-    currentSelectedIndex = selectedMenuItem;
-  }
+  const currentMenuItems = displayMenuItems;
+  const currentSelectedIndex = isInSettingsView ? selectedSettingsItem : selectedMenuItem;
 
   const handleShareProfile = async () => {
     try {
