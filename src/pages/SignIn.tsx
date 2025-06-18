@@ -49,8 +49,6 @@ const SignIn = () => {
         localStorage.setItem('ipod_device_id', deviceId);
       }
 
-      console.log('Signing up with device_id:', deviceId);
-
       // Sign up with Supabase - include device_id in user metadata
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
@@ -65,72 +63,14 @@ const SignIn = () => {
       });
 
       if (signUpError) {
-        console.error('Signup error:', signUpError);
         setError(signUpError.message);
         return;
       }
 
-      console.log('Signup successful:', data);
-
       if (data.user) {
-        console.log('User created, waiting for profile creation...');
-        
-        // Wait longer for the trigger to create the profile
-        setTimeout(async () => {
-          try {
-            // Check if profile exists first
-            const { data: existingProfile, error: fetchError } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', data.user.id)
-              .single();
-
-            if (fetchError && fetchError.code !== 'PGRST116') {
-              console.error('Error checking profile:', fetchError);
-            }
-
-            if (existingProfile) {
-              console.log('Profile already exists:', existingProfile);
-              // Update the existing profile with device_id if it's missing
-              if (!existingProfile.device_id) {
-                const { error: updateError } = await supabase
-                  .from('profiles')
-                  .update({ device_id: deviceId })
-                  .eq('id', data.user.id);
-
-                if (updateError) {
-                  console.error('Error updating profile with device_id:', updateError);
-                } else {
-                  console.log('Device ID updated successfully:', deviceId);
-                }
-              }
-            } else {
-              console.log('Profile does not exist yet, creating manually...');
-              // If profile doesn't exist, create it manually
-              const { error: insertError } = await supabase
-                .from('profiles')
-                .insert({
-                  id: data.user.id,
-                  full_name: formData.fullName,
-                  email: formData.email,
-                  device_id: deviceId
-                });
-
-              if (insertError) {
-                console.error('Error creating profile manually:', insertError);
-              } else {
-                console.log('Profile created manually with device_id:', deviceId);
-              }
-            }
-          } catch (err) {
-            console.error('Error in profile creation/update:', err);
-          }
-        }, 2000); // Increased wait time
-
         setIsSubmitted(true);
       }
     } catch (err) {
-      console.error('Unexpected signup error:', err);
       setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
