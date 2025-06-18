@@ -12,6 +12,7 @@ interface SignInFormProps {
   error: string | null;
   onErrorClear: () => void;
   isLoginMode?: boolean;
+  onModeToggle?: () => void;
 }
 
 const SignInForm: React.FC<SignInFormProps> = ({ 
@@ -19,7 +20,8 @@ const SignInForm: React.FC<SignInFormProps> = ({
   isLoading, 
   error, 
   onErrorClear,
-  isLoginMode = false 
+  isLoginMode = false,
+  onModeToggle
 }) => {
   const { isEditMode, currentUser, initialData } = useAuthMode();
   const { handleEditSubmit } = useAuthSubmit();
@@ -63,6 +65,7 @@ const SignInForm: React.FC<SignInFormProps> = ({
         onErrorClear={onErrorClear}
         isEditMode={isEditMode}
         isLoginMode={isLoginMode}
+        onModeToggle={onModeToggle}
         initialData={initialData}
       />
     </AuthContainer>

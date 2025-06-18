@@ -36,6 +36,11 @@ const SignIn = () => {
     checkAuth();
   }, []);
 
+  const handleModeToggle = () => {
+    setIsLoginMode(!isLoginMode);
+    setError(null); // Clear any existing errors when toggling
+  };
+
   const handleSubmit = async (formData: { fullName: string; username: string; email: string; password: string }) => {
     setUserEmail(formData.email);
     
@@ -101,6 +106,7 @@ const SignIn = () => {
       error={error}
       onErrorClear={handleErrorClear}
       isLoginMode={isLoginMode}
+      onModeToggle={handleModeToggle}
     />
   );
 };

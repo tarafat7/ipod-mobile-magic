@@ -11,6 +11,7 @@ interface AuthFormProps {
   onErrorClear: () => void;
   isEditMode?: boolean;
   isLoginMode?: boolean;
+  onModeToggle?: () => void;
   initialData?: {
     fullName: string;
     email: string;
@@ -24,6 +25,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
   onErrorClear,
   isEditMode = false,
   isLoginMode = false,
+  onModeToggle,
   initialData = { fullName: '', email: '' }
 }) => {
   const [formData, setFormData] = useState({
@@ -111,6 +113,20 @@ const AuthForm: React.FC<AuthFormProps> = ({
       >
         {getButtonText()}
       </Button>
+
+      {!isEditMode && onModeToggle && (
+        <div className="text-center">
+          <Button
+            type="button"
+            variant="link"
+            onClick={onModeToggle}
+            disabled={isLoading}
+            className="text-sm text-gray-600 hover:text-gray-800"
+          >
+            {isLoginMode ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+          </Button>
+        </div>
+      )}
 
       <div className="text-center">
         <Button
