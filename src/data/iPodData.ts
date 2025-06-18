@@ -2,11 +2,9 @@
 import { Song } from '../types/iPod';
 
 export const menuItems = [
-  'Cover Flow',
-  'Music',
-  'Games',
-  'Settings',
-  'Sign In'
+  'Sign In',
+  'Friends', 
+  'Settings'
 ];
 
 export const songs: Song[] = [

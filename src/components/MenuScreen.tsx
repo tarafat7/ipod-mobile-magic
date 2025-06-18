@@ -1,12 +1,68 @@
 
 import React from 'react';
 import { menuItems } from '../data/iPodData';
+import FriendsScreen from './FriendsScreen';
+import SettingsScreen from './SettingsScreen';
+import { User } from 'lucide-react';
 
 interface MenuScreenProps {
   selectedMenuItem: number;
 }
 
 const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
+  // Check if user is signed in
+  const userData = localStorage.getItem('ipod_user');
+  const isSignedIn = !!userData;
+
+  const renderRightPanel = () => {
+    const selectedItem = menuItems[selectedMenuItem];
+    
+    switch (selectedItem) {
+      case 'Friends':
+        return <FriendsScreen />;
+      case 'Settings':
+        return <SettingsScreen />;
+      case 'Sign In':
+        if (isSignedIn) {
+          const user = JSON.parse(userData);
+          return (
+            <div className="h-full flex flex-col items-center justify-center p-4 text-center">
+              <User size={32} className="text-green-600 mb-3" />
+              <h3 className="font-bold text-lg mb-1">Welcome!</h3>
+              <p className="text-sm text-gray-600 leading-tight">
+                Hello, {user.fullName}<br />
+                You're signed in
+              </p>
+            </div>
+          );
+        }
+        return (
+          <div className="h-full flex flex-col items-center justify-center p-4 text-center">
+            <User size={32} className="text-gray-600 mb-3" />
+            <h3 className="font-bold text-lg mb-1">Sign In</h3>
+            <p className="text-sm text-gray-600 leading-tight">
+              Create an account<br />
+              to get started
+            </p>
+          </div>
+        );
+      default:
+        return (
+          <div className="h-full flex flex-col items-center justify-center p-4 text-center">
+            <div className="w-16 h-16 bg-black rounded-xl flex items-center justify-center mb-3">
+              <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                <div className="w-6 h-6 bg-green-600 rounded-md"></div>
+              </div>
+            </div>
+            <h3 className="font-bold text-lg mb-1">iPod.js</h3>
+            <p className="text-sm text-gray-600 text-center leading-tight">
+              Your personal<br />music player
+            </p>
+          </div>
+        );
+    }
+  };
+
   return (
     <div className="h-full flex">
       {/* Left menu panel */}
@@ -37,16 +93,8 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
       </div>
       
       {/* Right content panel */}
-      <div className="w-1/2 bg-gray-50 flex flex-col items-center justify-center p-4">
-        <div className="w-16 h-16 bg-black rounded-xl flex items-center justify-center mb-3">
-          <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
-            <div className="w-6 h-6 bg-green-600 rounded-md"></div>
-          </div>
-        </div>
-        <h3 className="font-bold text-lg mb-1">Spotify</h3>
-        <p className="text-sm text-gray-600 text-center leading-tight">
-          Sign in to view<br />your library
-        </p>
+      <div className="w-1/2 bg-gray-50">
+        {renderRightPanel()}
       </div>
     </div>
   );

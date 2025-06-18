@@ -70,9 +70,13 @@ const IPod = () => {
 
   const handleCenterClick = () => {
     if (currentScreen === 'menu') {
-      if (selectedMenuItem === 1) { // Music
-        setCurrentScreen('music');
-        setSelectedSong(0); // Reset to first song when entering music
+      if (selectedMenuItem === 0) { // Sign In
+        // Open sign-in page in a new tab/window
+        window.open('/signin', '_blank');
+      } else if (selectedMenuItem === 1) { // Friends
+        setCurrentScreen('friends');
+      } else if (selectedMenuItem === 2) { // Settings
+        setCurrentScreen('settings');
       } else {
         setIsPlaying(!isPlaying);
       }

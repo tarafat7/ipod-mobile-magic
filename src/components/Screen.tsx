@@ -2,6 +2,8 @@
 import React from 'react';
 import MenuScreen from './MenuScreen';
 import MusicScreen from './MusicScreen';
+import FriendsScreen from './FriendsScreen';
+import SettingsScreen from './SettingsScreen';
 import { Song } from '../types/iPod';
 import { songs } from '../data/iPodData';
 
@@ -24,6 +26,10 @@ const Screen: React.FC<ScreenProps> = ({
     switch (currentScreen) {
       case 'menu':
         return <MenuScreen selectedMenuItem={selectedMenuItem} />;
+      case 'friends':
+        return <FriendsScreen />;
+      case 'settings':
+        return <SettingsScreen />;
       case 'music':
         return (
           <MusicScreen 
