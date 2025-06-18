@@ -60,14 +60,22 @@ export const useWheelNavigation = ({
       direction = 'up';
     }
 
+    console.log('Wheel navigation - direction:', direction, 'currentScreen:', currentScreen, 'isInMyFiveView:', isInMyFiveView);
+
     if (currentScreen === 'menu') {
       if (isInMyFiveView) {
         // In My Five view - navigate through songs
         const songsCount = isSharedView ? sharedUserSongs.length : myFiveSongsCount;
+        console.log('My Five navigation - songsCount:', songsCount, 'currentIndex:', selectedMyFiveSong);
+        
         if (direction === 'down') {
-          setSelectedMyFiveSong((selectedMyFiveSong + 1) % songsCount);
+          const newIndex = (selectedMyFiveSong + 1) % songsCount;
+          console.log('Moving to next song:', newIndex);
+          setSelectedMyFiveSong(newIndex);
         } else if (direction === 'up') {
-          setSelectedMyFiveSong((selectedMyFiveSong - 1 + songsCount) % songsCount);
+          const newIndex = (selectedMyFiveSong - 1 + songsCount) % songsCount;
+          console.log('Moving to previous song:', newIndex);
+          setSelectedMyFiveSong(newIndex);
         }
       } else if (isInSettingsView) {
         // In Settings view - navigate through settings
@@ -79,10 +87,15 @@ export const useWheelNavigation = ({
         }
       } else {
         // In main menu - navigate through menu items
+        console.log('Main menu navigation - menuItems.length:', menuItems.length, 'currentIndex:', selectedMenuItem);
         if (direction === 'down') {
-          setSelectedMenuItem((selectedMenuItem + 1) % menuItems.length);
+          const newIndex = (selectedMenuItem + 1) % menuItems.length;
+          console.log('Moving to next menu item:', newIndex);
+          setSelectedMenuItem(newIndex);
         } else if (direction === 'up') {
-          setSelectedMenuItem((selectedMenuItem - 1 + menuItems.length) % menuItems.length);
+          const newIndex = (selectedMenuItem - 1 + menuItems.length) % menuItems.length;
+          console.log('Moving to previous menu item:', newIndex);
+          setSelectedMenuItem(newIndex);
         }
       }
     } else if (currentScreen === 'music') {
