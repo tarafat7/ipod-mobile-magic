@@ -14,6 +14,11 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [isInSettingsView, setIsInSettingsView] = useState(false);
   const [selectedSettingsItem, setSelectedSettingsItem] = useState(0);
+  const [currentSelectedMenuItem, setCurrentSelectedMenuItem] = useState(selectedMenuItem);
+
+  useEffect(() => {
+    setCurrentSelectedMenuItem(selectedMenuItem);
+  }, [selectedMenuItem]);
 
   useEffect(() => {
     const loadMenuItems = async () => {
@@ -37,15 +42,17 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
   }, []);
 
   const handleSettingsClick = () => {
-    const selectedItem = menuItems[selectedMenuItem];
-    if (selectedItem === 'Settings' && isSignedIn) {
-      setIsInSettingsView(true);
-    }
+    setIsInSettingsView(true);
+    setSelectedSettingsItem(0);
   };
 
   const handleBackToMain = () => {
     setIsInSettingsView(false);
     setSelectedSettingsItem(0);
+  };
+
+  const handleMenuItemClick = (index: number) => {
+    setCurrentSelectedMenuItem(index);
   };
 
   const handleSettingsAction = async (action: string) => {
@@ -80,16 +87,17 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
     <div className="h-full flex">
       <MenuPanel
         menuItems={menuItems}
-        selectedMenuItem={selectedMenuItem}
+        selectedMenuItem={currentSelectedMenuItem}
         isInSettingsView={isInSettingsView}
         isSignedIn={isSignedIn}
         selectedSettingsItem={selectedSettingsItem}
         onSettingsClick={handleSettingsClick}
         onSettingsAction={handleSettingsAction}
+        onMenuItemClick={handleMenuItemClick}
       />
       <ContentPanel
         menuItems={menuItems}
-        selectedMenuItem={selectedMenuItem}
+        selectedMenuItem={currentSelectedMenuItem}
         isInSettingsView={isInSettingsView}
         isSignedIn={isSignedIn}
       />
