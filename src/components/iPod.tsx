@@ -193,8 +193,12 @@ const IPod = () => {
     
     if (currentScreen === 'menu') {
       if (isInMyFiveView) {
-        // Handle My Five song selection - this will be handled by the MyFiveFullView component
+        // Handle My Five song selection - open Spotify link
         console.log('My Five song selected:', selectedMyFiveSong);
+        // We need to get the song URL and open it
+        // This will be handled by triggering the song click from MyFiveFullView
+        const event = new CustomEvent('myFiveSongSelect', { detail: { songIndex: selectedMyFiveSong } });
+        window.dispatchEvent(event);
       } else if (isInSettingsView) {
         // Handle settings item selection
         const settingsItems = ['Share Profile', 'Edit Account', 'Edit My Five', 'Logout', 'Delete Account'];

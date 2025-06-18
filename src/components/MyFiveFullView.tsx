@@ -21,6 +21,22 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({ selectedSongIndex }) =>
     loadMyFiveSongs();
   }, []);
 
+  useEffect(() => {
+    // Listen for song selection events from the center button
+    const handleSongSelect = (event: CustomEvent) => {
+      const { songIndex } = event.detail;
+      if (songs[songIndex]) {
+        handleSongClick(songs[songIndex].spotifyUrl);
+      }
+    };
+
+    window.addEventListener('myFiveSongSelect', handleSongSelect as EventListener);
+    
+    return () => {
+      window.removeEventListener('myFiveSongSelect', handleSongSelect as EventListener);
+    };
+  }, [songs]);
+
   const extractSpotifyTrackId = (url: string): string | null => {
     const match = url.match(/track\/([a-zA-Z0-9]+)/);
     return match ? match[1] : null;
@@ -139,12 +155,11 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({ selectedSongIndex }) =>
         {songs.map((song, index) => (
           <div 
             key={index} 
-            className={`flex items-center p-2 border-b border-gray-200 cursor-pointer transition-colors ${
+            className={`flex items-center p-2 border-b border-gray-200 transition-colors ${
               selectedSongIndex === index 
                 ? 'bg-blue-500 text-white' 
                 : 'bg-white hover:bg-gray-50'
             }`}
-            onClick={() => handleSongClick(song.spotifyUrl)}
           >
             <div className="w-12 h-12 bg-gray-200 rounded flex-shrink-0 overflow-hidden mr-3">
               {song.albumArt ? (
