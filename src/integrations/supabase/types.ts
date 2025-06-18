@@ -36,6 +36,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_five_songs: {
+        Row: {
+          created_at: string
+          id: string
+          song_1: string | null
+          song_2: string | null
+          song_3: string | null
+          song_4: string | null
+          song_5: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          song_1?: string | null
+          song_2?: string | null
+          song_3?: string | null
+          song_4?: string | null
+          song_5?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          song_1?: string | null
+          song_2?: string | null
+          song_3?: string | null
+          song_4?: string | null
+          song_5?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

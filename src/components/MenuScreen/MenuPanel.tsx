@@ -35,6 +35,22 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   const currentMenuItems = isInSettingsView ? settingsMenuItems : menuItems;
   const currentSelectedIndex = isInSettingsView ? selectedSettingsItem : selectedMenuItem;
 
+  const handleItemClick = (item: string, index: number) => {
+    if (isInSettingsView) {
+      onSettingsItemClick(index);
+      if (item === 'Edit My Five') {
+        window.location.href = '/edit-my-five';
+      } else {
+        onSettingsAction(item);
+      }
+    } else {
+      onMenuItemClick(index);
+      if (item === 'Settings' && isSignedIn) {
+        onSettingsClick();
+      }
+    }
+  };
+
   return (
     <div className={`w-1/2 bg-white border-r border-gray-300 transition-transform duration-300 relative ${
       isInSettingsView ? 'transform translate-x-0' : 'transform translate-x-0'
@@ -67,17 +83,7 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
               style={{
                 backgroundColor: currentSelectedIndex === index ? '#3398d8' : 'transparent'
               }}
-              onClick={() => {
-                if (isInSettingsView) {
-                  onSettingsItemClick(index);
-                  onSettingsAction(item);
-                } else {
-                  onMenuItemClick(index);
-                  if (item === 'Settings' && isSignedIn) {
-                    onSettingsClick();
-                  }
-                }
-              }}
+              onClick={() => handleItemClick(item, index)}
             >
               <span>{item}</span>
               {currentSelectedIndex === index && isInSettingsView && (

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { getMenuItems } from '../data/iPodData';
 import FriendsScreen from './FriendsScreen';
@@ -93,10 +92,17 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
     window.location.href = '/sign-in?mode=edit';
   };
 
+  const handleEditMyFive = () => {
+    window.location.href = '/edit-my-five';
+  };
+
   const handleSettingsAction = (item: string) => {
     switch (item) {
       case 'Edit Account':
         handleEditAccount();
+        break;
+      case 'Edit My Five':
+        handleEditMyFive();
         break;
       case 'Logout':
         handleLogout();

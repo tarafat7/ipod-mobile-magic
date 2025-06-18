@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import Screen from './Screen';
 import ClickWheel from './ClickWheel';
@@ -140,6 +139,10 @@ const IPod = () => {
     window.location.href = '/signin?mode=edit';
   };
 
+  const handleEditMyFive = () => {
+    window.location.href = '/edit-my-five';
+  };
+
   const handleCenterClick = () => {
     console.log('Center button clicked!');
     console.log('Current screen:', currentScreen);
@@ -158,6 +161,9 @@ const IPod = () => {
         switch (selectedSettingsAction) {
           case 'Edit Account':
             handleEditAccount();
+            break;
+          case 'Edit My Five':
+            handleEditMyFive();
             break;
           case 'Logout':
             handleLogout();
