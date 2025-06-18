@@ -1,0 +1,88 @@
+
+import { useState } from 'react';
+import { supabase } from '../integrations/supabase/client';
+import { useToast } from './use-toast';
+
+interface FormData {
+  fullName: string;
+  email: string;
+  password: string;
+}
+
+export const useSignUp = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const signUp = async (formData: FormData) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      console.log('Starting signup process with data:', { 
+        email: formData.email, 
+        fullName: formData.fullName 
+      });
+
+      // Generate a device ID if one doesn't exist
+      let deviceId = localStorage.getItem('ipod_device_id');
+      if (!deviceId) {
+        deviceId = 'device_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('ipod_device_id', deviceId);
+      }
+      console.log('Device ID:', deviceId);
+
+      // Sign up with Supabase
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            full_name: formData.fullName
+          }
+        }
+      });
+
+      console.log('Signup response:', { data, error: signUpError });
+
+      if (signUpError) {
+        console.error('Signup error:', signUpError);
+        setError(signUpError.message);
+        return null;
+      }
+
+      if (data.user) {
+        console.log('User created successfully:', data.user.id);
+        
+        // Check if the user needs email confirmation
+        if (!data.session) {
+          // User needs to confirm email
+          toast({
+            title: "Check your email!",
+            description: `We've sent a confirmation link to ${formData.email}. Please click the link to activate your account.`,
+          });
+          return { needsConfirmation: true };
+        } else {
+          // User is immediately logged in (email confirmation disabled)
+          return { needsConfirmation: false };
+        }
+      }
+    } catch (err) {
+      console.error('Unexpected signup error:', err);
+      setError('An unexpected error occurred. Please try again.');
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+
+    return null;
+  };
+
+  return {
+    signUp,
+    isLoading,
+    error,
+    setError
+  };
+};
