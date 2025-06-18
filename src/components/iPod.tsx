@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Play, Pause, SkipForward, SkipBack } from 'lucide-react';
 
@@ -149,17 +148,15 @@ const IPod = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center p-4">
       <div className="relative">
-        {/* iPod Body - White/Silver */}
-        <div className="bg-gradient-to-b from-gray-50 via-white to-gray-100 rounded-3xl p-6 shadow-2xl border border-gray-200 w-80 md:w-96">
+        {/* iPod Body - White/Silver - Made slightly taller */}
+        <div className="bg-gradient-to-b from-gray-50 via-white to-gray-100 rounded-3xl p-6 shadow-2xl border border-gray-200 w-80 md:w-96" style={{ height: '580px' }}>
           
-          {/* Screen */}
-          <div className="bg-gray-900 rounded-xl p-1 mb-8 shadow-inner">
-            <div className="bg-gray-800 rounded-lg p-1">
-              <div className="bg-gray-100 rounded-md min-h-[220px] border border-gray-300 overflow-hidden">
-                {renderScreen()}
-              </div>
+          {/* Screen - Thinner black bevel */}
+          <div className="bg-gray-900 rounded-xl p-0.5 mb-8 shadow-inner">
+            <div className="bg-gray-100 rounded-lg min-h-[220px] border border-gray-300 overflow-hidden">
+              {renderScreen()}
             </div>
           </div>
 
@@ -199,12 +196,11 @@ const IPod = () => {
                   <SkipBack size={14} />
                 </button>
 
-                {/* Center Button */}
+                {/* Center Button - No icon */}
                 <button 
-                  className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-gradient-to-b from-gray-100 to-gray-200 rounded-full shadow-inner border border-gray-300 flex items-center justify-center hover:shadow-lg transition-all duration-200 active:scale-95"
+                  className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-gradient-to-b from-gray-100 to-gray-200 rounded-full shadow-inner border border-gray-300 hover:shadow-lg transition-all duration-200 active:scale-95"
                   onClick={handleCenterClick}
                 >
-                  {isPlaying ? <Pause size={18} className="text-gray-700" /> : <Play size={18} className="text-gray-700 ml-0.5" />}
                 </button>
               </div>
             </div>
