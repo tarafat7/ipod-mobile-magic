@@ -90,6 +90,17 @@ export const useCenterButtonActions = ({
     }
   };
 
+  const handleSignInClick = () => {
+    const choice = window.confirm('New to FivePod? Click OK to sign up, or Cancel to sign in with an existing account.');
+    if (choice) {
+      // User chose to sign up (new user)
+      window.open('/signin', '_blank');
+    } else {
+      // User chose to sign in (existing user)
+      window.open('/signin?mode=login', '_blank');
+    }
+  };
+
   const handleCenterClick = () => {
     if (currentScreen === 'menu') {
       if (isInMyFiveView) {
@@ -123,7 +134,7 @@ export const useCenterButtonActions = ({
       } else {
         const selectedItem = menuItems[selectedMenuItem];
         if (selectedItem === 'Sign In') {
-          window.open('/signin', '_blank');
+          handleSignInClick();
         } else if (selectedItem === 'My Five') {
           setIsInMyFiveView(true);
           setSelectedMyFiveSong(0);

@@ -11,14 +11,21 @@ interface SignInFormProps {
   isLoading: boolean;
   error: string | null;
   onErrorClear: () => void;
+  isLoginMode?: boolean;
 }
 
-const SignInForm: React.FC<SignInFormProps> = ({ onSubmit, isLoading, error, onErrorClear }) => {
+const SignInForm: React.FC<SignInFormProps> = ({ 
+  onSubmit, 
+  isLoading, 
+  error, 
+  onErrorClear,
+  isLoginMode = false 
+}) => {
   const { isEditMode, currentUser, initialData } = useAuthMode();
   const { handleEditSubmit } = useAuthSubmit();
 
   useEffect(() => {
-    if (!isEditMode) {
+    if (!isEditMode && !isLoginMode) {
       const checkAuth = async () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
@@ -27,7 +34,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSubmit, isLoading, error, onE
       };
       checkAuth();
     }
-  }, [isEditMode]);
+  }, [isEditMode, isLoginMode]);
 
   const handleSubmit = async (formData: { fullName: string; email: string; password: string }) => {
     if (isEditMode && currentUser) {
@@ -41,14 +48,21 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSubmit, isLoading, error, onE
     }
   };
 
+  const getTitle = () => {
+    if (isEditMode) return 'Edit Account';
+    if (isLoginMode) return 'Sign In to FivePod';
+    return 'Sign Up for FivePod';
+  };
+
   return (
-    <AuthContainer title={isEditMode ? 'Edit Account' : 'Sign Up for FivePod'}>
+    <AuthContainer title={getTitle()}>
       <AuthForm
         onSubmit={handleSubmit}
         isLoading={isLoading}
         error={error}
         onErrorClear={onErrorClear}
         isEditMode={isEditMode}
+        isLoginMode={isLoginMode}
         initialData={initialData}
       />
     </AuthContainer>
