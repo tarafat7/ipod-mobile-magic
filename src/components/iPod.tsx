@@ -73,11 +73,6 @@ const IPod: React.FC<IPodProps> = ({
     } else {
       // Reset shared view state when not on shared route
       setIsSharedView(false);
-      if (isInMyFiveView && currentPath === '/') {
-        // User navigated back to home, reset My Five view
-        setIsInMyFiveView(false);
-        setSelectedMyFiveSong(0);
-      }
     }
   }, [sharedUserProfile, sharedUserSongs, window.location.pathname]);
 
@@ -326,11 +321,9 @@ const IPod: React.FC<IPodProps> = ({
           const newWindow = window.open('/signin', '_blank');
           console.log('Window opened:', newWindow);
         } else if (selectedItem === 'My Five') {
-          console.log('Entering My Five view - checking if shared view should be cleared');
-          // Clear shared view state when entering personal My Five
-          if (isSharedView) {
-            setIsSharedView(false);
-          }
+          console.log('Entering My Five view');
+          // Clear any shared view state and enter personal My Five
+          setIsSharedView(false);
           setIsInMyFiveView(true);
           setSelectedMyFiveSong(0);
         } else if (selectedItem === 'Friends') {
@@ -355,15 +348,9 @@ const IPod: React.FC<IPodProps> = ({
     
     if (isInMyFiveView) {
       console.log('Exiting My Five view');
-      if (isSharedView) {
-        // In shared view, return to main menu but keep shared context
-        setIsInMyFiveView(false);
-        setSelectedMyFiveSong(0);
-        setSelectedMenuItem(0); // Reset to first menu item
-      } else {
-        setIsInMyFiveView(false);
-        setSelectedMyFiveSong(0);
-      }
+      setIsInMyFiveView(false);
+      setSelectedMyFiveSong(0);
+      // Don't clear shared view state here - let route detection handle it
     } else if (isInSettingsView) {
       console.log('Exiting settings view');
       setIsInSettingsView(false);
