@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { getMenuItems } from '../../data/iPodData';
 import { supabase } from '../../integrations/supabase/client';
@@ -13,6 +12,9 @@ interface MenuScreenProps {
   isInMyFiveView?: boolean;
   selectedMyFiveSong?: number;
   onMyFiveSongChange?: (index: number) => void;
+  isSharedView?: boolean;
+  sharedUserProfile?: {full_name: string} | null;
+  sharedUserSongs?: string[];
 }
 
 const MenuScreen: React.FC<MenuScreenProps> = ({ 
@@ -22,7 +24,10 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
   onSettingsItemChange,
   isInMyFiveView = false,
   selectedMyFiveSong = 0,
-  onMyFiveSongChange
+  onMyFiveSongChange,
+  isSharedView = false,
+  sharedUserProfile = null,
+  sharedUserSongs = []
 }) => {
   const [menuItems, setMenuItems] = useState<string[]>([]);
   const [isSignedIn, setIsSignedIn] = useState(false);
@@ -48,6 +53,29 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Add effect to load shared profile data when in shared view
+  useEffect(() => {
+    if (isSharedView && !sharedUserProfile) {
+      // Extract user ID from URL
+      const currentPath = window.location.pathname;
+      const userIdMatch = currentPath.match(/\/my-five\/([^\/]+)/);
+      
+      if (userIdMatch) {
+        const userId = userIdMatch[1];
+        loadSharedProfile(userId);
+      }
+    }
+  }, [isSharedView, sharedUserProfile]);
+
+  const loadSharedProfile = async (userId: string) => {
+    try {
+      // This will be handled by the parent component or through a different mechanism
+      // For now, we'll rely on the shared props being passed down
+    } catch (error) {
+      console.error('Error loading shared profile:', error);
+    }
+  };
 
   const handleSettingsClick = () => {
     console.log('Settings clicked');
@@ -136,6 +164,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
           onMenuItemClick={handleMenuItemClick}
           onSettingsItemClick={handleSettingsItemClick}
           onSettingsItemHover={handleSettingsItemHover}
+          isSharedView={isSharedView}
         />
       )}
       <ContentPanel
@@ -146,6 +175,9 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
         isInMyFiveView={isInMyFiveView}
         selectedMyFiveSong={selectedMyFiveSong}
         hoveredSettingsItem={hoveredSettingsItem}
+        isSharedView={isSharedView}
+        sharedUserProfile={sharedUserProfile}
+        sharedUserSongs={sharedUserSongs}
       />
     </div>
   );

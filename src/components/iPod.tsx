@@ -17,6 +17,9 @@ const IPod = () => {
   const [isInMyFiveView, setIsInMyFiveView] = useState(false);
   const [selectedMyFiveSong, setSelectedMyFiveSong] = useState(0);
   const [myFiveSongsCount, setMyFiveSongsCount] = useState(0);
+  const [isSharedView, setIsSharedView] = useState(false);
+  const [sharedUserProfile, setSharedUserProfile] = useState<{full_name: string} | null>(null);
+  const [sharedUserSongs, setSharedUserSongs] = useState<string[]>([]);
 
   useEffect(() => {
     const loadMenuItems = async () => {
@@ -60,6 +63,18 @@ const IPod = () => {
     });
 
     return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const currentPath = window.location.pathname;
+    const isMyFiveRoute = currentPath.includes('/my-five/');
+    
+    if (isMyFiveRoute) {
+      setIsSharedView(true);
+      setCurrentScreen('menu');
+      setIsInMyFiveView(true);
+      setSelectedMenuItem(0); // Set to first menu item which should be "My Five" equivalent
+    }
   }, []);
 
   const triggerHapticFeedback = () => {
@@ -213,6 +228,7 @@ const IPod = () => {
     console.log('Selected menu item name:', menuItems[selectedMenuItem]);
     console.log('Is in settings view:', isInSettingsView);
     console.log('Is in My Five view:', isInMyFiveView);
+    console.log('Is shared view:', isSharedView);
     console.log('Selected settings item:', selectedSettingsItem);
     
     if (currentScreen === 'menu') {
@@ -278,12 +294,19 @@ const IPod = () => {
 
   const handleMenuClick = () => {
     console.log('Menu button clicked');
-    console.log('Current state - Screen:', currentScreen, 'InSettings:', isInSettingsView, 'InMyFive:', isInMyFiveView);
+    console.log('Current state - Screen:', currentScreen, 'InSettings:', isInSettingsView, 'InMyFive:', isInMyFiveView, 'IsShared:', isSharedView);
     
     if (isInMyFiveView) {
       console.log('Exiting My Five view');
-      setIsInMyFiveView(false);
-      setSelectedMyFiveSong(0);
+      if (isSharedView) {
+        // In shared view, return to main menu but keep shared context
+        setIsInMyFiveView(false);
+        setSelectedMyFiveSong(0);
+        setSelectedMenuItem(0); // Reset to first menu item
+      } else {
+        setIsInMyFiveView(false);
+        setSelectedMyFiveSong(0);
+      }
     } else if (isInSettingsView) {
       console.log('Exiting settings view');
       setIsInSettingsView(false);
@@ -322,6 +345,9 @@ const IPod = () => {
             isInMyFiveView={isInMyFiveView}
             selectedMyFiveSong={selectedMyFiveSong}
             onMyFiveSongChange={handleMyFiveSongChange}
+            isSharedView={isSharedView}
+            sharedUserProfile={sharedUserProfile}
+            sharedUserSongs={sharedUserSongs}
           />
 
           {/* Click Wheel - Centered in remaining space, moved up slightly on mobile */}

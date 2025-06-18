@@ -14,6 +14,9 @@ interface ContentPanelProps {
   isInMyFiveView?: boolean;
   selectedMyFiveSong?: number;
   hoveredSettingsItem?: string | null;
+  isSharedView?: boolean;
+  sharedUserProfile?: {full_name: string} | null;
+  sharedUserSongs?: string[];
 }
 
 const ContentPanel: React.FC<ContentPanelProps> = ({
@@ -23,12 +26,20 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
   isSignedIn,
   isInMyFiveView = false,
   selectedMyFiveSong = 0,
-  hoveredSettingsItem = null
+  hoveredSettingsItem = null,
+  isSharedView = false,
+  sharedUserProfile = null,
+  sharedUserSongs = []
 }) => {
   if (isInMyFiveView) {
     return (
       <div className="w-full bg-gray-50 transition-all duration-300">
-        <MyFiveFullView selectedSongIndex={selectedMyFiveSong} />
+        <MyFiveFullView 
+          selectedSongIndex={selectedMyFiveSong}
+          isSharedView={isSharedView}
+          sharedUserProfile={sharedUserProfile}
+          sharedUserSongs={sharedUserSongs}
+        />
       </div>
     );
   }

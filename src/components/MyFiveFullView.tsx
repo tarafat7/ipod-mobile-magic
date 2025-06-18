@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Music, ExternalLink } from 'lucide-react';
@@ -13,15 +12,28 @@ interface SpotifyTrackInfo {
 
 interface MyFiveFullViewProps {
   selectedSongIndex: number;
+  isSharedView?: boolean;
+  sharedUserProfile?: {full_name: string} | null;
+  sharedUserSongs?: string[];
 }
 
-const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({ selectedSongIndex }) => {
+const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({ 
+  selectedSongIndex,
+  isSharedView = false,
+  sharedUserProfile = null,
+  sharedUserSongs = []
+}) => {
   const [songs, setSongs] = useState<SpotifyTrackInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadMyFiveSongs();
-  }, []);
+    if (isSharedView && sharedUserSongs.length > 0) {
+      // Use shared songs data instead of loading from database
+      loadSharedSongsInfo();
+    } else {
+      loadMyFiveSongs();
+    }
+  }, [isSharedView, sharedUserSongs]);
 
   useEffect(() => {
     // Listen for song selection events from the center button
@@ -75,6 +87,29 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({ selectedSongIndex }) =>
       month: 'long', 
       day: 'numeric' 
     });
+  };
+
+  const loadSharedSongsInfo = async () => {
+    setIsLoading(true);
+    try {
+      const addedDate = 'Recently added'; // Default date for shared view
+
+      const songInfoPromises = sharedUserSongs.map(async (url) => {
+        const trackId = extractSpotifyTrackId(url);
+        if (trackId) {
+          return await fetchSpotifyTrackInfo(trackId, addedDate);
+        }
+        return null;
+      });
+
+      const songInfos = await Promise.all(songInfoPromises);
+      const validSongs = songInfos.filter((song): song is SpotifyTrackInfo => song !== null);
+      setSongs(validSongs);
+    } catch (error) {
+      console.error('Error loading shared songs:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const loadMyFiveSongs = async () => {
@@ -133,33 +168,36 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({ selectedSongIndex }) =>
   };
 
   if (isLoading) {
+    const displayName = isSharedView && sharedUserProfile ? sharedUserProfile.full_name : 'your';
     return (
       <div className="h-full flex flex-col items-center justify-center p-4 text-center">
         <Music size={32} className="text-blue-600 mb-3 animate-pulse" />
-        <p className="text-sm text-gray-600">Loading your five...</p>
+        <p className="text-sm text-gray-600">Loading {displayName} five...</p>
       </div>
     );
   }
 
   if (songs.length === 0) {
+    const displayName = isSharedView && sharedUserProfile ? sharedUserProfile.full_name : 'My';
     return (
       <div className="h-full flex flex-col items-center justify-center p-4 text-center">
         <Music size={32} className="text-blue-600 mb-3" />
-        <h3 className="font-bold text-lg mb-1">My Five</h3>
+        <h3 className="font-bold text-lg mb-1">{displayName} Five</h3>
         <p className="text-sm text-gray-600 leading-tight">
-          Add the 5 songs that are<br />
-          on repeat for you right now
+          {isSharedView ? 'No songs shared yet' : 'Add the 5 songs that are on repeat for you right now'}
         </p>
       </div>
     );
   }
+
+  const displayName = isSharedView && sharedUserProfile ? `${sharedUserProfile.full_name}'s` : 'My';
 
   return (
     <div className="h-full bg-white">
       {/* Header */}
       <div className="p-2">
         <div className="flex items-center justify-between mb-3 text-xs">
-          <span className="font-bold">My Five</span>
+          <span className="font-bold">{displayName} Five</span>
           <div className="w-6 h-3 bg-green-500 rounded-sm"></div>
         </div>
       </div>

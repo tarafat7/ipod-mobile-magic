@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { supabase } from '../../integrations/supabase/client';
 
@@ -13,6 +12,7 @@ interface MenuPanelProps {
   onMenuItemClick: (index: number) => void;
   onSettingsItemClick: (index: number) => void;
   onSettingsItemHover?: (item: string | null) => void;
+  isSharedView?: boolean;
 }
 
 const settingsMenuItems = [
@@ -33,11 +33,17 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   onSettingsAction,
   onMenuItemClick,
   onSettingsItemClick,
-  onSettingsItemHover
+  onSettingsItemHover,
+  isSharedView = false
 }) => {
   const [touchedItem, setTouchedItem] = useState<string | null>(null);
   
-  const currentMenuItems = isInSettingsView ? settingsMenuItems : menuItems;
+  // Modify menu items for shared view
+  const displayMenuItems = isSharedView && !isSignedIn 
+    ? ['Sign In', ...menuItems.filter(item => item !== 'Sign In')] 
+    : (isInSettingsView ? settingsMenuItems : menuItems);
+  
+  const currentMenuItems = displayMenuItems;
   const currentSelectedIndex = isInSettingsView ? selectedSettingsItem : selectedMenuItem;
 
   const handleShareProfile = async () => {
