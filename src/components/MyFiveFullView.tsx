@@ -1,7 +1,7 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Music, ExternalLink } from 'lucide-react';
+import { ScrollArea } from './ui/scroll-area';
 
 interface SpotifyTrackInfo {
   name: string;
@@ -192,57 +192,59 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
   const displayName = isSharedView && sharedUserProfile ? `${sharedUserProfile.full_name}'s` : 'My';
 
   return (
-    <div className="h-full bg-white">
+    <div className="h-full bg-white flex flex-col">
       {/* Header */}
-      <div className="p-2">
+      <div className="p-2 flex-shrink-0">
         <div className="flex items-center justify-between mb-3 text-xs">
           <span className="font-bold">{displayName} Five</span>
           <div className="w-6 h-3 bg-green-500 rounded-sm"></div>
         </div>
       </div>
 
-      {/* Song List */}
-      <div className="bg-white px-2">
-        {songs.map((song, index) => (
-          <div 
-            key={index} 
-            className={`flex items-center p-2 border-b border-gray-200 transition-colors ${
-              selectedSongIndex === index 
-                ? 'bg-blue-500 text-white' 
-                : 'bg-white hover:bg-gray-50'
-            }`}
-          >
-            <div className="w-12 h-12 bg-gray-200 rounded flex-shrink-0 overflow-hidden mr-3">
-              {song.albumArt ? (
-                <img 
-                  src={song.albumArt} 
-                  alt={`${song.name} album art`}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <Music size={20} className="text-gray-400" />
-                </div>
+      {/* Scrollable Song List */}
+      <ScrollArea className="flex-1">
+        <div className="bg-white px-2">
+          {songs.map((song, index) => (
+            <div 
+              key={index} 
+              className={`flex items-center p-2 border-b border-gray-200 transition-colors ${
+                selectedSongIndex === index 
+                  ? 'bg-blue-500 text-white' 
+                  : 'bg-white hover:bg-gray-50'
+              }`}
+            >
+              <div className="w-12 h-12 bg-gray-200 rounded flex-shrink-0 overflow-hidden mr-3">
+                {song.albumArt ? (
+                  <img 
+                    src={song.albumArt} 
+                    alt={`${song.name} album art`}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Music size={20} className="text-gray-400" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className={`font-semibold text-base truncate ${
+                  selectedSongIndex === index ? 'text-white' : 'text-black'
+                }`}>
+                  {song.name}
+                </h3>
+                <p className={`text-sm truncate ${
+                  selectedSongIndex === index ? 'text-blue-100' : 'text-gray-600'
+                }`}>
+                  {song.artist || song.addedDate}
+                </p>
+              </div>
+              {selectedSongIndex === index && (
+                <div className="text-white text-xl">▶</div>
               )}
             </div>
-            <div className="flex-1 min-w-0">
-              <h3 className={`font-semibold text-base truncate ${
-                selectedSongIndex === index ? 'text-white' : 'text-black'
-              }`}>
-                {song.name}
-              </h3>
-              <p className={`text-sm truncate ${
-                selectedSongIndex === index ? 'text-blue-100' : 'text-gray-600'
-              }`}>
-                {song.artist || song.addedDate}
-              </p>
-            </div>
-            {selectedSongIndex === index && (
-              <div className="text-white text-xl">▶</div>
-            )}
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </ScrollArea>
     </div>
   );
 };
