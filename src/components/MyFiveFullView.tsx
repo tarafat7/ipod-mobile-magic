@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Music, ExternalLink } from 'lucide-react';
@@ -128,16 +127,15 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({ selectedSongIndex }) =>
   return (
     <div className="h-full bg-white">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-400 to-blue-600 text-white p-3 flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-bold">My Five</h2>
-          <p className="text-sm opacity-90">{songs.length} songs</p>
+      <div className="p-2">
+        <div className="flex items-center justify-between mb-3 text-xs">
+          <span className="font-bold">My Five</span>
+          <div className="w-6 h-3 bg-green-500 rounded-sm"></div>
         </div>
-        <div className="w-6 h-3 bg-green-500 rounded-sm"></div>
       </div>
 
       {/* Song List */}
-      <div className="bg-white">
+      <div className="bg-white px-2">
         {songs.map((song, index) => (
           <div 
             key={index} 

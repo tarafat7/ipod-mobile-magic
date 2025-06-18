@@ -1,4 +1,3 @@
-
 import React from 'react';
 import FriendsScreen from '../FriendsScreen';
 import SettingsScreen from '../SettingsScreen';
@@ -23,6 +22,14 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
   isInMyFiveView = false,
   selectedMyFiveSong = 0
 }) => {
+  if (isInMyFiveView) {
+    return (
+      <div className="w-full bg-gray-50 transition-all duration-300">
+        <MyFiveFullView selectedSongIndex={selectedMyFiveSong} />
+      </div>
+    );
+  }
+
   if (isInSettingsView) {
     return (
       <div className="w-1/2 bg-gray-50 transition-all duration-300">
@@ -37,14 +44,6 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
             Configure your<br />FivePod settings
           </p>
         </div>
-      </div>
-    );
-  }
-
-  if (isInMyFiveView) {
-    return (
-      <div className="w-1/2 bg-gray-50 transition-all duration-300">
-        <MyFiveFullView selectedSongIndex={selectedMyFiveSong} />
       </div>
     );
   }

@@ -92,17 +92,19 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
 
   return (
     <div className="h-full flex">
-      <MenuPanel
-        menuItems={menuItems}
-        selectedMenuItem={selectedMenuItem}
-        isInSettingsView={isInSettingsView}
-        isSignedIn={isSignedIn}
-        selectedSettingsItem={selectedSettingsItem}
-        onSettingsClick={handleSettingsClick}
-        onSettingsAction={handleSettingsAction}
-        onMenuItemClick={handleMenuItemClick}
-        onSettingsItemClick={handleSettingsItemClick}
-      />
+      {!isInMyFiveView && (
+        <MenuPanel
+          menuItems={menuItems}
+          selectedMenuItem={selectedMenuItem}
+          isInSettingsView={isInSettingsView}
+          isSignedIn={isSignedIn}
+          selectedSettingsItem={selectedSettingsItem}
+          onSettingsClick={handleSettingsClick}
+          onSettingsAction={handleSettingsAction}
+          onMenuItemClick={handleMenuItemClick}
+          onSettingsItemClick={handleSettingsItemClick}
+        />
+      )}
       <ContentPanel
         menuItems={menuItems}
         selectedMenuItem={selectedMenuItem}
