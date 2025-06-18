@@ -161,10 +161,10 @@ const IPod = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black md:flex md:items-center md:justify-center md:p-4 overflow-hidden">
-      <div className="relative w-full h-full md:w-auto md:h-auto md:max-w-sm">
-        {/* iPod Body - Full screen on mobile, framed on desktop */}
-        <div className="bg-gradient-to-br from-gray-300 via-gray-200 to-gray-400 w-full h-full md:rounded-3xl md:p-6 shadow-2xl border border-gray-400 md:w-full md:h-[680px] flex flex-col touch-none select-none">
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center md:p-4 overflow-hidden">
+      <div className="relative w-full h-screen md:w-auto md:h-auto">
+        {/* iPod Body - Full screen on mobile, centered on desktop */}
+        <div className="bg-gradient-to-br from-gray-300 via-gray-200 to-gray-400 w-full h-full md:rounded-3xl md:p-6 shadow-2xl border border-gray-400 md:w-96 md:h-[680px] flex flex-col touch-none select-none">
           
           {/* Screen - Responsive sizing */}
           <Screen 
@@ -178,8 +178,8 @@ const IPod = () => {
             onSettingsItemChange={handleSettingsItemChange}
           />
 
-          {/* Click Wheel - Centered in remaining space */}
-          <div className="flex-1 flex items-center justify-center pb-4 md:pb-4">
+          {/* Click Wheel - Centered in remaining space, moved up slightly on mobile */}
+          <div className="flex-1 flex items-center justify-center md:items-center" style={{ alignItems: 'center', paddingBottom: '2rem' }}>
             <ClickWheel 
               onWheelMove={handleWheelMove}
               onWheelLeave={handleWheelLeave}
