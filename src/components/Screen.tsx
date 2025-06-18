@@ -19,9 +19,6 @@ interface ScreenProps {
   isInMyFiveView?: boolean;
   selectedMyFiveSong?: number;
   onMyFiveSongChange?: (index: number) => void;
-  sharedUserProfile?: { full_name: string | null } | null;
-  sharedUserSongs?: string[];
-  isSharedView?: boolean;
 }
 
 const Screen: React.FC<ScreenProps> = ({ 
@@ -35,10 +32,7 @@ const Screen: React.FC<ScreenProps> = ({
   onSettingsItemChange,
   isInMyFiveView = false,
   selectedMyFiveSong = 0,
-  onMyFiveSongChange,
-  sharedUserProfile = null,
-  sharedUserSongs = [],
-  isSharedView = false
+  onMyFiveSongChange
 }) => {
   const renderScreen = () => {
     switch (currentScreen) {
@@ -52,9 +46,6 @@ const Screen: React.FC<ScreenProps> = ({
             isInMyFiveView={isInMyFiveView}
             selectedMyFiveSong={selectedMyFiveSong}
             onMyFiveSongChange={onMyFiveSongChange}
-            sharedUserProfile={sharedUserProfile}
-            sharedUserSongs={sharedUserSongs}
-            isSharedView={isSharedView}
           />
         );
       case 'friends':

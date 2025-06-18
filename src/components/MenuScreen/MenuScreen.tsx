@@ -13,9 +13,6 @@ interface MenuScreenProps {
   isInMyFiveView?: boolean;
   selectedMyFiveSong?: number;
   onMyFiveSongChange?: (index: number) => void;
-  sharedUserProfile?: { full_name: string | null } | null;
-  sharedUserSongs?: string[];
-  isSharedView?: boolean;
 }
 
 const MenuScreen: React.FC<MenuScreenProps> = ({ 
@@ -25,10 +22,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
   onSettingsItemChange,
   isInMyFiveView = false,
   selectedMyFiveSong = 0,
-  onMyFiveSongChange,
-  sharedUserProfile = null,
-  sharedUserSongs = [],
-  isSharedView = false
+  onMyFiveSongChange
 }) => {
   const [menuItems, setMenuItems] = useState<string[]>([]);
   const [isSignedIn, setIsSignedIn] = useState(false);
@@ -152,9 +146,6 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
         isInMyFiveView={isInMyFiveView}
         selectedMyFiveSong={selectedMyFiveSong}
         hoveredSettingsItem={hoveredSettingsItem}
-        sharedUserProfile={sharedUserProfile}
-        sharedUserSongs={sharedUserSongs}
-        isSharedView={isSharedView}
       />
     </div>
   );

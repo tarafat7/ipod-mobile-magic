@@ -13,27 +13,15 @@ interface SpotifyTrackInfo {
 
 interface MyFiveFullViewProps {
   selectedSongIndex: number;
-  sharedUserProfile?: { full_name: string | null } | null;
-  sharedUserSongs?: string[];
-  isSharedView?: boolean;
 }
 
-const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({ 
-  selectedSongIndex,
-  sharedUserProfile = null,
-  sharedUserSongs = [],
-  isSharedView = false
-}) => {
+const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({ selectedSongIndex }) => {
   const [songs, setSongs] = useState<SpotifyTrackInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (isSharedView && sharedUserSongs.length > 0) {
-      loadSharedSongs();
-    } else {
-      loadMyFiveSongs();
-    }
-  }, [isSharedView, sharedUserSongs]);
+    loadMyFiveSongs();
+  }, []);
 
   useEffect(() => {
     // Listen for song selection events from the center button
@@ -87,29 +75,6 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
       month: 'long', 
       day: 'numeric' 
     });
-  };
-
-  const loadSharedSongs = async () => {
-    setIsLoading(true);
-    try {
-      const addedDate = 'Shared playlist';
-
-      const songInfoPromises = sharedUserSongs.map(async (url) => {
-        const trackId = extractSpotifyTrackId(url);
-        if (trackId) {
-          return await fetchSpotifyTrackInfo(trackId, addedDate);
-        }
-        return null;
-      });
-
-      const songInfos = await Promise.all(songInfoPromises);
-      const validSongs = songInfos.filter((song): song is SpotifyTrackInfo => song !== null);
-      setSongs(validSongs);
-    } catch (error) {
-      console.error('Error loading shared songs:', error);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const loadMyFiveSongs = async () => {
@@ -171,9 +136,7 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
     return (
       <div className="h-full flex flex-col items-center justify-center p-4 text-center">
         <Music size={32} className="text-blue-600 mb-3 animate-pulse" />
-        <p className="text-sm text-gray-600">
-          {isSharedView ? "Loading shared songs..." : "Loading your five..."}
-        </p>
+        <p className="text-sm text-gray-600">Loading your five...</p>
       </div>
     );
   }
@@ -182,14 +145,10 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
     return (
       <div className="h-full flex flex-col items-center justify-center p-4 text-center">
         <Music size={32} className="text-blue-600 mb-3" />
-        <h3 className="font-bold text-lg mb-1">
-          {isSharedView ? `${sharedUserProfile?.full_name || 'User'}'s Five` : 'My Five'}
-        </h3>
+        <h3 className="font-bold text-lg mb-1">My Five</h3>
         <p className="text-sm text-gray-600 leading-tight">
-          {isSharedView 
-            ? 'No songs shared yet' 
-            : 'Add the 5 songs that are\non repeat for you right now'
-          }
+          Add the 5 songs that are<br />
+          on repeat for you right now
         </p>
       </div>
     );
@@ -200,9 +159,7 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
       {/* Header */}
       <div className="p-2">
         <div className="flex items-center justify-between mb-3 text-xs">
-          <span className="font-bold">
-            {isSharedView ? `${sharedUserProfile?.full_name || 'User'}'s Five` : 'My Five'}
-          </span>
+          <span className="font-bold">My Five</span>
           <div className="w-6 h-3 bg-green-500 rounded-sm"></div>
         </div>
       </div>
