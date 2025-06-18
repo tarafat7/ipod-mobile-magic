@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Music, ExternalLink } from 'lucide-react';
@@ -7,6 +8,7 @@ interface SpotifyTrackInfo {
   artist: string;
   albumArt: string;
   spotifyUrl: string;
+  addedDate: string;
 }
 
 interface MyFiveFullViewProps {
@@ -42,7 +44,7 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({ selectedSongIndex }) =>
     return match ? match[1] : null;
   };
 
-  const fetchSpotifyTrackInfo = async (trackId: string): Promise<SpotifyTrackInfo | null> => {
+  const fetchSpotifyTrackInfo = async (trackId: string, addedDate: string): Promise<SpotifyTrackInfo | null> => {
     try {
       const response = await fetch(`https://open.spotify.com/oembed?url=https://open.spotify.com/track/${trackId}`);
       const data = await response.json();
@@ -50,19 +52,29 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({ selectedSongIndex }) =>
       if (data && data.title) {
         const titleParts = data.title.split(' by ');
         const songName = titleParts[0] || 'Unknown Song';
-        const artistName = titleParts[1] || 'Unknown Artist';
+        const artistName = titleParts[1] || '';
         
         return {
           name: songName,
           artist: artistName,
           albumArt: data.thumbnail_url || '',
-          spotifyUrl: `https://open.spotify.com/track/${trackId}`
+          spotifyUrl: `https://open.spotify.com/track/${trackId}`,
+          addedDate
         };
       }
     } catch (error) {
       console.error('Error fetching Spotify track info:', error);
     }
     return null;
+  };
+
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
   };
 
   const loadMyFiveSongs = async () => {
@@ -95,10 +107,12 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({ selectedSongIndex }) =>
           data.song_5
         ].filter(Boolean);
 
+        const addedDate = formatDate(data.created_at);
+
         const songInfoPromises = songUrls.map(async (url) => {
           const trackId = extractSpotifyTrackId(url);
           if (trackId) {
-            return await fetchSpotifyTrackInfo(trackId);
+            return await fetchSpotifyTrackInfo(trackId, addedDate);
           }
           return null;
         });
@@ -183,7 +197,7 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({ selectedSongIndex }) =>
               <p className={`text-sm truncate ${
                 selectedSongIndex === index ? 'text-blue-100' : 'text-gray-600'
               }`}>
-                {song.artist}
+                {song.artist || song.addedDate}
               </p>
             </div>
             {selectedSongIndex === index && (

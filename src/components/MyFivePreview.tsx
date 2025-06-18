@@ -8,6 +8,7 @@ interface SpotifyTrackInfo {
   artist: string;
   albumArt: string;
   spotifyUrl: string;
+  addedDate: string;
 }
 
 const MyFivePreview: React.FC = () => {
@@ -23,7 +24,7 @@ const MyFivePreview: React.FC = () => {
     return match ? match[1] : null;
   };
 
-  const fetchSpotifyTrackInfo = async (trackId: string): Promise<SpotifyTrackInfo | null> => {
+  const fetchSpotifyTrackInfo = async (trackId: string, addedDate: string): Promise<SpotifyTrackInfo | null> => {
     try {
       // Use Spotify's oEmbed API to get basic track info
       const response = await fetch(`https://open.spotify.com/oembed?url=https://open.spotify.com/track/${trackId}`);
@@ -33,19 +34,29 @@ const MyFivePreview: React.FC = () => {
         // Parse title which usually comes as "Song Name by Artist Name"
         const titleParts = data.title.split(' by ');
         const songName = titleParts[0] || 'Unknown Song';
-        const artistName = titleParts[1] || 'Unknown Artist';
+        const artistName = titleParts[1] || '';
         
         return {
           name: songName,
           artist: artistName,
           albumArt: data.thumbnail_url || '',
-          spotifyUrl: `https://open.spotify.com/track/${trackId}`
+          spotifyUrl: `https://open.spotify.com/track/${trackId}`,
+          addedDate
         };
       }
     } catch (error) {
       console.error('Error fetching Spotify track info:', error);
     }
     return null;
+  };
+
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
   };
 
   const loadMyFiveSongs = async () => {
@@ -78,10 +89,12 @@ const MyFivePreview: React.FC = () => {
           data.song_5
         ].filter(Boolean);
 
+        const addedDate = formatDate(data.created_at);
+
         const songInfoPromises = songUrls.map(async (url) => {
           const trackId = extractSpotifyTrackId(url);
           if (trackId) {
-            return await fetchSpotifyTrackInfo(trackId);
+            return await fetchSpotifyTrackInfo(trackId, addedDate);
           }
           return null;
         });
@@ -145,7 +158,7 @@ const MyFivePreview: React.FC = () => {
                 {song.name}
               </p>
               <p className="text-xs text-gray-500 truncate">
-                {song.artist}
+                {song.artist || song.addedDate}
               </p>
             </div>
           </div>
