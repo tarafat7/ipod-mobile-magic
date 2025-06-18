@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import Screen from './Screen';
 import ClickWheel from './ClickWheel';
@@ -51,6 +52,7 @@ const IPod = () => {
           ? (selectedMenuItem + 1) % menuItems.length
           : (selectedMenuItem - 1 + menuItems.length) % menuItems.length;
         
+        console.log('Menu navigation:', { currentSelection: selectedMenuItem, newSelection, selectedItem: menuItems[newSelection] });
         setSelectedMenuItem(newSelection);
       } else if (currentScreen === 'music') {
         const newSelection = isClockwise 
@@ -69,13 +71,22 @@ const IPod = () => {
   };
 
   const handleCenterClick = () => {
+    console.log('Center button clicked!');
+    console.log('Current screen:', currentScreen);
+    console.log('Selected menu item:', selectedMenuItem);
+    console.log('Selected menu item name:', menuItems[selectedMenuItem]);
+    
     if (currentScreen === 'menu') {
       if (selectedMenuItem === 0) { // Sign In
+        console.log('Attempting to open sign-in page...');
         // Open sign-in page in a new tab/window
-        window.open('/signin', '_blank');
+        const newWindow = window.open('/signin', '_blank');
+        console.log('Window opened:', newWindow);
       } else if (selectedMenuItem === 1) { // Friends
+        console.log('Navigating to friends screen');
         setCurrentScreen('friends');
       } else if (selectedMenuItem === 2) { // Settings
+        console.log('Navigating to settings screen');
         setCurrentScreen('settings');
       } else {
         setIsPlaying(!isPlaying);
@@ -86,6 +97,7 @@ const IPod = () => {
   };
 
   const handleMenuClick = () => {
+    console.log('Menu button clicked - returning to main menu');
     setCurrentScreen('menu');
     setSelectedMenuItem(0); // Reset to first menu item
   };
