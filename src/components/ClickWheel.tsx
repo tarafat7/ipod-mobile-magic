@@ -4,11 +4,12 @@ import { SkipForward, SkipBack } from 'lucide-react';
 
 interface ClickWheelProps {
   onWheelMove: (e: React.MouseEvent) => void;
+  onWheelLeave: () => void;
   onCenterClick: () => void;
   onMenuClick: () => void;
 }
 
-const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onCenterClick, onMenuClick }) => {
+const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCenterClick, onMenuClick }) => {
   const wheelRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -17,6 +18,7 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onCenterClick, onM
         ref={wheelRef}
         className="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-300 rounded-full shadow-lg border border-gray-400 cursor-pointer"
         onMouseMove={onWheelMove}
+        onMouseLeave={onWheelLeave}
       >
         
         {/* MENU Text */}

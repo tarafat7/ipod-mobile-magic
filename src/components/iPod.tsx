@@ -10,31 +10,54 @@ const IPod = () => {
   const [selectedMenuItem, setSelectedMenuItem] = useState(0);
   const [selectedSong, setSelectedSong] = useState(0);
   const [currentTime, setCurrentTime] = useState('0:00');
-  const wheelRef = useRef<HTMLDivElement>(null);
+  const [lastAngle, setLastAngle] = useState<number | null>(null);
 
   const handleWheelMove = (e: React.MouseEvent) => {
-    if (!wheelRef.current) return;
-    
-    const rect = wheelRef.current.getBoundingClientRect();
+    const wheelElement = e.currentTarget as HTMLElement;
+    const rect = wheelElement.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
     const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
     
     const normalizedAngle = ((angle * 180) / Math.PI + 360) % 360;
     
-    if (currentScreen === 'menu') {
-      const newIndex = Math.floor((normalizedAngle / 360) * menuItems.length);
-      setSelectedMenuItem(newIndex);
-    } else if (currentScreen === 'music') {
-      const newIndex = Math.floor((normalizedAngle / 360) * songs.length);
-      setSelectedSong(newIndex);
+    if (lastAngle !== null) {
+      let angleDiff = normalizedAngle - lastAngle;
+      
+      // Handle angle wrap-around
+      if (angleDiff > 180) angleDiff -= 360;
+      if (angleDiff < -180) angleDiff += 360;
+      
+      // Determine direction: positive = clockwise, negative = counter-clockwise
+      const isClockwise = angleDiff > 0;
+      
+      if (currentScreen === 'menu') {
+        if (isClockwise) {
+          setSelectedMenuItem(prev => (prev + 1) % menuItems.length);
+        } else {
+          setSelectedMenuItem(prev => (prev - 1 + menuItems.length) % menuItems.length);
+        }
+      } else if (currentScreen === 'music') {
+        if (isClockwise) {
+          setSelectedSong(prev => (prev + 1) % songs.length);
+        } else {
+          setSelectedSong(prev => (prev - 1 + songs.length) % songs.length);
+        }
+      }
     }
+    
+    setLastAngle(normalizedAngle);
+  };
+
+  const handleWheelLeave = () => {
+    setLastAngle(null);
   };
 
   const handleCenterClick = () => {
     if (currentScreen === 'menu') {
       if (selectedMenuItem === 1) { // Music
         setCurrentScreen('music');
+        setSelectedSong(0); // Reset to first song when entering music
       } else {
         setIsPlaying(!isPlaying);
       }
@@ -44,9 +67,8 @@ const IPod = () => {
   };
 
   const handleMenuClick = () => {
-    if (currentScreen !== 'menu') {
-      setCurrentScreen('menu');
-    }
+    setCurrentScreen('menu');
+    setSelectedMenuItem(0); // Reset to first menu item
   };
 
   return (
@@ -68,6 +90,7 @@ const IPod = () => {
           <div className="flex-1 flex items-center justify-center">
             <ClickWheel 
               onWheelMove={handleWheelMove}
+              onWheelLeave={handleWheelLeave}
               onCenterClick={handleCenterClick}
               onMenuClick={handleMenuClick}
             />
