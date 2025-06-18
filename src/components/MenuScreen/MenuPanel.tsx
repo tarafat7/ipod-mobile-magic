@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { supabase } from '../../integrations/supabase/client';
 
@@ -71,6 +72,12 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   };
 
   const handleItemClick = (item: string, index: number) => {
+    // Clear hover state on click
+    setHoveredItem(null);
+    if (onSettingsItemHover) {
+      onSettingsItemHover(null);
+    }
+    
     if (isInSettingsView) {
       onSettingsItemClick(index);
       if (item === 'Edit My Five') {
@@ -89,21 +96,27 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   };
 
   const handleItemHover = (item: string) => {
-    console.log('MenuPanel - Item hovered:', item, 'Calling parent callback');
-    if (onSettingsItemHover) {
+    console.log('MenuPanel - Hovering over item:', item, 'isInSettingsView:', isInSettingsView);
+    setHoveredItem(item);
+    if (isInSettingsView && onSettingsItemHover) {
+      console.log('MenuPanel - Calling onSettingsItemHover with:', item);
       onSettingsItemHover(item);
     }
   };
 
   const handleItemLeave = () => {
-    console.log('MenuPanel - Item hover left, calling parent callback with null');
-    if (onSettingsItemHover) {
+    console.log('MenuPanel - Left item hover');
+    setHoveredItem(null);
+    if (isInSettingsView && onSettingsItemHover) {
+      console.log('MenuPanel - Calling onSettingsItemHover with null');
       onSettingsItemHover(null);
     }
   };
 
   return (
-    <div className="w-1/2 bg-white border-r border-gray-300 relative">
+    <div className={`w-1/2 bg-white border-r border-gray-300 transition-all duration-300 relative transform ${
+      isInSettingsView ? 'translate-x-0' : 'translate-x-0'
+    }`}>
       {/* Battery indicator - only show in main menu */}
       {!isInSettingsView && (
         <div className="absolute top-2 right-2">
@@ -124,10 +137,10 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
           {currentMenuItems.map((item, index) => (
             <div
               key={item}
-              className={`px-2 py-1 text-sm flex items-center justify-between cursor-pointer ${
+              className={`px-2 py-1 text-sm flex items-center justify-between cursor-pointer transition-all duration-200 ${
                 currentSelectedIndex === index
-                  ? 'text-white'
-                  : 'text-black hover:bg-gray-100'
+                  ? 'text-white transform scale-105'
+                  : 'text-black hover:bg-gray-100 hover:transform hover:scale-102'
               } ${item === 'Delete Account' ? 'text-red-600' : ''}`}
               style={{
                 backgroundColor: currentSelectedIndex === index ? '#3398d8' : 'transparent'
