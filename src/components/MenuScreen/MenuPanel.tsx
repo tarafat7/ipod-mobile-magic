@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { supabase } from '../../integrations/supabase/client';
 
@@ -20,6 +19,7 @@ const settingsMenuItems = [
   'Share Profile',
   'Edit Account', 
   'Edit My Five',
+  'Product Feedback',
   'Logout',
   'Delete Account'
 ];
