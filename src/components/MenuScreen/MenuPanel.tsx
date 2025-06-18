@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { supabase } from '../../integrations/supabase/client';
 
@@ -42,9 +43,10 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   // Modify menu items for shared view
   const displayMenuItems = isSharedView && !isSignedIn 
     ? ['Sign In', ...menuItems.filter(item => item !== 'Sign In')] 
-    : (isInSettingsView ? settingsMenuItems : menuItems);
+    : menuItems;
   
-  const currentMenuItems = displayMenuItems;
+  // Use settings menu items when in settings view, otherwise use main menu items
+  const currentMenuItems = isInSettingsView ? settingsMenuItems : displayMenuItems;
   const currentSelectedIndex = isInSettingsView ? selectedSettingsItem : selectedMenuItem;
 
   const handleShareProfile = async () => {
