@@ -161,10 +161,10 @@ const IPod = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center p-4 overflow-hidden">
-      <div className="relative w-full max-w-sm">
-        {/* iPod Body - Now shows frame on mobile too */}
-        <div className="bg-gradient-to-br from-gray-300 via-gray-200 to-gray-400 rounded-3xl p-6 shadow-2xl border border-gray-400 w-full h-[680px] flex flex-col touch-none select-none">
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black md:flex md:items-center md:justify-center md:p-4 overflow-hidden">
+      <div className="relative w-full h-full md:w-auto md:h-auto md:max-w-sm">
+        {/* iPod Body - Full screen on mobile, framed on desktop */}
+        <div className="bg-gradient-to-br from-gray-300 via-gray-200 to-gray-400 w-full h-full md:rounded-3xl md:p-6 shadow-2xl border border-gray-400 md:w-full md:h-[680px] flex flex-col touch-none select-none">
           
           {/* Screen - Responsive sizing */}
           <Screen 
@@ -179,7 +179,7 @@ const IPod = () => {
           />
 
           {/* Click Wheel - Centered in remaining space */}
-          <div className="flex-1 flex items-center justify-center" style={{ paddingBottom: '1rem' }}>
+          <div className="flex-1 flex items-center justify-center pb-4 md:pb-4">
             <ClickWheel 
               onWheelMove={handleWheelMove}
               onWheelLeave={handleWheelLeave}
@@ -189,8 +189,8 @@ const IPod = () => {
           </div>
         </div>
 
-        {/* Subtle highlight effect for sheen */}
-        <div className="absolute top-6 left-6 right-6 h-1/3 bg-gradient-to-b from-white/20 to-transparent rounded-t-3xl pointer-events-none"></div>
+        {/* Subtle highlight effect for sheen - only on desktop */}
+        <div className="absolute top-6 left-6 right-6 h-1/3 bg-gradient-to-b from-white/20 to-transparent rounded-t-3xl pointer-events-none hidden md:block"></div>
       </div>
     </div>
   );
