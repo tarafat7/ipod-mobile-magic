@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
+import { supabase } from '../integrations/supabase/client';
 
 const SignIn = () => {
   const [formData, setFormData] = useState({
@@ -10,6 +12,20 @@ const SignIn = () => {
     password: ''
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Check if user is already authenticated
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        // User is already logged in, redirect to main page
+        window.location.href = '/';
+      }
+    };
+    checkAuth();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -17,27 +33,58 @@ const SignIn = () => {
       ...prev,
       [name]: value
     }));
+    setError(null); // Clear error when user starts typing
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError(null);
     
-    // Generate a device ID if one doesn't exist
-    let deviceId = localStorage.getItem('ipod_device_id');
-    if (!deviceId) {
-      deviceId = 'device_' + Math.random().toString(36).substr(2, 9);
-      localStorage.setItem('ipod_device_id', deviceId);
+    try {
+      // Generate a device ID if one doesn't exist
+      let deviceId = localStorage.getItem('ipod_device_id');
+      if (!deviceId) {
+        deviceId = 'device_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('ipod_device_id', deviceId);
+      }
+
+      // Sign up with Supabase
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            full_name: formData.fullName
+          }
+        }
+      });
+
+      if (signUpError) {
+        setError(signUpError.message);
+        return;
+      }
+
+      if (data.user) {
+        // Update the profile with device_id
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ device_id: deviceId })
+          .eq('id', data.user.id);
+
+        if (profileError) {
+          console.error('Error updating profile:', profileError);
+        }
+
+        setIsSubmitted(true);
+      }
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.');
+      console.error('Signup error:', err);
+    } finally {
+      setIsLoading(false);
     }
-    
-    // Store user data
-    const userData = {
-      ...formData,
-      deviceId,
-      signedInAt: new Date().toISOString()
-    };
-    
-    localStorage.setItem('ipod_user', JSON.stringify(userData));
-    setIsSubmitted(true);
   };
 
   const handleReturnToiPod = () => {
@@ -75,6 +122,12 @@ const SignIn = () => {
           <p className="text-gray-600">Create your account to get started</p>
         </div>
         
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-md text-sm">
+            {error}
+          </div>
+        )}
+        
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="fullName">Full Name</Label>
@@ -86,6 +139,7 @@ const SignIn = () => {
               onChange={handleInputChange}
               required
               className="mt-1"
+              disabled={isLoading}
             />
           </div>
           
@@ -99,6 +153,7 @@ const SignIn = () => {
               onChange={handleInputChange}
               required
               className="mt-1"
+              disabled={isLoading}
             />
           </div>
           
@@ -112,14 +167,16 @@ const SignIn = () => {
               onChange={handleInputChange}
               required
               className="mt-1"
+              disabled={isLoading}
             />
           </div>
           
           <Button 
             type="submit" 
             className="w-full bg-blue-600 hover:bg-blue-700 mt-6"
+            disabled={isLoading}
           >
-            Create Account
+            {isLoading ? 'Creating Account...' : 'Create Account'}
           </Button>
         </form>
       </div>

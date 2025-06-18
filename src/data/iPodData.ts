@@ -1,9 +1,11 @@
 
 import { Song } from '../types/iPod';
+import { supabase } from '../integrations/supabase/client';
 
-export const getMenuItems = () => {
-  const userData = localStorage.getItem('ipod_user');
-  const isSignedIn = !!userData;
+export const getMenuItems = async () => {
+  // Check if user is signed in with Supabase
+  const { data: { session } } = await supabase.auth.getSession();
+  const isSignedIn = !!session;
   
   return [
     isSignedIn ? 'My Five' : 'Sign In',

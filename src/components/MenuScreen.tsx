@@ -1,19 +1,39 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { getMenuItems } from '../data/iPodData';
 import FriendsScreen from './FriendsScreen';
 import SettingsScreen from './SettingsScreen';
 import { User, Music } from 'lucide-react';
+import { supabase } from '../integrations/supabase/client';
 
 interface MenuScreenProps {
   selectedMenuItem: number;
 }
 
 const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
-  // Check if user is signed in
-  const userData = localStorage.getItem('ipod_user');
-  const isSignedIn = !!userData;
-  const menuItems = getMenuItems();
+  const [menuItems, setMenuItems] = useState<string[]>([]);
+  const [isSignedIn, setIsSignedIn] = useState(false);
+
+  useEffect(() => {
+    const loadMenuItems = async () => {
+      const items = await getMenuItems();
+      setMenuItems(items);
+      
+      // Check auth status
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsSignedIn(!!session);
+    };
+
+    loadMenuItems();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsSignedIn(!!session);
+      loadMenuItems(); // Reload menu items when auth state changes
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const renderRightPanel = () => {
     const selectedItem = menuItems[selectedMenuItem];

@@ -1,8 +1,9 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Screen from './Screen';
 import ClickWheel from './ClickWheel';
 import { getMenuItems, songs } from '../data/iPodData';
+import { supabase } from '../integrations/supabase/client';
 
 const IPod = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -11,6 +12,23 @@ const IPod = () => {
   const [selectedSong, setSelectedSong] = useState(0);
   const [currentTime, setCurrentTime] = useState('0:00');
   const [lastAngle, setLastAngle] = useState<number | null>(null);
+  const [menuItems, setMenuItems] = useState<string[]>([]);
+
+  useEffect(() => {
+    const loadMenuItems = async () => {
+      const items = await getMenuItems();
+      setMenuItems(items);
+    };
+
+    loadMenuItems();
+
+    // Listen for auth changes to update menu
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      loadMenuItems();
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const triggerHapticFeedback = () => {
     // Check if vibration API is available (mobile devices)
@@ -48,7 +66,6 @@ const IPod = () => {
       const isClockwise = angleDiff > 0;
       
       if (currentScreen === 'menu') {
-        const menuItems = getMenuItems();
         const newSelection = isClockwise 
           ? (selectedMenuItem + 1) % menuItems.length
           : (selectedMenuItem - 1 + menuItems.length) % menuItems.length;
@@ -72,7 +89,6 @@ const IPod = () => {
   };
 
   const handleCenterClick = () => {
-    const menuItems = getMenuItems();
     console.log('Center button clicked!');
     console.log('Current screen:', currentScreen);
     console.log('Selected menu item:', selectedMenuItem);
