@@ -13,6 +13,7 @@ interface MenuScreenProps {
 const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
   const [menuItems, setMenuItems] = useState<string[]>([]);
   const [isSignedIn, setIsSignedIn] = useState(false);
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false);
 
   useEffect(() => {
     const loadMenuItems = async () => {
@@ -35,6 +36,35 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
     return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    const selectedItem = menuItems[selectedMenuItem];
+    setShowSettingsMenu(selectedItem === 'Settings');
+  }, [selectedMenuItem, menuItems]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
+
+  const handleDeleteAccount = async () => {
+    if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          // Delete user profile first
+          await supabase.from('profiles').delete().eq('id', user.id);
+          // Then sign out
+          await supabase.auth.signOut();
+        }
+      } catch (error) {
+        console.error('Error deleting account:', error);
+      }
+    }
+  };
+
+  const handleEditAccount = () => {
+    window.location.href = '/sign-in?mode=edit';
+  };
+
   const renderRightPanel = () => {
     const selectedItem = menuItems[selectedMenuItem];
     
@@ -42,6 +72,39 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
       case 'Friends':
         return <FriendsScreen />;
       case 'Settings':
+        if (showSettingsMenu && isSignedIn) {
+          return (
+            <div className="h-full p-4">
+              <h3 className="font-bold text-lg mb-4">Settings</h3>
+              <div className="space-y-2">
+                <button className="w-full text-left px-3 py-2 text-sm hover:bg-gray-200 rounded">
+                  Share Profile
+                </button>
+                <button 
+                  onClick={handleEditAccount}
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-200 rounded"
+                >
+                  Edit Account
+                </button>
+                <button className="w-full text-left px-3 py-2 text-sm hover:bg-gray-200 rounded">
+                  Edit My Five
+                </button>
+                <button 
+                  onClick={handleLogout}
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-200 rounded"
+                >
+                  Logout
+                </button>
+                <button 
+                  onClick={handleDeleteAccount}
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-200 rounded text-red-600"
+                >
+                  Delete Account
+                </button>
+              </div>
+            </div>
+          );
+        }
         return <SettingsScreen />;
       case 'My Five':
         return (
@@ -73,7 +136,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
                 <div className="w-6 h-6 bg-green-600 rounded-md"></div>
               </div>
             </div>
-            <h3 className="font-bold text-lg mb-1">iPod.js</h3>
+            <h3 className="font-bold text-lg mb-1">FivePod</h3>
             <p className="text-sm text-gray-600 text-center leading-tight">
               Your personal<br />music player
             </p>
@@ -89,7 +152,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
         <div className="p-2">
           <div className="flex items-center gap-1 mb-3 text-xs">
             <div className="w-3 h-2 bg-green-500 rounded-sm"></div>
-            <span className="font-bold">iPod.js</span>
+            <span className="font-bold">FivePod</span>
           </div>
           <div className="space-y-0">
             {menuItems.map((item, index) => (

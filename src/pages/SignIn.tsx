@@ -36,8 +36,8 @@ const SignIn = () => {
     }
   };
 
-  const handleReturnToiPod = () => {
-    // Redirect to the main iPod page
+  const handleReturnToFivePod = () => {
+    // Redirect to the main FivePod page
     window.location.href = '/';
   };
 
@@ -49,14 +49,14 @@ const SignIn = () => {
     return (
       <EmailConfirmationScreen 
         email={userEmail} 
-        onReturnToiPod={handleReturnToiPod} 
+        onReturnToiPod={handleReturnToFivePod} 
       />
     );
   }
 
   if (isSubmitted) {
     return (
-      <SuccessScreen onReturnToiPod={handleReturnToiPod} />
+      <SuccessScreen onReturnToiPod={handleReturnToFivePod} />
     );
   }
 

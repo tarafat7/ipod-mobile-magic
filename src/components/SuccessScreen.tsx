@@ -21,7 +21,7 @@ const SuccessScreen = ({ onReturnToiPod }: SuccessScreenProps) => {
           onClick={onReturnToiPod}
           className="w-full bg-blue-600 hover:bg-blue-700"
         >
-          Return to iPod
+          Return to FivePod
         </Button>
       </div>
     </div>

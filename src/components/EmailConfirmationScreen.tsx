@@ -28,7 +28,7 @@ const EmailConfirmationScreen = ({ email, onReturnToiPod }: EmailConfirmationScr
           variant="outline"
           className="w-full"
         >
-          Return to iPod
+          Return to FivePod
         </Button>
       </div>
     </div>

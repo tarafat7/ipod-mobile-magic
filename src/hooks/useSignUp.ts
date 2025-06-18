@@ -25,10 +25,10 @@ export const useSignUp = () => {
       });
 
       // Generate a device ID if one doesn't exist
-      let deviceId = localStorage.getItem('ipod_device_id');
+      let deviceId = localStorage.getItem('fivepod_device_id');
       if (!deviceId) {
         deviceId = 'device_' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('ipod_device_id', deviceId);
+        localStorage.setItem('fivepod_device_id', deviceId);
       }
       console.log('Device ID:', deviceId);
 
