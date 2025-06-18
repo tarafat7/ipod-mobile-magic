@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Play, Pause, SkipForward, SkipBack } from 'lucide-react';
 
@@ -149,67 +148,64 @@ const IPod = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center p-4">
       <div className="relative">
-        {/* iPod Body - White/Silver - Made taller and proportioned like classic iPod */}
-        <div className="bg-gradient-to-b from-gray-50 via-white to-gray-100 rounded-3xl p-6 shadow-2xl border border-gray-200 w-80 md:w-96" style={{ height: '620px' }}>
+        {/* iPod Body - Matte Silver with Sheen */}
+        <div className="bg-gradient-to-br from-gray-200 via-gray-100 to-gray-300 rounded-3xl p-6 shadow-2xl border border-gray-300 w-80 md:w-96" style={{ height: '660px' }}>
           
           {/* Screen - Thicker black bevel and larger screen */}
-          <div className="bg-gray-900 rounded-xl p-1.5 mb-6 shadow-inner">
-            <div className="bg-gray-100 rounded-lg min-h-[280px] border border-gray-300 overflow-hidden">
+          <div className="bg-gray-900 rounded-xl p-2 mb-6 shadow-inner">
+            <div className="bg-gray-100 rounded-lg min-h-[300px] border border-gray-300 overflow-hidden">
               {renderScreen()}
             </div>
           </div>
 
-          {/* Click Wheel - Bigger to match proportions */}
-          <div className="relative mx-auto w-56 h-56">
+          {/* Click Wheel - Bigger to match proportions, no inner ring */}
+          <div className="relative mx-auto w-60 h-60">
             <div 
               ref={wheelRef}
-              className="absolute inset-0 bg-gradient-to-b from-white via-gray-50 to-gray-100 rounded-full shadow-lg border border-gray-300 cursor-pointer"
+              className="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-300 rounded-full shadow-lg border border-gray-400 cursor-pointer"
               onMouseMove={handleWheelMove}
             >
-              {/* Outer Ring */}
-              <div className="absolute inset-4 rounded-full border border-gray-200">
-                
-                {/* MENU Text */}
-                <div className="absolute top-5 left-1/2 transform -translate-x-1/2">
-                  <button 
-                    className="text-gray-600 hover:text-gray-800 transition-colors font-medium text-sm tracking-wider"
-                    onClick={handleMenuClick}
-                  >
-                    MENU
-                  </button>
-                </div>
-                
-                {/* Control Buttons */}
-                <button className="absolute right-5 top-1/2 transform -translate-y-1/2 w-6 h-6 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-colors">
-                  <SkipForward size={16} />
-                </button>
-                
-                <button className="absolute bottom-5 left-1/2 transform -translate-x-1/2 w-6 h-6 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-colors">
-                  <div className="flex space-x-1">
-                    <div className="w-1 h-1 bg-gray-600 rounded-full"></div>
-                    <div className="w-1 h-1 bg-gray-600 rounded-full"></div>
-                  </div>
-                </button>
-                
-                <button className="absolute left-5 top-1/2 transform -translate-y-1/2 w-6 h-6 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-colors">
-                  <SkipBack size={16} />
-                </button>
-
-                {/* Center Button - Bigger to match proportions */}
+              
+              {/* MENU Text */}
+              <div className="absolute top-6 left-1/2 transform -translate-x-1/2">
                 <button 
-                  className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-gradient-to-b from-gray-100 to-gray-200 rounded-full shadow-inner border border-gray-300 hover:shadow-lg transition-all duration-200 active:scale-95"
-                  onClick={handleCenterClick}
+                  className="text-gray-700 hover:text-gray-900 transition-colors font-medium text-sm tracking-wider"
+                  onClick={handleMenuClick}
                 >
+                  MENU
                 </button>
               </div>
+              
+              {/* Control Buttons */}
+              <button className="absolute right-6 top-1/2 transform -translate-y-1/2 w-6 h-6 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-colors">
+                <SkipForward size={16} />
+              </button>
+              
+              <button className="absolute bottom-6 left-1/2 transform -translate-x-1/2 w-6 h-6 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-colors">
+                <div className="flex space-x-1">
+                  <div className="w-1 h-1 bg-gray-700 rounded-full"></div>
+                  <div className="w-1 h-1 bg-gray-700 rounded-full"></div>
+                </div>
+              </button>
+              
+              <button className="absolute left-6 top-1/2 transform -translate-y-1/2 w-6 h-6 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-colors">
+                <SkipBack size={16} />
+              </button>
+
+              {/* Center Button - No inner ring, bigger to match proportions */}
+              <button 
+                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-300 rounded-full shadow-inner border border-gray-400 hover:shadow-lg transition-all duration-200 active:scale-95"
+                onClick={handleCenterClick}
+              >
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Subtle highlight effect */}
-        <div className="absolute top-6 left-6 right-6 h-1/3 bg-gradient-to-b from-white/40 to-transparent rounded-t-3xl pointer-events-none"></div>
+        {/* Subtle highlight effect for sheen */}
+        <div className="absolute top-6 left-6 right-6 h-1/3 bg-gradient-to-b from-white/30 to-transparent rounded-t-3xl pointer-events-none"></div>
       </div>
     </div>
   );
