@@ -140,6 +140,30 @@ const IPod = () => {
     setLastAngle(null);
   };
 
+  const handleShareProfile = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const shareUrl = `${window.location.origin}/my-five/${user.id}`;
+      const shareData = {
+        title: 'Check out my Five!',
+        text: 'Here are the 5 songs on repeat for me right now',
+        url: shareUrl
+      };
+
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(shareUrl);
+        alert('Link copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Error sharing profile:', error);
+    }
+  };
+
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
@@ -206,6 +230,9 @@ const IPod = () => {
         console.log('Settings action selected:', selectedSettingsAction);
         
         switch (selectedSettingsAction) {
+          case 'Share Profile':
+            handleShareProfile();
+            break;
           case 'Edit Account':
             handleEditAccount();
             break;
