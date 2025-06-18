@@ -129,7 +129,7 @@ const IPod = () => {
           console.log('Navigating to friends screen');
           setCurrentScreen('friends');
         } else if (selectedItem === 'Settings') {
-          console.log('Navigating to settings screen');
+          console.log('Entering settings view');
           setIsInSettingsView(true);
           setSelectedSettingsItem(0);
         } else {
@@ -143,12 +143,14 @@ const IPod = () => {
 
   const handleMenuClick = () => {
     console.log('Menu button clicked');
+    console.log('Current state - Screen:', currentScreen, 'InSettings:', isInSettingsView);
+    
     if (isInSettingsView) {
-      console.log('Returning from settings to main menu');
+      console.log('Exiting settings view');
       setIsInSettingsView(false);
       setSelectedSettingsItem(0);
-    } else {
-      console.log('Returning to main menu');
+    } else if (currentScreen !== 'menu') {
+      console.log('Returning to main menu from', currentScreen);
       setCurrentScreen('menu');
       setSelectedMenuItem(0);
     }
