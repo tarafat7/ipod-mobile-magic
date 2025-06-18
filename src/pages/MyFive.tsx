@@ -25,25 +25,73 @@ const MyFive: React.FC = () => {
 
   useEffect(() => {
     if (userId) {
-      console.log('Loading data for user ID:', userId);
-      loadData();
+      console.log('Loading shared data for user ID:', userId);
+      loadSharedData();
     }
   }, [userId]);
 
-  const loadData = async () => {
-    console.log('Starting to load user data...');
+  const loadSharedData = async () => {
+    console.log('Starting to load shared user data...');
     setIsLoading(true);
     
     try {
-      // Load both profile and songs in parallel
-      const [profileResult, songsResult] = await Promise.all([
-        loadUserProfile(),
-        loadUserSongs()
-      ]);
-      
-      console.log('Data loading completed:', { profile: profileResult, songs: songsResult });
+      // Load profile data
+      console.log('Loading profile for user:', userId);
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (profileError) {
+        console.error('Error loading user profile:', profileError);
+      } else {
+        console.log('Loaded shared profile:', profileData);
+        setProfile(profileData);
+      }
+
+      // Load songs data
+      console.log('Loading songs for user:', userId);
+      const { data: songsData, error: songsError } = await supabase
+        .from('user_five_songs')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (songsError) {
+        console.error('Error loading songs:', songsError);
+      } else if (songsData) {
+        console.log('Raw songs data:', songsData);
+        
+        const songUrls = [
+          songsData.song_1,
+          songsData.song_2,
+          songsData.song_3,
+          songsData.song_4,
+          songsData.song_5
+        ].filter(Boolean);
+
+        console.log('Found song URLs:', songUrls);
+
+        if (songUrls.length > 0) {
+          const addedDate = formatDate(songsData.created_at);
+          const songInfoPromises = songUrls.map(async (url) => {
+            const trackId = extractSpotifyTrackId(url);
+            if (trackId) {
+              return await fetchSpotifyTrackInfo(trackId, addedDate);
+            }
+            return null;
+          });
+
+          const songInfos = await Promise.all(songInfoPromises);
+          const validSongs = songInfos.filter((song): song is SpotifyTrackInfo => song !== null);
+          
+          console.log('Processed songs:', validSongs);
+          setSongs(validSongs);
+        }
+      }
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('Error loading shared data:', error);
     } finally {
       setIsLoading(false);
     }
@@ -87,81 +135,6 @@ const MyFive: React.FC = () => {
     });
   };
 
-  const loadUserProfile = async () => {
-    try {
-      console.log('Loading profile for user:', userId);
-      // Make this completely public - no authentication required
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('full_name')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        console.error('Error loading user profile:', error);
-        return null;
-      } else {
-        console.log('Loaded shared profile:', data);
-        setProfile(data);
-        return data;
-      }
-    } catch (error) {
-      console.error('Error loading user profile:', error);
-      return null;
-    }
-  };
-
-  const loadUserSongs = async () => {
-    try {
-      console.log('Loading songs for user:', userId);
-      // Make this completely public - no authentication required
-      const { data, error } = await supabase
-        .from('user_five_songs')
-        .select('*')
-        .eq('user_id', userId)
-        .single();
-
-      if (error) {
-        console.error('Error loading songs:', error);
-        return [];
-      }
-
-      if (data) {
-        const songUrls = [
-          data.song_1,
-          data.song_2,
-          data.song_3,
-          data.song_4,
-          data.song_5
-        ].filter(Boolean);
-
-        console.log('Found song URLs:', songUrls);
-
-        const addedDate = formatDate(data.created_at);
-
-        const songInfoPromises = songUrls.map(async (url) => {
-          const trackId = extractSpotifyTrackId(url);
-          if (trackId) {
-            return await fetchSpotifyTrackInfo(trackId, addedDate);
-          }
-          return null;
-        });
-
-        const songInfos = await Promise.all(songInfoPromises);
-        const validSongs = songInfos.filter((song): song is SpotifyTrackInfo => song !== null);
-        
-        console.log('Processed songs:', validSongs);
-        setSongs(validSongs);
-        return validSongs;
-      }
-      
-      return [];
-    } catch (error) {
-      console.error('Error loading user songs:', error);
-      return [];
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center">
@@ -173,7 +146,7 @@ const MyFive: React.FC = () => {
     );
   }
 
-  // Pass the loaded data to the iPod component
+  // Pass the loaded data to the iPod component with shared view enabled
   return <IPod sharedUserProfile={profile} sharedUserSongs={songs} />;
 };
 

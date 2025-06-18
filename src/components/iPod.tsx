@@ -39,19 +39,23 @@ const IPod: React.FC<IPodProps> = ({
   const [myFiveSongsCount, setMyFiveSongsCount] = useState(0);
   const [isSharedView, setIsSharedView] = useState(false);
 
-  // Check if we're on a shared route immediately
+  // Check if we're on a shared route and have data
   useEffect(() => {
     const currentPath = window.location.pathname;
     const isMyFiveRoute = currentPath.includes('/my-five/');
     
-    if (isMyFiveRoute) {
-      console.log('Detected shared route, setting up shared view');
+    if (isMyFiveRoute && (sharedUserProfile || sharedUserSongs.length > 0)) {
+      console.log('Setting up shared view with data:', { profile: sharedUserProfile, songsCount: sharedUserSongs.length });
       setIsSharedView(true);
       setCurrentScreen('menu');
       setIsInMyFiveView(true);
       setSelectedMenuItem(0);
+      setMyFiveSongsCount(sharedUserSongs.length);
+    } else if (isMyFiveRoute) {
+      console.log('Detected shared route but waiting for data...');
+      setIsSharedView(true);
     }
-  }, []); // Run once on mount
+  }, [sharedUserProfile, sharedUserSongs]);
 
   // Update songs count when shared songs change
   useEffect(() => {
