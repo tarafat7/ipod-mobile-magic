@@ -1,0 +1,53 @@
+
+import React from 'react';
+import MenuScreen from './MenuScreen';
+import MusicScreen from './MusicScreen';
+import { Song } from '../types/iPod';
+import { songs } from '../data/iPodData';
+
+interface ScreenProps {
+  currentScreen: string;
+  selectedMenuItem: number;
+  selectedSong: number;
+  isPlaying: boolean;
+  currentTime: string;
+}
+
+const Screen: React.FC<ScreenProps> = ({ 
+  currentScreen, 
+  selectedMenuItem, 
+  selectedSong, 
+  isPlaying, 
+  currentTime 
+}) => {
+  const renderScreen = () => {
+    switch (currentScreen) {
+      case 'menu':
+        return <MenuScreen selectedMenuItem={selectedMenuItem} />;
+      case 'music':
+        return (
+          <MusicScreen 
+            selectedSong={songs[selectedSong]} 
+            isPlaying={isPlaying} 
+            currentTime={currentTime} 
+          />
+        );
+      default:
+        return (
+          <div className="bg-white h-full flex items-center justify-center text-black">
+            iPod
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div className="bg-gray-900 rounded-xl p-2 mb-6 shadow-inner flex-1 md:flex-none md:min-h-[280px]">
+      <div className="bg-gray-100 rounded-lg h-full border border-gray-300 overflow-hidden">
+        {renderScreen()}
+      </div>
+    </div>
+  );
+};
+
+export default Screen;
