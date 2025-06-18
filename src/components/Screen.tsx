@@ -61,8 +61,8 @@ const Screen: React.FC<ScreenProps> = ({
   };
 
   return (
-    <div className="bg-gray-900 rounded-xl p-2 mb-3 md:mb-6 shadow-inner flex-1 max-h-[40vh] md:max-h-none md:flex-none md:min-h-[220px] md:p-2 p-3 md:mt-0 mt-2">
-      <div className="bg-gray-100 rounded-lg h-full border border-gray-300 overflow-hidden md:mx-0 mx-1">
+    <div className="bg-gray-900 rounded-xl p-2 mb-3 md:mb-6 shadow-inner flex-1 max-h-[40vh] md:max-h-none md:flex-none md:min-h-[220px] md:mt-0 mt-1">
+      <div className="bg-gray-100 rounded-lg h-full border border-gray-300 overflow-hidden md:mx-0 mx-0.5">
         {renderScreen()}
       </div>
     </div>
