@@ -60,12 +60,13 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
             <div
               key={item}
               className={`px-2 py-1 text-sm flex items-center justify-between cursor-pointer ${
-                currentSelectedIndex === index && isInSettingsView
-                  ? 'bg-blue-500 text-white'
-                  : currentSelectedIndex === index && !isInSettingsView
-                  ? 'bg-gray-200 text-black'
+                currentSelectedIndex === index
+                  ? 'text-white'
                   : 'text-black hover:bg-gray-100'
               } ${item === 'Delete Account' ? 'text-red-600' : ''}`}
+              style={{
+                backgroundColor: currentSelectedIndex === index ? '#3398d8' : 'transparent'
+              }}
               onClick={() => {
                 if (isInSettingsView) {
                   onSettingsItemClick(index);
@@ -83,7 +84,7 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
                 <span className="text-white">▶</span>
               )}
               {currentSelectedIndex === index && !isInSettingsView && item === 'Settings' && isSignedIn && (
-                <span className="text-black">▶</span>
+                <span className="text-white">▶</span>
               )}
             </div>
           ))}
