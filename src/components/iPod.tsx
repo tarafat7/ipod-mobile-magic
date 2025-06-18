@@ -51,6 +51,7 @@ const IPod: React.FC<IPodProps> = ({
   useEffect(() => {
     const currentPath = window.location.pathname;
     const isMyFiveRoute = currentPath.includes('/my-five/');
+    const wasSharedView = state.isSharedView;
     
     if (isMyFiveRoute && sharedUserProfile) {
       // We're on a shared route with shared data
@@ -65,12 +66,12 @@ const IPod: React.FC<IPodProps> = ({
       state.setIsInMyFiveView(false);
       state.setSelectedMyFiveSong(0);
       // Reset to main menu when leaving shared view
-      if (state.isSharedView) {
+      if (wasSharedView) {
         state.setCurrentScreen('menu');
         state.setSelectedMenuItem(0);
       }
     }
-  }, [sharedUserProfile, sharedUserSongs, window.location.pathname, state.isSharedView]);
+  }, [sharedUserProfile, sharedUserSongs, window.location.pathname]);
 
   // Update songs count when shared songs change
   useEffect(() => {
