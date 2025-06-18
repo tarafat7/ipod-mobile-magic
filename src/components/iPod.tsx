@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import Screen from './Screen';
 import ClickWheel from './ClickWheel';
@@ -13,18 +12,26 @@ const IPod = () => {
   const [currentTime, setCurrentTime] = useState('0:00');
   const [lastAngle, setLastAngle] = useState<number | null>(null);
   const [menuItems, setMenuItems] = useState<string[]>([]);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   useEffect(() => {
     const loadMenuItems = async () => {
       const items = await getMenuItems();
       setMenuItems(items);
+      setIsAuthLoading(false);
     };
 
-    loadMenuItems();
+    // Check initial session
+    const checkInitialSession = async () => {
+      await loadMenuItems();
+    };
+
+    checkInitialSession();
 
     // Listen for auth changes to update menu
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      loadMenuItems();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event, session?.user?.id);
+      await loadMenuItems();
     });
 
     return () => subscription.unsubscribe();
@@ -123,6 +130,15 @@ const IPod = () => {
     setCurrentScreen('menu');
     setSelectedMenuItem(0); // Reset to first menu item
   };
+
+  // Show loading state while checking authentication
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center md:p-4 overflow-hidden">

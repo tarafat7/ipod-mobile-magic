@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -56,7 +55,8 @@ const SignIn = () => {
         options: {
           emailRedirectTo: `${window.location.origin}/`,
           data: {
-            full_name: formData.fullName
+            full_name: formData.fullName,
+            device_id: deviceId
           }
         }
       });
@@ -67,15 +67,19 @@ const SignIn = () => {
       }
 
       if (data.user) {
-        // Update the profile with device_id
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({ device_id: deviceId })
-          .eq('id', data.user.id);
+        // Wait a moment for the trigger to create the profile, then update with device_id
+        setTimeout(async () => {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .update({ device_id: deviceId })
+            .eq('id', data.user.id);
 
-        if (profileError) {
-          console.error('Error updating profile:', profileError);
-        }
+          if (profileError) {
+            console.error('Error updating profile with device_id:', profileError);
+          } else {
+            console.log('Device ID saved successfully:', deviceId);
+          }
+        }, 1000);
 
         setIsSubmitted(true);
       }
