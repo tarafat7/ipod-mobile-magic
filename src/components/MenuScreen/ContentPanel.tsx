@@ -40,6 +40,8 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
   sharedUserProfile = null,
   sharedUserSongs = []
 }) => {
+  console.log('ContentPanel render - hoveredSettingsItem:', hoveredSettingsItem, 'isInSettingsView:', isInSettingsView);
+
   if (isInMyFiveView) {
     return (
       <div className="w-full bg-gray-50 transition-all duration-300">
@@ -56,6 +58,7 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
   if (isInSettingsView) {
     // Show account preview when hovering over "Edit Account"
     if (hoveredSettingsItem === 'Edit Account') {
+      console.log('Showing AccountPreview');
       return (
         <div className="w-1/2 bg-gray-50 transition-all duration-300">
           <AccountPreview />

@@ -96,23 +96,25 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   };
 
   const handleItemHover = (item: string) => {
+    console.log('Hovering over item:', item);
     setHoveredItem(item);
     if (isInSettingsView && onSettingsItemHover) {
+      console.log('Calling onSettingsItemHover with:', item);
       onSettingsItemHover(item);
     }
   };
 
   const handleItemLeave = () => {
+    console.log('Left item hover');
     setHoveredItem(null);
     if (isInSettingsView && onSettingsItemHover) {
+      console.log('Calling onSettingsItemHover with null');
       onSettingsItemHover(null);
     }
   };
 
   return (
-    <div className={`w-1/2 bg-white border-r border-gray-300 transition-transform duration-300 relative ${
-      isInSettingsView ? 'transform translate-x-0' : 'transform translate-x-0'
-    }`}>
+    <div className={`w-1/2 bg-white border-r border-gray-300 transition-all duration-300 relative`}>
       {/* Battery indicator - only show in main menu */}
       {!isInSettingsView && (
         <div className="absolute top-2 right-2">
@@ -133,7 +135,7 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
           {currentMenuItems.map((item, index) => (
             <div
               key={item}
-              className={`px-2 py-1 text-sm flex items-center justify-between cursor-pointer ${
+              className={`px-2 py-1 text-sm flex items-center justify-between cursor-pointer transition-colors duration-200 ${
                 currentSelectedIndex === index
                   ? 'text-white'
                   : 'text-black hover:bg-gray-100'
