@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { getMenuItems } from '../data/iPodData';
 import FriendsScreen from './FriendsScreen';
@@ -73,7 +72,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
                 <div className="w-6 h-6 bg-green-600 rounded-md"></div>
               </div>
             </div>
-            <h3 className="font-bold text-lg mb-1">iPod.js</h3>
+            <h3 className="font-bold text-lg mb-1">FivePod</h3>
             <p className="text-sm text-gray-600 text-center leading-tight">
               Your personal<br />music player
             </p>
@@ -89,7 +88,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
         <div className="p-2">
           <div className="flex items-center gap-1 mb-3 text-xs">
             <div className="w-3 h-2 bg-green-500 rounded-sm"></div>
-            <span className="font-bold">iPod.js</span>
+            <span className="font-bold">FivePod</span>
           </div>
           <div className="space-y-0">
             {menuItems.map((item, index) => (

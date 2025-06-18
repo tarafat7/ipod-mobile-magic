@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -111,7 +112,7 @@ const SignIn = () => {
             onClick={handleReturnToiPod}
             className="w-full bg-blue-600 hover:bg-blue-700"
           >
-            Return to iPod
+            Return to FivePod
           </Button>
         </div>
       </div>
@@ -122,7 +123,7 @@ const SignIn = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black flex items-center justify-center p-4">
       <div className="bg-white rounded-xl p-8 max-w-md w-full shadow-2xl">
         <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">iPod.js</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">FivePod</h1>
           <p className="text-gray-600">Create your account to get started</p>
         </div>
         
