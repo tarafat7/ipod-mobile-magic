@@ -40,6 +40,9 @@ const IPod = () => {
         return;
       }
       
+      // Trigger haptic feedback for every significant wheel movement
+      triggerHapticFeedback();
+      
       // Determine direction: positive = clockwise, negative = counter-clockwise
       const isClockwise = angleDiff > 0;
       
@@ -48,19 +51,13 @@ const IPod = () => {
           ? (selectedMenuItem + 1) % menuItems.length
           : (selectedMenuItem - 1 + menuItems.length) % menuItems.length;
         
-        if (newSelection !== selectedMenuItem) {
-          triggerHapticFeedback();
-          setSelectedMenuItem(newSelection);
-        }
+        setSelectedMenuItem(newSelection);
       } else if (currentScreen === 'music') {
         const newSelection = isClockwise 
           ? (selectedSong + 1) % songs.length
           : (selectedSong - 1 + songs.length) % songs.length;
         
-        if (newSelection !== selectedSong) {
-          triggerHapticFeedback();
-          setSelectedSong(newSelection);
-        }
+        setSelectedSong(newSelection);
       }
     }
     
