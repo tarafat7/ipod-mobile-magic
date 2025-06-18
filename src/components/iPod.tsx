@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import Screen from './Screen';
 import ClickWheel from './ClickWheel';
@@ -92,8 +91,8 @@ const IPod = () => {
             currentTime={currentTime}
           />
 
-          {/* Click Wheel - Centered in remaining space */}
-          <div className="flex-1 flex items-center justify-center">
+          {/* Click Wheel - Centered in remaining space, moved up slightly on mobile */}
+          <div className="flex-1 flex items-center justify-center md:items-center" style={{ alignItems: 'center', paddingBottom: '2rem' }}>
             <ClickWheel 
               onWheelMove={handleWheelMove}
               onWheelLeave={handleWheelLeave}
