@@ -70,6 +70,7 @@ const MyFive: React.FC = () => {
 
   const loadUserProfile = async () => {
     try {
+      // Make this completely public - no authentication required
       const { data, error } = await supabase
         .from('profiles')
         .select('full_name')
@@ -90,6 +91,7 @@ const MyFive: React.FC = () => {
   const loadUserSongs = async () => {
     setIsLoading(true);
     try {
+      // Make this completely public - no authentication required
       const { data, error } = await supabase
         .from('user_five_songs')
         .select('*')

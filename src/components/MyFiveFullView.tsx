@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Music, ExternalLink } from 'lucide-react';
@@ -27,12 +28,13 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (isSharedView && sharedUserSongs.length > 0) {
-      // Use the shared songs data directly
+    if (isSharedView) {
+      // For shared views, use the provided shared songs data directly
       console.log('Using shared songs data:', sharedUserSongs);
       setSongs(sharedUserSongs);
       setIsLoading(false);
     } else {
+      // For authenticated users viewing their own songs
       loadMyFiveSongs();
     }
   }, [isSharedView, sharedUserSongs]);
