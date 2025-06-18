@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { getMenuItems } from '../data/iPodData';
 import FriendsScreen from './FriendsScreen';
@@ -134,29 +135,16 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
       case 'Settings':
         if (showSettingsMenu && isSignedIn) {
           return (
-            <div className="h-full p-2">
-              <div className="flex items-center justify-between mb-3 text-xs">
-                <span className="font-bold">Settings</span>
-                <div className="w-6 h-2 bg-green-500 rounded-sm"></div>
+            <div className="h-full flex flex-col items-center justify-center p-4 text-center">
+              <div className="w-16 h-16 bg-black rounded-xl flex items-center justify-center mb-3">
+                <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                  <div className="w-6 h-6 bg-green-600 rounded-md"></div>
+                </div>
               </div>
-              <div className="space-y-0">
-                {settingsMenuItems.map((item, index) => (
-                  <div
-                    key={item}
-                    className={`px-2 py-1 text-sm flex items-center justify-between cursor-pointer ${
-                      selectedSettingsItem === index
-                        ? 'bg-blue-500 text-white'
-                        : 'text-black hover:bg-gray-100'
-                    } ${item === 'Delete Account' ? 'text-red-600' : ''}`}
-                    onClick={() => handleSettingsAction(item)}
-                  >
-                    <span>{item}</span>
-                    {selectedSettingsItem === index && (
-                      <span className="text-white">▶</span>
-                    )}
-                  </div>
-                ))}
-              </div>
+              <h3 className="font-bold text-lg mb-1">Settings</h3>
+              <p className="text-sm text-gray-600 text-center leading-tight">
+                Configure your<br />FivePod settings
+              </p>
             </div>
           );
         }
@@ -206,19 +194,31 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
   return (
     <div className="h-full flex">
       {/* Left menu panel */}
-      <div className="w-1/2 bg-white border-r border-gray-300 transition-all duration-300 relative">
+      <div className={`w-1/2 bg-white border-r border-gray-300 transition-all duration-300 relative ${isInSettingsView ? 'transform translate-x-0' : ''}`}>
+        {/* Battery indicator - only show in main menu */}
+        {!isInSettingsView && (
+          <div className="absolute top-2 right-2">
+            <div className="w-6 h-3 bg-green-500 rounded-sm"></div>
+          </div>
+        )}
+        
         <div className="p-2">
           <div className="flex items-center justify-between mb-3 text-xs">
             <span className="font-bold">{isInSettingsView ? 'Settings' : 'FivePod'}</span>
-            <div className="w-6 h-2 bg-green-500 rounded-sm"></div>
+            {/* Battery indicator for Settings view */}
+            {isInSettingsView && (
+              <div className="w-6 h-3 bg-green-500 rounded-sm"></div>
+            )}
           </div>
           <div className="space-y-0">
             {currentMenuItems.map((item, index) => (
               <div
                 key={item}
                 className={`px-2 py-1 text-sm flex items-center justify-between cursor-pointer ${
-                  currentSelectedIndex === index
+                  currentSelectedIndex === index && isInSettingsView
                     ? 'bg-blue-500 text-white'
+                    : currentSelectedIndex === index && !isInSettingsView
+                    ? 'bg-gray-200 text-black'
                     : 'text-black hover:bg-gray-100'
                 } ${item === 'Delete Account' ? 'text-red-600' : ''}`}
                 onClick={() => {
@@ -230,8 +230,11 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
                 }}
               >
                 <span>{item}</span>
-                {currentSelectedIndex === index && (
+                {currentSelectedIndex === index && isInSettingsView && (
                   <span className="text-white">▶</span>
+                )}
+                {currentSelectedIndex === index && !isInSettingsView && item === 'Settings' && isSignedIn && (
+                  <span className="text-black">▶</span>
                 )}
               </div>
             ))}
