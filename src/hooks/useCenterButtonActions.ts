@@ -91,21 +91,18 @@ export const useCenterButtonActions = ({
   };
 
   const handleCenterClick = () => {
-    console.log('=== CENTER BUTTON CLICKED ===');
+    console.log('CENTER BUTTON CLICKED');
     console.log('Current state:', {
       currentScreen,
       isInMyFiveView,
       isInSettingsView,
-      isSharedView,
       selectedMenuItem,
-      selectedSettingsItem,
-      selectedMyFiveSong,
-      menuItems
+      menuItems,
+      selectedMyFiveSong
     });
 
     // Handle music screen - toggle playback
     if (currentScreen === 'music') {
-      console.log('Music screen - toggling play state');
       setIsPlaying(!isPlaying);
       return;
     }
@@ -113,17 +110,13 @@ export const useCenterButtonActions = ({
     // Handle menu screen
     if (currentScreen === 'menu') {
       
-      // Handle My Five full view - play selected song
+      // If we're in My Five view, play the selected song
       if (isInMyFiveView) {
-        console.log('=== IN MY FIVE VIEW - PLAYING SONG ===');
-        console.log('Selected song index:', selectedMyFiveSong);
-        console.log('Is shared view:', isSharedView);
-        
+        console.log('In My Five view - playing song at index:', selectedMyFiveSong);
         if (isSharedView && sharedUserSongs[selectedMyFiveSong]) {
-          console.log('Opening shared song:', sharedUserSongs[selectedMyFiveSong].spotifyUrl);
           window.open(sharedUserSongs[selectedMyFiveSong].spotifyUrl, '_blank');
         } else {
-          console.log('Dispatching myFiveSongSelect event for index:', selectedMyFiveSong);
+          // Dispatch event for personal songs
           const event = new CustomEvent('myFiveSongSelect', { 
             detail: { songIndex: selectedMyFiveSong } 
           });
@@ -132,9 +125,8 @@ export const useCenterButtonActions = ({
         return;
       }
 
-      // Handle Settings view
+      // If we're in settings view
       if (isInSettingsView) {
-        console.log('=== IN SETTINGS VIEW ===');
         const settingsItems = ['Share Profile', 'Edit Account', 'Edit My Five', 'Logout', 'Delete Account'];
         const selectedAction = settingsItems[selectedSettingsItem];
         
@@ -160,36 +152,32 @@ export const useCenterButtonActions = ({
         return;
       }
 
-      // Handle main menu navigation
+      // Handle main menu selection
       const selectedItem = menuItems[selectedMenuItem];
-      console.log('=== MAIN MENU SELECTION ===');
-      console.log('Selected item:', selectedItem, 'at index:', selectedMenuItem);
+      console.log('Main menu - selected item:', selectedItem);
       
       switch (selectedItem) {
         case 'Sign In':
-          console.log('Navigating to sign in');
           window.open('/signin', '_blank');
           break;
           
         case 'My Five':
-          console.log('=== ENTERING MY FIVE VIEW ===');
+          console.log('ENTERING MY FIVE VIEW');
           setIsInMyFiveView(true);
           setSelectedMyFiveSong(0);
           break;
           
         case 'Friends':
-          console.log('Navigating to friends screen');
           setCurrentScreen('friends');
           break;
           
         case 'Settings':
-          console.log('Entering settings view');
           setIsInSettingsView(true);
           setSelectedSettingsItem(0);
           break;
           
         default:
-          console.log('No specific action for:', selectedItem);
+          console.log('No action for:', selectedItem);
           break;
       }
     }
