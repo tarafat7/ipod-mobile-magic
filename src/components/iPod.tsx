@@ -1,5 +1,6 @@
+
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, SkipForward, SkipBack, Volume2 } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack } from 'lucide-react';
 
 interface Song {
   id: number;
@@ -13,17 +14,15 @@ const IPod = () => {
   const [currentScreen, setCurrentScreen] = useState('menu');
   const [selectedMenuItem, setSelectedMenuItem] = useState(0);
   const [selectedSong, setSelectedSong] = useState(0);
-  const [volume, setVolume] = useState(50);
   const [currentTime, setCurrentTime] = useState('0:00');
   const wheelRef = useRef<HTMLDivElement>(null);
 
   const menuItems = [
+    'Cover Flow',
     'Music',
-    'Photos',
-    'Videos',
-    'Extras',
+    'Games',
     'Settings',
-    'Shuffle Songs'
+    'Sign In'
   ];
 
   const songs: Song[] = [
@@ -42,7 +41,6 @@ const IPod = () => {
     const centerY = rect.top + rect.height / 2;
     const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
     
-    // Simple wheel navigation simulation
     const normalizedAngle = ((angle * 180) / Math.PI + 360) % 360;
     
     if (currentScreen === 'menu') {
@@ -56,15 +54,10 @@ const IPod = () => {
 
   const handleCenterClick = () => {
     if (currentScreen === 'menu') {
-      switch (selectedMenuItem) {
-        case 0:
-          setCurrentScreen('music');
-          break;
-        case 5:
-          setIsPlaying(!isPlaying);
-          break;
-        default:
-          break;
+      if (selectedMenuItem === 1) { // Music
+        setCurrentScreen('music');
+      } else {
+        setIsPlaying(!isPlaying);
       }
     } else if (currentScreen === 'music') {
       setIsPlaying(!isPlaying);
@@ -81,45 +74,69 @@ const IPod = () => {
     switch (currentScreen) {
       case 'menu':
         return (
-          <div className="text-white space-y-1">
-            <h2 className="text-center font-bold mb-4 text-sm">iPod</h2>
-            {menuItems.map((item, index) => (
-              <div
-                key={item}
-                className={`px-3 py-1 text-xs ${
-                  selectedMenuItem === index
-                    ? 'bg-blue-500 text-white rounded'
-                    : 'text-gray-300'
-                }`}
-              >
-                {selectedMenuItem === index && '▶ '}{item}
+          <div className="h-full flex">
+            {/* Left menu panel */}
+            <div className="w-1/2 bg-white border-r border-gray-300">
+              <div className="p-2">
+                <div className="flex items-center gap-1 mb-3 text-xs">
+                  <div className="w-3 h-2 bg-green-500 rounded-sm"></div>
+                  <span className="font-bold">iPod.js</span>
+                </div>
+                <div className="space-y-0">
+                  {menuItems.map((item, index) => (
+                    <div
+                      key={item}
+                      className={`px-2 py-1 text-sm flex items-center justify-between ${
+                        selectedMenuItem === index
+                          ? 'bg-blue-500 text-white'
+                          : 'text-black hover:bg-gray-100'
+                      }`}
+                    >
+                      <span>{item}</span>
+                      {selectedMenuItem === index && (
+                        <span className="text-white">▶</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
+            </div>
+            
+            {/* Right content panel */}
+            <div className="w-1/2 bg-gray-50 flex flex-col items-center justify-center p-4">
+              <div className="w-16 h-16 bg-black rounded-xl flex items-center justify-center mb-3">
+                <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                  <div className="w-6 h-6 bg-green-600 rounded-md"></div>
+                </div>
+              </div>
+              <h3 className="font-bold text-lg mb-1">Spotify</h3>
+              <p className="text-sm text-gray-600 text-center leading-tight">
+                Sign in to view<br />your library
+              </p>
+            </div>
           </div>
         );
       case 'music':
         return (
-          <div className="text-white space-y-2">
-            <div className="text-center mb-4">
-              <h3 className="font-bold text-sm">Now Playing</h3>
-              <div className="mt-2">
-                <div className="text-xs font-semibold">{songs[selectedSong].title}</div>
-                <div className="text-xs text-gray-400">{songs[selectedSong].artist}</div>
+          <div className="text-black bg-white h-full p-4 flex flex-col justify-center">
+            <div className="text-center">
+              <h3 className="font-bold text-lg mb-4">Now Playing</h3>
+              <div className="mb-4">
+                <div className="text-base font-semibold">{songs[selectedSong].title}</div>
+                <div className="text-sm text-gray-600">{songs[selectedSong].artist}</div>
               </div>
-            </div>
-            
-            <div className="space-y-1">
-              <div className="text-xs text-center text-gray-400">
-                {currentTime} / {songs[selectedSong].duration}
+              
+              <div className="space-y-2 mb-4">
+                <div className="text-sm text-gray-500">
+                  {currentTime} / {songs[selectedSong].duration}
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-1">
+                  <div className="bg-gray-400 h-1 rounded-full w-1/3"></div>
+                </div>
               </div>
-              <div className="w-full bg-gray-600 rounded-full h-1">
-                <div className="bg-white h-1 rounded-full w-1/3"></div>
-              </div>
-            </div>
 
-            <div className="text-center mt-4">
-              <div className={`inline-block px-2 py-1 rounded text-xs ${
-                isPlaying ? 'bg-green-500' : 'bg-gray-500'
+              <div className={`inline-block px-3 py-1 rounded text-sm ${
+                isPlaying ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'
               }`}>
                 {isPlaying ? '▶ Playing' : '⏸ Paused'}
               </div>
@@ -127,20 +144,22 @@ const IPod = () => {
           </div>
         );
       default:
-        return <div className="text-white text-center">iPod</div>;
+        return <div className="bg-white h-full flex items-center justify-center text-black">iPod</div>;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center p-4">
       <div className="relative">
-        {/* iPod Body */}
-        <div className="bg-gradient-to-b from-gray-200 via-gray-300 to-gray-400 rounded-3xl p-6 shadow-2xl transform hover:scale-105 transition-transform duration-300 w-80 md:w-96">
+        {/* iPod Body - White/Silver */}
+        <div className="bg-gradient-to-b from-gray-50 via-white to-gray-100 rounded-3xl p-6 shadow-2xl border border-gray-200 w-80 md:w-96">
           
           {/* Screen */}
-          <div className="bg-gradient-to-b from-gray-100 to-gray-200 rounded-2xl p-4 mb-8 shadow-inner">
-            <div className="bg-black rounded-xl p-4 min-h-[200px] border-2 border-gray-400">
-              {renderScreen()}
+          <div className="bg-gray-900 rounded-xl p-1 mb-8 shadow-inner">
+            <div className="bg-gray-800 rounded-lg p-1">
+              <div className="bg-gray-100 rounded-md min-h-[220px] border border-gray-300 overflow-hidden">
+                {renderScreen()}
+              </div>
             </div>
           </div>
 
@@ -148,53 +167,52 @@ const IPod = () => {
           <div className="relative mx-auto w-48 h-48">
             <div 
               ref={wheelRef}
-              className="absolute inset-0 bg-gradient-to-b from-gray-100 to-gray-300 rounded-full shadow-lg border-4 border-gray-400 cursor-pointer hover:shadow-xl transition-shadow duration-200"
+              className="absolute inset-0 bg-gradient-to-b from-white via-gray-50 to-gray-100 rounded-full shadow-lg border border-gray-300 cursor-pointer"
               onMouseMove={handleWheelMove}
             >
               {/* Outer Ring */}
-              <div className="absolute inset-2 rounded-full border-2 border-gray-400">
+              <div className="absolute inset-3 rounded-full border border-gray-200">
+                
+                {/* MENU Text */}
+                <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
+                  <button 
+                    className="text-gray-600 hover:text-gray-800 transition-colors font-medium text-sm tracking-wider"
+                    onClick={handleMenuClick}
+                  >
+                    MENU
+                  </button>
+                </div>
                 
                 {/* Control Buttons */}
-                <button 
-                  className="absolute top-2 left-1/2 transform -translate-x-1/2 w-8 h-8 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-colors"
-                  onClick={handleMenuClick}
-                >
-                  <span className="text-xs font-bold">MENU</span>
+                <button className="absolute right-4 top-1/2 transform -translate-y-1/2 w-6 h-6 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-colors">
+                  <SkipForward size={14} />
                 </button>
                 
-                <button className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-colors">
-                  <SkipForward size={16} />
+                <button className="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-6 h-6 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-colors">
+                  <div className="flex space-x-1">
+                    <div className="w-1 h-1 bg-gray-600 rounded-full"></div>
+                    <div className="w-1 h-1 bg-gray-600 rounded-full"></div>
+                  </div>
                 </button>
                 
-                <button className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-8 h-8 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-colors">
-                  <SkipBack size={16} />
-                </button>
-                
-                <button className="absolute left-2 top-1/2 transform -translate-y-1/2 w-8 h-8 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-colors">
-                  <SkipBack size={16} className="rotate-180" />
+                <button className="absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-colors">
+                  <SkipBack size={14} />
                 </button>
 
                 {/* Center Button */}
                 <button 
-                  className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-gradient-to-b from-gray-200 to-gray-400 rounded-full shadow-lg border-2 border-gray-500 flex items-center justify-center hover:shadow-xl transition-all duration-200 active:scale-95"
+                  className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-gradient-to-b from-gray-100 to-gray-200 rounded-full shadow-inner border border-gray-300 flex items-center justify-center hover:shadow-lg transition-all duration-200 active:scale-95"
                   onClick={handleCenterClick}
                 >
-                  {isPlaying ? <Pause size={20} className="text-gray-700" /> : <Play size={20} className="text-gray-700" />}
+                  {isPlaying ? <Pause size={18} className="text-gray-700" /> : <Play size={18} className="text-gray-700 ml-0.5" />}
                 </button>
               </div>
             </div>
           </div>
-
-          {/* Apple Logo */}
-          <div className="text-center mt-4">
-            <div className="inline-block w-6 h-6 bg-gray-600 rounded-full relative">
-              <div className="absolute inset-1 bg-gray-200 rounded-full"></div>
-            </div>
-          </div>
         </div>
 
-        {/* Reflection Effect */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-3xl pointer-events-none"></div>
+        {/* Subtle highlight effect */}
+        <div className="absolute top-6 left-6 right-6 h-1/3 bg-gradient-to-b from-white/40 to-transparent rounded-t-3xl pointer-events-none"></div>
       </div>
     </div>
   );
