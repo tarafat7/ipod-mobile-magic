@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useCallback } from 'react';
 
 interface UseWheelNavigationProps {
   currentScreen: string;
@@ -36,78 +36,85 @@ export const useWheelNavigation = ({
   setSelectedSettingsItem,
   setSelectedMyFiveSong
 }: UseWheelNavigationProps) => {
-  const [lastAngle, setLastAngle] = useState<number | null>(null);
 
-  const triggerHapticFeedback = () => {
-    if ('vibrate' in navigator) {
-      navigator.vibrate(10);
-    }
-  };
-
-  const handleWheelMove = (e: React.MouseEvent) => {
-    const wheelElement = e.currentTarget as HTMLElement;
-    const rect = wheelElement.getBoundingClientRect();
+  const handleWheelMove = useCallback((e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
-    const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
     
-    const normalizedAngle = ((angle * 180) / Math.PI + 360) % 360;
+    const deltaX = e.clientX - centerX;
+    const deltaY = e.clientY - centerY;
     
-    if (lastAngle !== null) {
-      let angleDiff = normalizedAngle - lastAngle;
-      
-      if (angleDiff > 180) angleDiff -= 360;
-      if (angleDiff < -180) angleDiff += 360;
-      
-      const threshold = 15;
-      if (Math.abs(angleDiff) < threshold) {
-        return;
-      }
-      
-      triggerHapticFeedback();
-      
-      const isClockwise = angleDiff > 0;
-      
-      if (currentScreen === 'menu') {
-        if (isInMyFiveView) {
-          const songsCount = isSharedView ? sharedUserSongs.length : myFiveSongsCount;
-          const newSelection = isClockwise 
-            ? (selectedMyFiveSong + 1) % Math.max(songsCount, 1)
-            : (selectedMyFiveSong - 1 + Math.max(songsCount, 1)) % Math.max(songsCount, 1);
-          
-          setSelectedMyFiveSong(newSelection);
-        } else if (isInSettingsView) {
-          const settingsItemsCount = 5;
-          const newSelection = isClockwise 
-            ? (selectedSettingsItem + 1) % settingsItemsCount
-            : (selectedSettingsItem - 1 + settingsItemsCount) % settingsItemsCount;
-          
-          setSelectedSettingsItem(newSelection);
-        } else {
-          const newSelection = isClockwise 
-            ? (selectedMenuItem + 1) % menuItems.length
-            : (selectedMenuItem - 1 + menuItems.length) % menuItems.length;
-          
-          setSelectedMenuItem(newSelection);
+    const angle = Math.atan2(deltaY, deltaX);
+    const normalizedAngle = ((angle + Math.PI * 2) % (Math.PI * 2));
+    
+    let direction: 'up' | 'down' | 'left' | 'right';
+    
+    if (normalizedAngle >= 7 * Math.PI / 4 || normalizedAngle < Math.PI / 4) {
+      direction = 'right';
+    } else if (normalizedAngle >= Math.PI / 4 && normalizedAngle < 3 * Math.PI / 4) {
+      direction = 'down';
+    } else if (normalizedAngle >= 3 * Math.PI / 4 && normalizedAngle < 5 * Math.PI / 4) {
+      direction = 'left';
+    } else {
+      direction = 'up';
+    }
+
+    if (currentScreen === 'menu') {
+      if (isInMyFiveView) {
+        // In My Five view - navigate through songs
+        const songsCount = isSharedView ? sharedUserSongs.length : myFiveSongsCount;
+        if (direction === 'down') {
+          setSelectedMyFiveSong((selectedMyFiveSong + 1) % songsCount);
+        } else if (direction === 'up') {
+          setSelectedMyFiveSong((selectedMyFiveSong - 1 + songsCount) % songsCount);
         }
-      } else if (currentScreen === 'music') {
-        const newSelection = isClockwise 
-          ? (selectedSong + 1) % 5 // songs.length
-          : (selectedSong - 1 + 5) % 5;
-        
-        setSelectedSong(newSelection);
+      } else if (isInSettingsView) {
+        // In Settings view - navigate through settings
+        const settingsCount = 5; // Share Profile, Edit Account, Edit My Five, Logout, Delete Account
+        if (direction === 'down') {
+          setSelectedSettingsItem((selectedSettingsItem + 1) % settingsCount);
+        } else if (direction === 'up') {
+          setSelectedSettingsItem((selectedSettingsItem - 1 + settingsCount) % settingsCount);
+        }
+      } else {
+        // In main menu - navigate through menu items
+        if (direction === 'down') {
+          setSelectedMenuItem((selectedMenuItem + 1) % menuItems.length);
+        } else if (direction === 'up') {
+          setSelectedMenuItem((selectedMenuItem - 1 + menuItems.length) % menuItems.length);
+        }
+      }
+    } else if (currentScreen === 'music') {
+      // Music screen navigation
+      const totalSongs = 10; // Default song count
+      if (direction === 'down') {
+        setSelectedSong((selectedSong + 1) % totalSongs);
+      } else if (direction === 'up') {
+        setSelectedSong((selectedSong - 1 + totalSongs) % totalSongs);
       }
     }
-    
-    setLastAngle(normalizedAngle);
-  };
+  }, [
+    currentScreen,
+    isInMyFiveView,
+    isInSettingsView,
+    isSharedView,
+    selectedMenuItem,
+    selectedSong,
+    selectedSettingsItem,
+    selectedMyFiveSong,
+    menuItems.length,
+    myFiveSongsCount,
+    sharedUserSongs.length,
+    setSelectedMenuItem,
+    setSelectedSong,
+    setSelectedSettingsItem,
+    setSelectedMyFiveSong
+  ]);
 
-  const handleWheelLeave = () => {
-    setLastAngle(null);
-  };
+  const handleWheelLeave = useCallback(() => {
+    // Handle wheel leave if needed
+  }, []);
 
-  return {
-    handleWheelMove,
-    handleWheelLeave
-  };
+  return { handleWheelMove, handleWheelLeave };
 };
