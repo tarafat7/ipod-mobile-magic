@@ -4,7 +4,17 @@ import ClickWheel from './ClickWheel';
 import { getMenuItems, songs } from '../data/iPodData';
 import { supabase } from '../integrations/supabase/client';
 
-const IPod = () => {
+interface IPodProps {
+  sharedUserProfile?: { full_name: string | null } | null;
+  sharedUserSongs?: string[];
+  isSharedView?: boolean;
+}
+
+const IPod: React.FC<IPodProps> = ({ 
+  sharedUserProfile = null, 
+  sharedUserSongs = [], 
+  isSharedView = false 
+}) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentScreen, setCurrentScreen] = useState('menu');
   const [selectedMenuItem, setSelectedMenuItem] = useState(0);
@@ -14,53 +24,65 @@ const IPod = () => {
   const [menuItems, setMenuItems] = useState<string[]>([]);
   const [isInSettingsView, setIsInSettingsView] = useState(false);
   const [selectedSettingsItem, setSelectedSettingsItem] = useState(0);
-  const [isInMyFiveView, setIsInMyFiveView] = useState(false);
+  const [isInMyFiveView, setIsInMyFiveView] = useState(isSharedView); // Start in My Five view if it's shared
   const [selectedMyFiveSong, setSelectedMyFiveSong] = useState(0);
   const [myFiveSongsCount, setMyFiveSongsCount] = useState(0);
 
   useEffect(() => {
     const loadMenuItems = async () => {
-      const items = await getMenuItems();
-      setMenuItems(items);
+      if (isSharedView) {
+        // For shared view, show limited menu options
+        setMenuItems(['My Five', 'Sign In']);
+      } else {
+        const items = await getMenuItems();
+        setMenuItems(items);
+      }
     };
 
     const loadMyFiveSongs = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data, error } = await supabase
-            .from('user_five_songs')
-            .select('*')
-            .eq('user_id', user.id)
-            .maybeSingle();
+      if (isSharedView) {
+        // Use the passed songs for shared view
+        setMyFiveSongsCount(sharedUserSongs.length);
+      } else {
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const { data, error } = await supabase
+              .from('user_five_songs')
+              .select('*')
+              .eq('user_id', user.id)
+              .maybeSingle();
 
-          if (data) {
-            const songUrls = [
-              data.song_1,
-              data.song_2,
-              data.song_3,
-              data.song_4,
-              data.song_5
-            ].filter(Boolean);
-            setMyFiveSongsCount(songUrls.length);
+            if (data) {
+              const songUrls = [
+                data.song_1,
+                data.song_2,
+                data.song_3,
+                data.song_4,
+                data.song_5
+              ].filter(Boolean);
+              setMyFiveSongsCount(songUrls.length);
+            }
           }
+        } catch (error) {
+          console.error('Error loading my five songs count:', error);
         }
-      } catch (error) {
-        console.error('Error loading my five songs count:', error);
       }
     };
 
     loadMenuItems();
     loadMyFiveSongs();
 
-    // Listen for auth changes to update menu
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      loadMenuItems();
-      loadMyFiveSongs();
-    });
+    if (!isSharedView) {
+      // Listen for auth changes to update menu (only for non-shared view)
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+        loadMenuItems();
+        loadMyFiveSongs();
+      });
 
-    return () => subscription.unsubscribe();
-  }, []);
+      return () => subscription.unsubscribe();
+    }
+  }, [isSharedView, sharedUserSongs]);
 
   const triggerHapticFeedback = () => {
     // Check if vibration API is available (mobile devices)
@@ -100,14 +122,15 @@ const IPod = () => {
       if (currentScreen === 'menu') {
         if (isInMyFiveView) {
           // Navigate My Five songs
+          const songsCount = isSharedView ? sharedUserSongs.length : myFiveSongsCount;
           const newSelection = isClockwise 
-            ? (selectedMyFiveSong + 1) % Math.max(myFiveSongsCount, 1)
-            : (selectedMyFiveSong - 1 + Math.max(myFiveSongsCount, 1)) % Math.max(myFiveSongsCount, 1);
+            ? (selectedMyFiveSong + 1) % Math.max(songsCount, 1)
+            : (selectedMyFiveSong - 1 + Math.max(songsCount, 1)) % Math.max(songsCount, 1);
           
           console.log('My Five navigation:', { currentSelection: selectedMyFiveSong, newSelection });
           setSelectedMyFiveSong(newSelection);
-        } else if (isInSettingsView) {
-          // Navigate settings items
+        } else if (isInSettingsView && !isSharedView) {
+          // Navigate settings items (only available in non-shared view)
           const settingsItemsCount = 5; // Share Profile, Edit Account, Edit My Five, Logout, Delete Account
           const newSelection = isClockwise 
             ? (selectedSettingsItem + 1) % settingsItemsCount
@@ -223,8 +246,8 @@ const IPod = () => {
         // This will be handled by triggering the song click from MyFiveFullView
         const event = new CustomEvent('myFiveSongSelect', { detail: { songIndex: selectedMyFiveSong } });
         window.dispatchEvent(event);
-      } else if (isInSettingsView) {
-        // Handle settings item selection
+      } else if (isInSettingsView && !isSharedView) {
+        // Handle settings item selection (only available in non-shared view)
         const settingsItems = ['Share Profile', 'Edit Account', 'Edit My Five', 'Logout', 'Delete Account'];
         const selectedSettingsAction = settingsItems[selectedSettingsItem];
         console.log('Settings action selected:', selectedSettingsAction);
@@ -260,10 +283,10 @@ const IPod = () => {
           console.log('Entering My Five view');
           setIsInMyFiveView(true);
           setSelectedMyFiveSong(0);
-        } else if (selectedItem === 'Friends') {
+        } else if (selectedItem === 'Friends' && !isSharedView) {
           console.log('Navigating to friends screen');
           setCurrentScreen('friends');
-        } else if (selectedItem === 'Settings') {
+        } else if (selectedItem === 'Settings' && !isSharedView) {
           console.log('Entering settings view');
           setIsInSettingsView(true);
           setSelectedSettingsItem(0);
@@ -281,6 +304,11 @@ const IPod = () => {
     console.log('Current state - Screen:', currentScreen, 'InSettings:', isInSettingsView, 'InMyFive:', isInMyFiveView);
     
     if (isInMyFiveView) {
+      if (isSharedView) {
+        // In shared view, don't allow exiting My Five view
+        console.log('Cannot exit My Five view in shared mode');
+        return;
+      }
       console.log('Exiting My Five view');
       setIsInMyFiveView(false);
       setSelectedMyFiveSong(0);
@@ -322,6 +350,9 @@ const IPod = () => {
             isInMyFiveView={isInMyFiveView}
             selectedMyFiveSong={selectedMyFiveSong}
             onMyFiveSongChange={handleMyFiveSongChange}
+            sharedUserProfile={sharedUserProfile}
+            sharedUserSongs={sharedUserSongs}
+            isSharedView={isSharedView}
           />
 
           {/* Click Wheel - Centered in remaining space, moved up slightly on mobile */}
