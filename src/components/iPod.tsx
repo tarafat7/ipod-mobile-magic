@@ -2,7 +2,7 @@
 import React from 'react';
 import Screen from './Screen';
 import ClickWheel from './ClickWheel';
-import IPodContainer from './IPodContainer';
+import IPodContainer from './iPodContainer';
 import { useIPodState } from '../hooks/useIPodState';
 import { useWheelNavigation } from '../hooks/useWheelNavigation';
 import { useCenterButtonActions } from '../hooks/useCenterButtonActions';
