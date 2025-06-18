@@ -42,12 +42,18 @@ const SignIn = () => {
     setError(null);
     
     try {
+      console.log('Starting signup process with data:', { 
+        email: formData.email, 
+        fullName: formData.fullName 
+      });
+
       // Generate a device ID if one doesn't exist
       let deviceId = localStorage.getItem('ipod_device_id');
       if (!deviceId) {
         deviceId = 'device_' + Math.random().toString(36).substr(2, 9);
         localStorage.setItem('ipod_device_id', deviceId);
       }
+      console.log('Device ID:', deviceId);
 
       // Sign up with Supabase
       const { data, error: signUpError } = await supabase.auth.signUp({
@@ -61,27 +67,66 @@ const SignIn = () => {
         }
       });
 
+      console.log('Signup response:', { data, error: signUpError });
+
       if (signUpError) {
+        console.error('Signup error:', signUpError);
         setError(signUpError.message);
         return;
       }
 
       if (data.user) {
-        // Update the profile with device_id
-        const { error: profileError } = await supabase
+        console.log('User created successfully:', data.user.id);
+        
+        // Wait a moment for the trigger to execute
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Check if profile was created by the trigger
+        const { data: profileData, error: profileCheckError } = await supabase
           .from('profiles')
-          .update({ device_id: deviceId })
-          .eq('id', data.user.id);
+          .select('*')
+          .eq('id', data.user.id)
+          .single();
+        
+        console.log('Profile check result:', { profileData, profileCheckError });
+        
+        if (!profileData && !profileCheckError) {
+          console.log('No profile found, manually creating one...');
+          // If trigger didn't create profile, create it manually
+          const { error: profileCreateError } = await supabase
+            .from('profiles')
+            .insert({
+              id: data.user.id,
+              full_name: formData.fullName,
+              email: formData.email,
+              device_id: deviceId
+            });
+          
+          if (profileCreateError) {
+            console.error('Manual profile creation error:', profileCreateError);
+          } else {
+            console.log('Profile created manually');
+          }
+        } else if (profileData) {
+          console.log('Profile found, updating with device_id...');
+          // Update the profile with device_id
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .update({ device_id: deviceId })
+            .eq('id', data.user.id);
 
-        if (profileError) {
-          console.error('Error updating profile:', profileError);
+          if (profileError) {
+            console.error('Error updating profile:', profileError);
+          } else {
+            console.log('Profile updated with device_id');
+          }
         }
 
         setIsSubmitted(true);
       }
     } catch (err) {
+      console.error('Unexpected signup error:', err);
       setError('An unexpected error occurred. Please try again.');
-      console.error('Signup error:', err);
     } finally {
       setIsLoading(false);
     }
