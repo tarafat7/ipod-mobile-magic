@@ -192,7 +192,7 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
   const displayName = isSharedView && sharedUserProfile ? `${sharedUserProfile.full_name}'s` : 'My';
 
   return (
-    <div className="h-full bg-white flex flex-col">
+    <div className="h-full bg-white flex flex-col min-h-0">
       {/* Header */}
       <div className="p-2 flex-shrink-0">
         <div className="flex items-center justify-between mb-3 text-xs">
@@ -201,8 +201,8 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
         </div>
       </div>
 
-      {/* Scrollable Song List - Using native CSS overflow instead of ScrollArea */}
-      <div className="flex-1 overflow-y-auto">
+      {/* Scrollable Song List - Fixed height container for proper mobile scrolling */}
+      <div className="flex-1 min-h-0 overflow-y-auto">
         <div className="bg-white px-2">
           {songs.map((song, index) => (
             <div 
