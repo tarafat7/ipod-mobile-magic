@@ -80,8 +80,11 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
               }}
             >
               <span>{item}</span>
-              {currentSelectedIndex === index && (
-                <span className="text-white">></span>
+              {currentSelectedIndex === index && isInSettingsView && (
+                <span className="text-white">▶</span>
+              )}
+              {currentSelectedIndex === index && !isInSettingsView && item === 'Settings' && isSignedIn && (
+                <span className="text-white">▶</span>
               )}
             </div>
           ))}
