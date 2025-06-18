@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react';
 import Screen from './Screen';
 import ClickWheel from './ClickWheel';
-import { menuItems, songs } from '../data/iPodData';
+import { getMenuItems, songs } from '../data/iPodData';
 
 const IPod = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -48,6 +48,7 @@ const IPod = () => {
       const isClockwise = angleDiff > 0;
       
       if (currentScreen === 'menu') {
+        const menuItems = getMenuItems();
         const newSelection = isClockwise 
           ? (selectedMenuItem + 1) % menuItems.length
           : (selectedMenuItem - 1 + menuItems.length) % menuItems.length;
@@ -71,21 +72,26 @@ const IPod = () => {
   };
 
   const handleCenterClick = () => {
+    const menuItems = getMenuItems();
     console.log('Center button clicked!');
     console.log('Current screen:', currentScreen);
     console.log('Selected menu item:', selectedMenuItem);
     console.log('Selected menu item name:', menuItems[selectedMenuItem]);
     
     if (currentScreen === 'menu') {
-      if (selectedMenuItem === 0) { // Sign In
+      const selectedItem = menuItems[selectedMenuItem];
+      if (selectedItem === 'Sign In') {
         console.log('Attempting to open sign-in page...');
         // Open sign-in page in a new tab/window
         const newWindow = window.open('/signin', '_blank');
         console.log('Window opened:', newWindow);
-      } else if (selectedMenuItem === 1) { // Friends
+      } else if (selectedItem === 'My Five') {
+        console.log('My Five clicked');
+        // Future functionality for My Five feature
+      } else if (selectedItem === 'Friends') {
         console.log('Navigating to friends screen');
         setCurrentScreen('friends');
-      } else if (selectedMenuItem === 2) { // Settings
+      } else if (selectedItem === 'Settings') {
         console.log('Navigating to settings screen');
         setCurrentScreen('settings');
       } else {

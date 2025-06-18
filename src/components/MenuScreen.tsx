@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { menuItems } from '../data/iPodData';
+import { getMenuItems } from '../data/iPodData';
 import FriendsScreen from './FriendsScreen';
 import SettingsScreen from './SettingsScreen';
-import { User } from 'lucide-react';
+import { User, Music } from 'lucide-react';
 
 interface MenuScreenProps {
   selectedMenuItem: number;
@@ -13,6 +13,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
   // Check if user is signed in
   const userData = localStorage.getItem('ipod_user');
   const isSignedIn = !!userData;
+  const menuItems = getMenuItems();
 
   const renderRightPanel = () => {
     const selectedItem = menuItems[selectedMenuItem];
@@ -22,20 +23,18 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
         return <FriendsScreen />;
       case 'Settings':
         return <SettingsScreen />;
+      case 'My Five':
+        return (
+          <div className="h-full flex flex-col items-center justify-center p-4 text-center">
+            <Music size={32} className="text-blue-600 mb-3" />
+            <h3 className="font-bold text-lg mb-1">My Five</h3>
+            <p className="text-sm text-gray-600 leading-tight">
+              Add the 5 songs that are<br />
+              on repeat for you right now
+            </p>
+          </div>
+        );
       case 'Sign In':
-        if (isSignedIn) {
-          const user = JSON.parse(userData);
-          return (
-            <div className="h-full flex flex-col items-center justify-center p-4 text-center">
-              <User size={32} className="text-green-600 mb-3" />
-              <h3 className="font-bold text-lg mb-1">Welcome!</h3>
-              <p className="text-sm text-gray-600 leading-tight">
-                Hello, {user.fullName}<br />
-                You're signed in
-              </p>
-            </div>
-          );
-        }
         return (
           <div className="h-full flex flex-col items-center justify-center p-4 text-center">
             <User size={32} className="text-gray-600 mb-3" />

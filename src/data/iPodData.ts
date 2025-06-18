@@ -1,6 +1,17 @@
 
 import { Song } from '../types/iPod';
 
+export const getMenuItems = () => {
+  const userData = localStorage.getItem('ipod_user');
+  const isSignedIn = !!userData;
+  
+  return [
+    isSignedIn ? 'My Five' : 'Sign In',
+    'Friends', 
+    'Settings'
+  ];
+};
+
 export const menuItems = [
   'Sign In',
   'Friends', 
