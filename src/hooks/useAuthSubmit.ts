@@ -3,7 +3,7 @@ import { supabase } from '../integrations/supabase/client';
 
 export const useAuthSubmit = () => {
   const handleEditSubmit = async (
-    formData: { fullName: string; email: string; password: string },
+    formData: { fullName: string; username: string; email: string; password: string },
     currentUser: any
   ) => {
     try {
@@ -11,6 +11,7 @@ export const useAuthSubmit = () => {
         .from('profiles')
         .update({
           full_name: formData.fullName,
+          username: formData.username,
           email: formData.email
         })
         .eq('id', currentUser.id);

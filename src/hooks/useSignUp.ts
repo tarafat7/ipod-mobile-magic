@@ -8,6 +8,7 @@ export const useSignUp = () => {
 
   const signUp = async (userData: {
     fullName: string;
+    username: string;
     email: string;
     password: string;
   }) => {
@@ -21,6 +22,7 @@ export const useSignUp = () => {
         options: {
           data: {
             full_name: userData.fullName,
+            username: userData.username,
           },
         },
       });

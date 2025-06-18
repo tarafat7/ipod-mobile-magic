@@ -7,7 +7,7 @@ import AuthContainer from './auth/AuthContainer';
 import AuthForm from './auth/AuthForm';
 
 interface SignInFormProps {
-  onSubmit: (data: { fullName: string; email: string; password: string }) => void;
+  onSubmit: (data: { fullName: string; username: string; email: string; password: string }) => void;
   isLoading: boolean;
   error: string | null;
   onErrorClear: () => void;
@@ -38,7 +38,7 @@ const SignInForm: React.FC<SignInFormProps> = ({
     }
   }, [isEditMode, isLoginMode]);
 
-  const handleSubmit = async (formData: { fullName: string; email: string; password: string }) => {
+  const handleSubmit = async (formData: { fullName: string; username: string; email: string; password: string }) => {
     if (isEditMode && currentUser) {
       try {
         await handleEditSubmit(formData, currentUser);

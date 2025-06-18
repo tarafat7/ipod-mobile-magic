@@ -5,7 +5,7 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 
 interface AuthFormProps {
-  onSubmit: (data: { fullName: string; email: string; password: string }) => void;
+  onSubmit: (data: { fullName: string; username: string; email: string; password: string }) => void;
   isLoading: boolean;
   error: string | null;
   onErrorClear: () => void;
@@ -14,6 +14,7 @@ interface AuthFormProps {
   onModeToggle?: () => void;
   initialData?: {
     fullName: string;
+    username: string;
     email: string;
   };
 }
@@ -26,10 +27,11 @@ const AuthForm: React.FC<AuthFormProps> = ({
   isEditMode = false,
   isLoginMode = false,
   onModeToggle,
-  initialData = { fullName: '', email: '' }
+  initialData = { fullName: '', username: '', email: '' }
 }) => {
   const [formData, setFormData] = useState({
     fullName: initialData.fullName,
+    username: initialData.username,
     email: initialData.email,
     password: ''
   });
@@ -66,6 +68,22 @@ const AuthForm: React.FC<AuthFormProps> = ({
             required
             disabled={isLoading}
             placeholder="Enter your full name"
+          />
+        </div>
+      )}
+
+      {!isLoginMode && (
+        <div className="space-y-2">
+          <Label htmlFor="username">Username</Label>
+          <Input
+            id="username"
+            name="username"
+            type="text"
+            value={formData.username}
+            onChange={handleInputChange}
+            required
+            disabled={isLoading}
+            placeholder="Choose a username"
           />
         </div>
       )}
