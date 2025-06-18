@@ -10,6 +10,7 @@ interface AuthFormProps {
   error: string | null;
   onErrorClear: () => void;
   isEditMode?: boolean;
+  isLoginMode?: boolean;
   initialData?: {
     fullName: string;
     email: string;
@@ -22,6 +23,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
   error, 
   onErrorClear,
   isEditMode = false,
+  isLoginMode = false,
   initialData = { fullName: '', email: '' }
 }) => {
   const [formData, setFormData] = useState({
@@ -41,21 +43,30 @@ const AuthForm: React.FC<AuthFormProps> = ({
     onSubmit(formData);
   };
 
+  const getButtonText = () => {
+    if (isLoading) return 'Processing...';
+    if (isEditMode) return 'Update Account';
+    if (isLoginMode) return 'Sign In';
+    return 'Sign Up';
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="fullName">Full Name</Label>
-        <Input
-          id="fullName"
-          name="fullName"
-          type="text"
-          value={formData.fullName}
-          onChange={handleInputChange}
-          required
-          disabled={isLoading}
-          placeholder="Enter your full name"
-        />
-      </div>
+      {!isLoginMode && (
+        <div className="space-y-2">
+          <Label htmlFor="fullName">Full Name</Label>
+          <Input
+            id="fullName"
+            name="fullName"
+            type="text"
+            value={formData.fullName}
+            onChange={handleInputChange}
+            required
+            disabled={isLoading}
+            placeholder="Enter your full name"
+          />
+        </div>
+      )}
 
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
@@ -98,7 +109,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
         className="w-full" 
         disabled={isLoading}
       >
-        {isLoading ? 'Processing...' : (isEditMode ? 'Update Account' : 'Sign Up')}
+        {getButtonText()}
       </Button>
 
       <div className="text-center">
