@@ -6,7 +6,6 @@ import { User } from 'lucide-react';
 interface UserProfile {
   full_name: string | null;
   email: string | null;
-  username: string | null;
 }
 
 const AccountPreview: React.FC = () => {
@@ -18,18 +17,22 @@ const AccountPreview: React.FC = () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          const { data: profileData } = await supabase
+          const { data: profileData, error } = await supabase
             .from('profiles')
-            .select('full_name, email, username')
+            .select('full_name, email')
             .eq('id', user.id)
             .single();
           
-          if (profileData) {
+          if (error) {
+            console.error('Error loading profile:', error);
+            setProfile(null);
+          } else if (profileData) {
             setProfile(profileData);
           }
         }
       } catch (error) {
         console.error('Error loading user profile:', error);
+        setProfile(null);
       } finally {
         setIsLoading(false);
       }
@@ -60,6 +63,9 @@ const AccountPreview: React.FC = () => {
     );
   }
 
+  // Extract username from email (part before @)
+  const username = profile.email ? profile.email.split('@')[0] : 'No username';
+
   return (
     <div className="h-full flex flex-col items-center justify-center p-4 text-center">
       {/* Profile Picture / Album Art */}
@@ -74,7 +80,7 @@ const AccountPreview: React.FC = () => {
       
       {/* Username / Artist */}
       <p className="text-sm text-gray-600 text-center leading-tight">
-        @{profile.username || 'No username'}
+        @{username}
       </p>
     </div>
   );

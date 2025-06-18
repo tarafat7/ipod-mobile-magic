@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { supabase } from '../../integrations/supabase/client';
 
@@ -36,7 +37,7 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   onSettingsItemHover,
   isSharedView = false
 }) => {
-  const [touchedItem, setTouchedItem] = useState<string | null>(null);
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   
   // Modify menu items for shared view
   const displayMenuItems = isSharedView && !isSignedIn 
@@ -71,8 +72,8 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   };
 
   const handleItemClick = (item: string, index: number) => {
-    // Clear any touched state first
-    setTouchedItem(null);
+    // Clear hover state on click
+    setHoveredItem(null);
     if (onSettingsItemHover) {
       onSettingsItemHover(null);
     }
@@ -95,32 +96,17 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   };
 
   const handleItemHover = (item: string) => {
+    setHoveredItem(item);
     if (isInSettingsView && onSettingsItemHover) {
       onSettingsItemHover(item);
     }
   };
 
   const handleItemLeave = () => {
-    if (isInSettingsView && onSettingsItemHover && !touchedItem) {
+    setHoveredItem(null);
+    if (isInSettingsView && onSettingsItemHover) {
       onSettingsItemHover(null);
     }
-  };
-
-  const handleTouchStart = (item: string) => {
-    if (isInSettingsView && onSettingsItemHover) {
-      setTouchedItem(item);
-      onSettingsItemHover(item);
-    }
-  };
-
-  const handleTouchEnd = () => {
-    // Small delay to allow preview to be seen before clearing
-    setTimeout(() => {
-      setTouchedItem(null);
-      if (isInSettingsView && onSettingsItemHover) {
-        onSettingsItemHover(null);
-      }
-    }, 100);
   };
 
   return (
@@ -158,8 +144,6 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
               onClick={() => handleItemClick(item, index)}
               onMouseEnter={() => handleItemHover(item)}
               onMouseLeave={handleItemLeave}
-              onTouchStart={() => handleTouchStart(item)}
-              onTouchEnd={handleTouchEnd}
             >
               <span>{item}</span>
               {currentSelectedIndex === index && isInSettingsView && (

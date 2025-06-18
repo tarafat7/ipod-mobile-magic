@@ -3,293 +3,187 @@ import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { supabase } from '../integrations/supabase/client';
 
-interface FormData {
-  fullName: string;
-  username: string;
-  email: string;
-  password: string;
-}
-
 interface SignInFormProps {
-  onSubmit: (formData: FormData) => void;
+  onSubmit: (data: { fullName: string; email: string; password: string }) => void;
   isLoading: boolean;
   error: string | null;
   onErrorClear: () => void;
 }
 
-const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProps) => {
-  const [formData, setFormData] = useState<FormData>({
+const SignInForm: React.FC<SignInFormProps> = ({ onSubmit, isLoading, error, onErrorClear }) => {
+  const [formData, setFormData] = useState({
     fullName: '',
-    username: '',
     email: '',
     password: ''
   });
   const [isEditMode, setIsEditMode] = useState(false);
-  const [isSignInMode, setIsSignInMode] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
-    // Check if we're in edit mode
-    const urlParams = new URLSearchParams(window.location.search);
-    const mode = urlParams.get('mode');
-    
-    if (mode === 'edit') {
-      setIsEditMode(true);
-      loadUserData();
-    }
-  }, []);
-
-  const loadUserData = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-        
-        if (profile) {
-          setFormData({
-            fullName: profile.full_name || '',
-            username: profile.username || '',
-            email: profile.email || '',
-            password: '' // Don't pre-fill password
-          });
+    // Check if we're in edit mode and load existing user data
+    const checkEditMode = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const mode = urlParams.get('mode');
+      
+      if (mode === 'edit') {
+        setIsEditMode(true);
+        // Load current user data
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setCurrentUser(user);
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name, email')
+            .eq('id', user.id)
+            .single();
+          
+          if (profile) {
+            setFormData({
+              fullName: profile.full_name || '',
+              email: profile.email || user.email || '',
+              password: '' // Don't pre-fill password
+            });
+          }
         }
       }
-    } catch (error) {
-      console.error('Error loading user data:', error);
-    }
-  };
+    };
+
+    checkEditMode();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    onErrorClear();
-  };
-
-  const handleSignIn = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      });
-
-      if (error) {
-        console.error('Sign in error:', error);
-        // Handle error - you might want to pass this to the parent component
-        return;
-      }
-
-      // Redirect to main page on successful sign in
-      window.location.href = '/';
-    } catch (error) {
-      console.error('Unexpected sign in error:', error);
-    }
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (error) onErrorClear();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (isSignInMode) {
-      await handleSignIn();
-      return;
-    }
-    
-    if (isEditMode) {
-      // Handle account update
+    if (isEditMode && currentUser) {
+      // Update existing user profile
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          // Update profile in profiles table
-          await supabase
-            .from('profiles')
-            .update({
-              full_name: formData.fullName,
-              username: formData.username,
-              email: formData.email
-            })
-            .eq('id', user.id);
-          
-          // Update auth user metadata and email
-          const updateData: any = {};
-          
-          // Update email if changed
-          if (formData.email !== user.email) {
-            updateData.email = formData.email;
-          }
-          
-          // Update password if provided
-          if (formData.password) {
-            updateData.password = formData.password;
-          }
-          
-          // Update user metadata with full name and username
-          updateData.data = {
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
             full_name: formData.fullName,
-            username: formData.username
-          };
-          
-          await supabase.auth.updateUser(updateData);
-          
-          // Redirect back to main page
-          window.location.href = '/';
+            email: formData.email
+          })
+          .eq('id', currentUser.id);
+
+        if (updateError) throw updateError;
+
+        // If password is provided, update it
+        if (formData.password) {
+          const { error: passwordError } = await supabase.auth.updateUser({
+            password: formData.password
+          });
+          if (passwordError) throw passwordError;
         }
+
+        // If email changed, update it
+        if (formData.email !== currentUser.email) {
+          const { error: emailError } = await supabase.auth.updateUser({
+            email: formData.email
+          });
+          if (emailError) throw emailError;
+        }
+
+        // Redirect back to main page
+        window.location.href = '/';
       } catch (error) {
-        console.error('Error updating account:', error);
+        console.error('Error updating profile:', error);
       }
     } else {
+      // Create new user
       onSubmit(formData);
     }
   };
 
-  const handleCancel = () => {
-    window.location.href = '/';
-  };
-
-  const toggleMode = () => {
-    setIsSignInMode(!isSignInMode);
-    onErrorClear();
-  };
-
-  const getTitle = () => {
-    if (isEditMode) return 'Edit your account';
-    if (isSignInMode) return 'Welcome back';
-    return 'Create your account to get started';
-  };
-
-  const getButtonText = () => {
-    if (isLoading) {
-      if (isEditMode) return 'Updating...';
-      if (isSignInMode) return 'Signing In...';
-      return 'Creating Account...';
-    }
-    if (isEditMode) return 'Update Account';
-    if (isSignInMode) return 'Sign In';
-    return 'Create Account';
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl p-8 max-w-md w-full shadow-2xl">
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">FivePod</h1>
-          <p className="text-gray-600">
-            {getTitle()}
-          </p>
-        </div>
-        
-        {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-md text-sm">
-            {error}
-          </div>
-        )}
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {!isSignInMode && (
-            <>
-              <div>
-                <Label htmlFor="fullName">Full Name</Label>
-                <Input
-                  id="fullName"
-                  name="fullName"
-                  type="text"
-                  value={formData.fullName}
-                  onChange={handleInputChange}
-                  required
-                  className="mt-1"
-                  disabled={isLoading}
-                />
-              </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-8">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold">
+            {isEditMode ? 'Edit Account' : 'Sign Up for FivePod'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="fullName">Full Name</Label>
+              <Input
+                id="fullName"
+                name="fullName"
+                type="text"
+                value={formData.fullName}
+                onChange={handleInputChange}
+                required
+                disabled={isLoading}
+                placeholder="Enter your full name"
+              />
+            </div>
 
-              <div>
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  name="username"
-                  type="text"
-                  value={formData.username}
-                  onChange={handleInputChange}
-                  required
-                  className="mt-1"
-                  disabled={isLoading}
-                  placeholder="Choose a unique username"
-                />
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+                disabled={isLoading}
+                placeholder="Enter your email"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password">
+                {isEditMode ? 'New Password (leave blank to keep current)' : 'Password'}
+              </Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                required={!isEditMode}
+                disabled={isLoading}
+                placeholder={isEditMode ? "Enter new password" : "Enter your password"}
+              />
+            </div>
+
+            {error && (
+              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+                {error}
               </div>
-            </>
-          )}
-          
-          <div>
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              required
-              className="mt-1"
-              disabled={isLoading}
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="password">
-              Password {isEditMode && '(leave blank to keep current)'}
-            </Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              required={!isEditMode}
-              className="mt-1"
-              disabled={isLoading}
-            />
-          </div>
-          
-          <div className="flex space-x-3">
+            )}
+
             <Button 
               type="submit" 
-              className="flex-1 bg-blue-600 hover:bg-blue-700 mt-6"
+              className="w-full" 
               disabled={isLoading}
             >
-              {getButtonText()}
+              {isLoading ? 'Processing...' : (isEditMode ? 'Update Account' : 'Sign Up')}
             </Button>
-            
-            {isEditMode && (
-              <Button 
-                type="button" 
-                variant="outline"
-                onClick={handleCancel}
-                className="flex-1 mt-6"
-                disabled={isLoading}
-              >
-                Cancel
-              </Button>
-            )}
-          </div>
 
-          {!isEditMode && (
-            <div className="text-center mt-4">
-              <button
+            <div className="text-center">
+              <Button
                 type="button"
-                onClick={toggleMode}
-                className="text-blue-600 hover:text-blue-700 text-sm underline"
+                variant="link"
+                onClick={() => window.location.href = '/'}
                 disabled={isLoading}
               >
-                {isSignInMode ? 'or create account' : 'or sign in'}
-              </button>
+                Back to FivePod
+              </Button>
             </div>
-          )}
-        </form>
-      </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 };
