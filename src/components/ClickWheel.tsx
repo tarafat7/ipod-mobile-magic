@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { SkipForward, SkipBack } from 'lucide-react';
 
@@ -45,7 +44,7 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCe
   };
 
   return (
-    <div className="relative w-80 h-80 md:w-72 md:h-72 flex-shrink-0">
+    <div className="relative w-72 h-72 md:w-64 md:h-64 flex-shrink-0">
       <div 
         ref={wheelRef}
         className="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-300 rounded-full shadow-lg border border-gray-400 cursor-pointer touch-none"
