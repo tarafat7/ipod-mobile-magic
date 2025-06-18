@@ -14,6 +14,16 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
   const [menuItems, setMenuItems] = useState<string[]>([]);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+  const [isInSettingsView, setIsInSettingsView] = useState(false);
+  const [selectedSettingsItem, setSelectedSettingsItem] = useState(0);
+
+  const settingsMenuItems = [
+    'Share Profile',
+    'Edit Account', 
+    'Edit My Five',
+    'Logout',
+    'Delete Account'
+  ];
 
   useEffect(() => {
     const loadMenuItems = async () => {
@@ -38,11 +48,28 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
 
   useEffect(() => {
     const selectedItem = menuItems[selectedMenuItem];
-    setShowSettingsMenu(selectedItem === 'Settings');
-  }, [selectedMenuItem, menuItems]);
+    if (selectedItem === 'Settings' && isSignedIn) {
+      setShowSettingsMenu(true);
+    } else {
+      setShowSettingsMenu(false);
+      setIsInSettingsView(false);
+    }
+  }, [selectedMenuItem, menuItems, isSignedIn]);
+
+  const handleSettingsClick = () => {
+    if (showSettingsMenu && isSignedIn) {
+      setIsInSettingsView(true);
+    }
+  };
+
+  const handleBackToMain = () => {
+    setIsInSettingsView(false);
+    setSelectedSettingsItem(0);
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    handleBackToMain();
   };
 
   const handleDeleteAccount = async () => {
@@ -59,13 +86,47 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
         console.error('Error deleting account:', error);
       }
     }
+    handleBackToMain();
   };
 
   const handleEditAccount = () => {
     window.location.href = '/sign-in?mode=edit';
   };
 
+  const handleSettingsAction = (item: string) => {
+    switch (item) {
+      case 'Edit Account':
+        handleEditAccount();
+        break;
+      case 'Logout':
+        handleLogout();
+        break;
+      case 'Delete Account':
+        handleDeleteAccount();
+        break;
+      default:
+        // Handle other actions later
+        break;
+    }
+  };
+
   const renderRightPanel = () => {
+    if (isInSettingsView) {
+      return (
+        <div className="h-full flex flex-col items-center justify-center p-4 text-center">
+          <div className="w-16 h-16 bg-black rounded-xl flex items-center justify-center mb-3">
+            <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+              <div className="w-6 h-6 bg-green-600 rounded-md"></div>
+            </div>
+          </div>
+          <h3 className="font-bold text-lg mb-1">Settings</h3>
+          <p className="text-sm text-gray-600 text-center leading-tight">
+            Configure your<br />FivePod settings
+          </p>
+        </div>
+      );
+    }
+
     const selectedItem = menuItems[selectedMenuItem];
     
     switch (selectedItem) {
@@ -74,33 +135,28 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
       case 'Settings':
         if (showSettingsMenu && isSignedIn) {
           return (
-            <div className="h-full p-4">
-              <h3 className="font-bold text-lg mb-4">Settings</h3>
-              <div className="space-y-2">
-                <button className="w-full text-left px-3 py-2 text-sm hover:bg-gray-200 rounded">
-                  Share Profile
-                </button>
-                <button 
-                  onClick={handleEditAccount}
-                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-200 rounded"
-                >
-                  Edit Account
-                </button>
-                <button className="w-full text-left px-3 py-2 text-sm hover:bg-gray-200 rounded">
-                  Edit My Five
-                </button>
-                <button 
-                  onClick={handleLogout}
-                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-200 rounded"
-                >
-                  Logout
-                </button>
-                <button 
-                  onClick={handleDeleteAccount}
-                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-200 rounded text-red-600"
-                >
-                  Delete Account
-                </button>
+            <div className="h-full p-2">
+              <div className="flex items-center gap-1 mb-3 text-xs">
+                <div className="w-3 h-2 bg-green-500 rounded-sm"></div>
+                <span className="font-bold">Settings</span>
+              </div>
+              <div className="space-y-0">
+                {settingsMenuItems.map((item, index) => (
+                  <div
+                    key={item}
+                    className={`px-2 py-1 text-sm flex items-center justify-between cursor-pointer ${
+                      selectedSettingsItem === index
+                        ? 'bg-blue-500 text-white'
+                        : 'text-black hover:bg-gray-100'
+                    } ${item === 'Delete Account' ? 'text-red-600' : ''}`}
+                    onClick={() => handleSettingsAction(item)}
+                  >
+                    <span>{item}</span>
+                    {selectedSettingsItem === index && (
+                      <span className="text-white">▶</span>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           );
@@ -145,27 +201,37 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
     }
   };
 
+  const currentMenuItems = isInSettingsView ? settingsMenuItems : menuItems;
+  const currentSelectedIndex = isInSettingsView ? selectedSettingsItem : selectedMenuItem;
+
   return (
     <div className="h-full flex">
       {/* Left menu panel */}
-      <div className="w-1/2 bg-white border-r border-gray-300">
+      <div className="w-1/2 bg-white border-r border-gray-300 transition-all duration-300">
         <div className="p-2">
           <div className="flex items-center gap-1 mb-3 text-xs">
             <div className="w-3 h-2 bg-green-500 rounded-sm"></div>
-            <span className="font-bold">FivePod</span>
+            <span className="font-bold">{isInSettingsView ? 'Settings' : 'FivePod'}</span>
           </div>
           <div className="space-y-0">
-            {menuItems.map((item, index) => (
+            {currentMenuItems.map((item, index) => (
               <div
                 key={item}
-                className={`px-2 py-1 text-sm flex items-center justify-between ${
-                  selectedMenuItem === index
+                className={`px-2 py-1 text-sm flex items-center justify-between cursor-pointer ${
+                  currentSelectedIndex === index
                     ? 'bg-blue-500 text-white'
                     : 'text-black hover:bg-gray-100'
-                }`}
+                } ${item === 'Delete Account' ? 'text-red-600' : ''}`}
+                onClick={() => {
+                  if (isInSettingsView) {
+                    handleSettingsAction(item);
+                  } else if (item === 'Settings' && isSignedIn) {
+                    handleSettingsClick();
+                  }
+                }}
               >
                 <span>{item}</span>
-                {selectedMenuItem === index && (
+                {currentSelectedIndex === index && (
                   <span className="text-white">▶</span>
                 )}
               </div>
@@ -175,7 +241,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
       </div>
       
       {/* Right content panel */}
-      <div className="w-1/2 bg-gray-50">
+      <div className="w-1/2 bg-gray-50 transition-all duration-300">
         {renderRightPanel()}
       </div>
     </div>
