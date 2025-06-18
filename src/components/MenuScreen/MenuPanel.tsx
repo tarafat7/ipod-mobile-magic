@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import { supabase } from '../../integrations/supabase/client';
 
 interface MenuPanelProps {
   menuItems: string[];
@@ -47,30 +46,6 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   const currentMenuItems = displayMenuItems;
   const currentSelectedIndex = isInSettingsView ? selectedSettingsItem : selectedMenuItem;
 
-  const handleShareProfile = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const shareUrl = `${window.location.origin}/my-five/${user.id}`;
-      const shareData = {
-        title: 'Check out my Five!',
-        text: 'Here are the 5 songs on repeat for me right now',
-        url: shareUrl
-      };
-
-      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
-        await navigator.share(shareData);
-      } else {
-        // Fallback: copy to clipboard
-        await navigator.clipboard.writeText(shareUrl);
-        alert('Link copied to clipboard!');
-      }
-    } catch (error) {
-      console.error('Error sharing profile:', error);
-    }
-  };
-
   const handleItemClick = (item: string, index: number) => {
     // Clear hover state on click
     setHoveredItem(null);
@@ -82,8 +57,6 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
       onSettingsItemClick(index);
       if (item === 'Edit My Five') {
         window.location.href = '/edit-my-five';
-      } else if (item === 'Share Profile') {
-        handleShareProfile();
       } else {
         onSettingsAction(item);
       }
