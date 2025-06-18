@@ -1,7 +1,10 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { supabase } from '../integrations/supabase/client';
-import { Music, ExternalLink } from 'lucide-react';
+import React, { useEffect } from 'react';
+import MyFiveLoadingState from './MyFive/MyFiveLoadingState';
+import MyFiveEmptyState from './MyFive/MyFiveEmptyState';
+import MyFiveHeader from './MyFive/MyFiveHeader';
+import MyFiveSongItem from './MyFive/MyFiveSongItem';
+import { useMyFiveSongs } from '../hooks/useMyFiveSongs';
 
 interface SpotifyTrackInfo {
   name: string;
@@ -24,128 +27,7 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
   sharedUserProfile = null,
   sharedUserSongs = []
 }) => {
-  const [songs, setSongs] = useState<SpotifyTrackInfo[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadedUserId, setLoadedUserId] = useState<string>('');
-
-  const extractSpotifyTrackId = useCallback((url: string): string | null => {
-    const match = url.match(/track\/([a-zA-Z0-9]+)/);
-    return match ? match[1] : null;
-  }, []);
-
-  const fetchSpotifyTrackInfo = useCallback(async (trackId: string, addedDate: string): Promise<SpotifyTrackInfo | null> => {
-    try {
-      const response = await fetch(`https://open.spotify.com/oembed?url=https://open.spotify.com/track/${trackId}`);
-      const data = await response.json();
-      
-      if (data && data.title) {
-        const titleParts = data.title.split(' by ');
-        const songName = titleParts[0] || 'Unknown Song';
-        const artistName = titleParts[1] || '';
-        
-        return {
-          name: songName,
-          artist: artistName,
-          albumArt: data.thumbnail_url || '',
-          spotifyUrl: `https://open.spotify.com/track/${trackId}`,
-          addedDate
-        };
-      }
-    } catch (error) {
-      console.error('Error fetching Spotify track info:', error);
-    }
-    return null;
-  }, []);
-
-  const formatDate = useCallback((dateString: string): string => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
-  }, []);
-
-  const loadMyFiveSongs = useCallback(async () => {
-    console.log('MyFiveFullView: Starting loadMyFiveSongs');
-    setIsLoading(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      console.log('MyFiveFullView: Current user:', user?.id || 'No user');
-      if (!user) {
-        console.log('MyFiveFullView: No user found, stopping load');
-        setIsLoading(false);
-        return;
-      }
-
-      // Prevent reloading if we already loaded for this user
-      if (loadedUserId === user.id) {
-        console.log('MyFiveFullView: Already loaded for this user, stopping');
-        setIsLoading(false);
-        return;
-      }
-
-      console.log('MyFiveFullView: Fetching songs from database for user:', user.id);
-      const { data, error } = await supabase
-        .from('user_five_songs')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (error) {
-        console.error('MyFiveFullView: Error loading songs:', error);
-        setIsLoading(false);
-        return;
-      }
-
-      console.log('MyFiveFullView: Database response:', data);
-
-      if (data) {
-        const songUrls = [
-          data.song_1,
-          data.song_2,
-          data.song_3,
-          data.song_4,
-          data.song_5
-        ].filter(Boolean);
-
-        console.log('MyFiveFullView: Found song URLs:', songUrls);
-
-        if (songUrls.length === 0) {
-          console.log('MyFiveFullView: No songs found, setting empty array');
-          setSongs([]);
-          setLoadedUserId(user.id);
-          setIsLoading(false);
-          return;
-        }
-
-        const addedDate = formatDate(data.created_at);
-
-        const songInfoPromises = songUrls.map(async (url) => {
-          const trackId = extractSpotifyTrackId(url);
-          if (trackId) {
-            return await fetchSpotifyTrackInfo(trackId, addedDate);
-          }
-          return null;
-        });
-
-        const songInfos = await Promise.all(songInfoPromises);
-        const validSongs = songInfos.filter((song): song is SpotifyTrackInfo => song !== null);
-        console.log('MyFiveFullView: Processed valid songs:', validSongs);
-        setSongs(validSongs);
-        setLoadedUserId(user.id); // Remember that we loaded for this user
-      } else {
-        console.log('MyFiveFullView: No data returned from database');
-        setSongs([]);
-        setLoadedUserId(user.id);
-      }
-    } catch (error) {
-      console.error('MyFiveFullView: Error loading user songs:', error);
-    } finally {
-      console.log('MyFiveFullView: Finished loading, setting isLoading to false');
-      setIsLoading(false);
-    }
-  }, [extractSpotifyTrackId, fetchSpotifyTrackInfo, formatDate, loadedUserId]);
+  const { songs, setSongs, isLoading, setIsLoading, loadMyFiveSongs, setLoadedUserId } = useMyFiveSongs();
 
   // Only run the effect when the view type changes or initial load
   useEffect(() => {
@@ -161,7 +43,7 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
       console.log('MyFiveFullView: Loading user songs');
       loadMyFiveSongs();
     }
-  }, [isSharedView]); // Removed sharedUserSongs from dependencies to prevent reloading
+  }, [isSharedView]);
 
   // Update songs only when sharedUserSongs actually changes (not on every scroll)
   useEffect(() => {
@@ -169,7 +51,7 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
       console.log('MyFiveFullView: Updating shared songs data:', sharedUserSongs);
       setSongs(sharedUserSongs);
     }
-  }, [isSharedView, sharedUserSongs.length]); // Only depend on length, not the array itself
+  }, [isSharedView, sharedUserSongs.length]);
 
   useEffect(() => {
     // Listen for song selection events from the center button
@@ -193,82 +75,33 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
 
   console.log('MyFiveFullView: Rendering - isLoading:', isLoading, 'songs length:', songs.length);
 
+  const displayName = isSharedView && sharedUserProfile ? sharedUserProfile.full_name : 'your';
+
   if (isLoading) {
-    const displayName = isSharedView && sharedUserProfile ? sharedUserProfile.full_name : 'your';
-    return (
-      <div className="h-full flex flex-col items-center justify-center p-4 text-center">
-        <Music size={32} className="text-blue-600 mb-3 animate-pulse" />
-        <p className="text-sm text-gray-600">Loading {displayName} five...</p>
-      </div>
-    );
+    return <MyFiveLoadingState displayName={displayName} />;
   }
 
   if (songs.length === 0) {
-    const displayName = isSharedView && sharedUserProfile ? sharedUserProfile.full_name : 'My';
-    return (
-      <div className="h-full flex flex-col items-center justify-center p-4 text-center">
-        <Music size={32} className="text-blue-600 mb-3" />
-        <h3 className="font-bold text-lg mb-1">{displayName} Five</h3>
-        <p className="text-sm text-gray-600 leading-tight">
-          {isSharedView ? 'No songs shared yet' : 'Add the 5 songs that are on repeat for you right now'}
-        </p>
-      </div>
-    );
+    const emptyDisplayName = isSharedView && sharedUserProfile ? sharedUserProfile.full_name : 'My';
+    return <MyFiveEmptyState displayName={emptyDisplayName} isSharedView={isSharedView} />;
   }
 
-  const displayName = isSharedView && sharedUserProfile ? `${sharedUserProfile.full_name}'s` : 'My';
+  const headerDisplayName = isSharedView && sharedUserProfile ? `${sharedUserProfile.full_name}'s` : 'My';
 
   return (
     <div className="h-full bg-white flex flex-col min-h-0">
-      {/* Header */}
-      <div className="p-2 flex-shrink-0">
-        <div className="flex items-center justify-between mb-3 text-xs">
-          <span className="font-bold">{displayName} Five</span>
-          <div className="w-6 h-3 bg-green-500 rounded-sm"></div>
-        </div>
-      </div>
-
+      <MyFiveHeader displayName={headerDisplayName} />
+      
       {/* Scrollable Song List - Fixed height container for proper mobile scrolling */}
       <div className="flex-1 min-h-0 overflow-y-auto">
         <div className="bg-white px-2">
           {songs.map((song, index) => (
-            <div 
-              key={index} 
-              className={`flex items-center p-2 border-b border-gray-200 transition-colors ${
-                selectedSongIndex === index 
-                  ? 'bg-blue-500 text-white' 
-                  : 'bg-white hover:bg-gray-50'
-              }`}
-            >
-              <div className="w-12 h-12 bg-gray-200 rounded flex-shrink-0 overflow-hidden mr-3">
-                {song.albumArt ? (
-                  <img 
-                    src={song.albumArt} 
-                    alt={`${song.name} album art`}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Music size={20} className="text-gray-400" />
-                  </div>
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className={`font-semibold text-base truncate ${
-                  selectedSongIndex === index ? 'text-white' : 'text-black'
-                }`}>
-                  {song.name}
-                </h3>
-                <p className={`text-sm truncate ${
-                  selectedSongIndex === index ? 'text-blue-100' : 'text-gray-600'
-                }`}>
-                  {song.artist || song.addedDate}
-                </p>
-              </div>
-              {selectedSongIndex === index && (
-                <div className="text-white text-xl">▶</div>
-              )}
-            </div>
+            <MyFiveSongItem
+              key={index}
+              song={song}
+              index={index}
+              isSelected={selectedSongIndex === index}
+            />
           ))}
         </div>
       </div>
