@@ -126,23 +126,29 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({ selectedSongIndex }) =>
   }
 
   return (
-    <div className="h-full p-2 overflow-y-auto">
-      <div className="text-center mb-3">
-        <h3 className="font-bold text-lg mb-1">My Five</h3>
-        <p className="text-xs text-gray-600">Click a song to open in Spotify</p>
+    <div className="h-full bg-white">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-400 to-blue-600 text-white p-3 flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-bold">My Five</h2>
+          <p className="text-sm opacity-90">{songs.length} songs</p>
+        </div>
+        <div className="w-6 h-3 bg-green-500 rounded-sm"></div>
       </div>
-      <div className="space-y-1">
+
+      {/* Song List */}
+      <div className="bg-white">
         {songs.map((song, index) => (
           <div 
             key={index} 
-            className={`flex items-center space-x-3 p-2 rounded cursor-pointer transition-colors ${
+            className={`flex items-center p-2 border-b border-gray-200 cursor-pointer transition-colors ${
               selectedSongIndex === index 
                 ? 'bg-blue-500 text-white' 
-                : 'bg-white hover:bg-gray-100'
+                : 'bg-white hover:bg-gray-50'
             }`}
             onClick={() => handleSongClick(song.spotifyUrl)}
           >
-            <div className="w-10 h-10 bg-gray-200 rounded flex-shrink-0 overflow-hidden">
+            <div className="w-12 h-12 bg-gray-200 rounded flex-shrink-0 overflow-hidden mr-3">
               {song.albumArt ? (
                 <img 
                   src={song.albumArt} 
@@ -151,26 +157,25 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({ selectedSongIndex }) =>
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <Music size={16} className="text-gray-400" />
+                  <Music size={20} className="text-gray-400" />
                 </div>
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className={`text-sm font-medium truncate ${
-                selectedSongIndex === index ? 'text-white' : 'text-gray-900'
+              <h3 className={`font-semibold text-base truncate ${
+                selectedSongIndex === index ? 'text-white' : 'text-black'
               }`}>
                 {song.name}
-              </p>
-              <p className={`text-xs truncate ${
-                selectedSongIndex === index ? 'text-blue-100' : 'text-gray-500'
+              </h3>
+              <p className={`text-sm truncate ${
+                selectedSongIndex === index ? 'text-blue-100' : 'text-gray-600'
               }`}>
                 {song.artist}
               </p>
             </div>
-            <ExternalLink 
-              size={14} 
-              className={selectedSongIndex === index ? 'text-white' : 'text-gray-400'} 
-            />
+            {selectedSongIndex === index && (
+              <div className="text-white text-xl">▶</div>
+            )}
           </div>
         ))}
       </div>
