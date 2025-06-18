@@ -6,6 +6,14 @@ import MyFiveFullView from '../MyFiveFullView';
 import AccountPreview from '../AccountPreview';
 import { User, Settings } from 'lucide-react';
 
+interface SpotifyTrackInfo {
+  name: string;
+  artist: string;
+  albumArt: string;
+  spotifyUrl: string;
+  addedDate: string;
+}
+
 interface ContentPanelProps {
   menuItems: string[];
   selectedMenuItem: number;
@@ -16,7 +24,7 @@ interface ContentPanelProps {
   hoveredSettingsItem?: string | null;
   isSharedView?: boolean;
   sharedUserProfile?: {full_name: string} | null;
-  sharedUserSongs?: string[];
+  sharedUserSongs?: SpotifyTrackInfo[];
 }
 
 const ContentPanel: React.FC<ContentPanelProps> = ({

@@ -4,6 +4,14 @@ import { supabase } from '../../integrations/supabase/client';
 import MenuPanel from './MenuPanel';
 import ContentPanel from './ContentPanel';
 
+interface SpotifyTrackInfo {
+  name: string;
+  artist: string;
+  albumArt: string;
+  spotifyUrl: string;
+  addedDate: string;
+}
+
 interface MenuScreenProps {
   selectedMenuItem: number;
   selectedSettingsItem: number;
@@ -14,7 +22,7 @@ interface MenuScreenProps {
   onMyFiveSongChange?: (index: number) => void;
   isSharedView?: boolean;
   sharedUserProfile?: {full_name: string} | null;
-  sharedUserSongs?: string[];
+  sharedUserSongs?: SpotifyTrackInfo[];
 }
 
 const MenuScreen: React.FC<MenuScreenProps> = ({ 
