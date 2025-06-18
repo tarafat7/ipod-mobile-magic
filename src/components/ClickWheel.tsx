@@ -34,6 +34,13 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCe
     onWheelLeave();
   };
 
+  const handleCenterTouch = (e: React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Center button touched on mobile');
+    onCenterClick();
+  };
+
   return (
     <div className="relative w-72 h-72 md:w-64 md:h-64 flex-shrink-0">
       <div 
@@ -76,6 +83,7 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCe
         <button 
           className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-28 h-28 bg-gradient-to-br from-gray-100 to-gray-300 rounded-full shadow-inner border border-gray-400 hover:shadow-lg transition-all duration-200 active:scale-95"
           onClick={onCenterClick}
+          onTouchEnd={handleCenterTouch}
         >
         </button>
       </div>
