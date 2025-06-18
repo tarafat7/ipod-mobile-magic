@@ -10,8 +10,8 @@ interface UserProfile {
 export const useAuthMode = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [initialData, setInitialData] = useState<UserProfile>({
-    full_name: '',
+  const [initialData, setInitialData] = useState<{ fullName: string; email: string }>({
+    fullName: '',
     email: ''
   });
 
@@ -34,7 +34,7 @@ export const useAuthMode = () => {
           
           if (profile) {
             setInitialData({
-              full_name: profile.full_name || '',
+              fullName: profile.full_name || '',
               email: profile.email || user.email || ''
             });
           }
