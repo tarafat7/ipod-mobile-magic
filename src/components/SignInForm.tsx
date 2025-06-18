@@ -25,6 +25,7 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
     password: ''
   });
   const [isEditMode, setIsEditMode] = useState(false);
+  const [isSignInMode, setIsSignInMode] = useState(false);
 
   useEffect(() => {
     // Check if we're in edit mode
@@ -69,8 +70,33 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
     onErrorClear();
   };
 
+  const handleSignIn = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (error) {
+        console.error('Sign in error:', error);
+        // Handle error - you might want to pass this to the parent component
+        return;
+      }
+
+      // Redirect to main page on successful sign in
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Unexpected sign in error:', error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (isSignInMode) {
+      await handleSignIn();
+      return;
+    }
     
     if (isEditMode) {
       // Handle account update
@@ -111,13 +137,35 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
     window.location.href = '/';
   };
 
+  const toggleMode = () => {
+    setIsSignInMode(!isSignInMode);
+    onErrorClear();
+  };
+
+  const getTitle = () => {
+    if (isEditMode) return 'Edit your account';
+    if (isSignInMode) return 'Welcome back';
+    return 'Create your account to get started';
+  };
+
+  const getButtonText = () => {
+    if (isLoading) {
+      if (isEditMode) return 'Updating...';
+      if (isSignInMode) return 'Signing In...';
+      return 'Creating Account...';
+    }
+    if (isEditMode) return 'Update Account';
+    if (isSignInMode) return 'Sign In';
+    return 'Create Account';
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black flex items-center justify-center p-4">
       <div className="bg-white rounded-xl p-8 max-w-md w-full shadow-2xl">
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">FivePod</h1>
           <p className="text-gray-600">
-            {isEditMode ? 'Edit your account' : 'Create your account to get started'}
+            {getTitle()}
           </p>
         </div>
         
@@ -128,19 +176,21 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
         )}
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="fullName">Full Name</Label>
-            <Input
-              id="fullName"
-              name="fullName"
-              type="text"
-              value={formData.fullName}
-              onChange={handleInputChange}
-              required
-              className="mt-1"
-              disabled={isLoading}
-            />
-          </div>
+          {!isSignInMode && (
+            <div>
+              <Label htmlFor="fullName">Full Name</Label>
+              <Input
+                id="fullName"
+                name="fullName"
+                type="text"
+                value={formData.fullName}
+                onChange={handleInputChange}
+                required
+                className="mt-1"
+                disabled={isLoading}
+              />
+            </div>
+          )}
           
           <div>
             <Label htmlFor="email">Email</Label>
@@ -178,10 +228,7 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
               className="flex-1 bg-blue-600 hover:bg-blue-700 mt-6"
               disabled={isLoading}
             >
-              {isLoading ? 
-                (isEditMode ? 'Updating...' : 'Creating Account...') : 
-                (isEditMode ? 'Update Account' : 'Create Account')
-              }
+              {getButtonText()}
             </Button>
             
             {isEditMode && (
@@ -196,6 +243,19 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
               </Button>
             )}
           </div>
+
+          {!isEditMode && (
+            <div className="text-center mt-4">
+              <button
+                type="button"
+                onClick={toggleMode}
+                className="text-blue-600 hover:text-blue-700 text-sm underline"
+                disabled={isLoading}
+              >
+                {isSignInMode ? 'or create account' : 'or sign in'}
+              </button>
+            </div>
+          )}
         </form>
       </div>
     </div>
