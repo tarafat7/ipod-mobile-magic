@@ -14,10 +14,17 @@ const SignIn = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        // User is already logged in, redirect to main page
-        window.location.href = '/';
+      // Check if we're in edit mode
+      const urlParams = new URLSearchParams(window.location.search);
+      const mode = urlParams.get('mode');
+      
+      // Only redirect if user is logged in AND we're not in edit mode
+      if (mode !== 'edit') {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          // User is already logged in, redirect to main page
+          window.location.href = '/';
+        }
       }
     };
     checkAuth();
