@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import Screen from './Screen';
 import ClickWheel from './ClickWheel';
@@ -44,20 +43,23 @@ const IPod = () => {
       // Determine direction: positive = clockwise, negative = counter-clockwise
       const isClockwise = angleDiff > 0;
       
-      // Trigger haptic feedback when an item changes
-      triggerHapticFeedback();
-      
       if (currentScreen === 'menu') {
-        if (isClockwise) {
-          setSelectedMenuItem(prev => (prev + 1) % menuItems.length);
-        } else {
-          setSelectedMenuItem(prev => (prev - 1 + menuItems.length) % menuItems.length);
+        const newSelection = isClockwise 
+          ? (selectedMenuItem + 1) % menuItems.length
+          : (selectedMenuItem - 1 + menuItems.length) % menuItems.length;
+        
+        if (newSelection !== selectedMenuItem) {
+          triggerHapticFeedback();
+          setSelectedMenuItem(newSelection);
         }
       } else if (currentScreen === 'music') {
-        if (isClockwise) {
-          setSelectedSong(prev => (prev + 1) % songs.length);
-        } else {
-          setSelectedSong(prev => (prev - 1 + songs.length) % songs.length);
+        const newSelection = isClockwise 
+          ? (selectedSong + 1) % songs.length
+          : (selectedSong - 1 + songs.length) % songs.length;
+        
+        if (newSelection !== selectedSong) {
+          triggerHapticFeedback();
+          setSelectedSong(newSelection);
         }
       }
     }
