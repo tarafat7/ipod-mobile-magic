@@ -3,6 +3,7 @@ import React from 'react';
 import FriendsScreen from '../FriendsScreen';
 import SettingsScreen from '../SettingsScreen';
 import MyFivePreview from '../MyFivePreview';
+import MyFiveFullView from '../MyFiveFullView';
 import { User } from 'lucide-react';
 
 interface ContentPanelProps {
@@ -10,13 +11,17 @@ interface ContentPanelProps {
   selectedMenuItem: number;
   isInSettingsView: boolean;
   isSignedIn: boolean;
+  isInMyFiveView?: boolean;
+  selectedMyFiveSong?: number;
 }
 
 const ContentPanel: React.FC<ContentPanelProps> = ({
   menuItems,
   selectedMenuItem,
   isInSettingsView,
-  isSignedIn
+  isSignedIn,
+  isInMyFiveView = false,
+  selectedMyFiveSong = 0
 }) => {
   if (isInSettingsView) {
     return (
@@ -32,6 +37,14 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
             Configure your<br />FivePod settings
           </p>
         </div>
+      </div>
+    );
+  }
+
+  if (isInMyFiveView) {
+    return (
+      <div className="w-1/2 bg-gray-50 transition-all duration-300">
+        <MyFiveFullView selectedSongIndex={selectedMyFiveSong} />
       </div>
     );
   }

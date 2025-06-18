@@ -16,6 +16,9 @@ interface ScreenProps {
   selectedSettingsItem?: number;
   isInSettingsView?: boolean;
   onSettingsItemChange?: (index: number) => void;
+  isInMyFiveView?: boolean;
+  selectedMyFiveSong?: number;
+  onMyFiveSongChange?: (index: number) => void;
 }
 
 const Screen: React.FC<ScreenProps> = ({ 
@@ -26,7 +29,10 @@ const Screen: React.FC<ScreenProps> = ({
   currentTime,
   selectedSettingsItem = 0,
   isInSettingsView = false,
-  onSettingsItemChange
+  onSettingsItemChange,
+  isInMyFiveView = false,
+  selectedMyFiveSong = 0,
+  onMyFiveSongChange
 }) => {
   const renderScreen = () => {
     switch (currentScreen) {
@@ -37,6 +43,9 @@ const Screen: React.FC<ScreenProps> = ({
             selectedSettingsItem={selectedSettingsItem}
             isInSettingsView={isInSettingsView}
             onSettingsItemChange={onSettingsItemChange}
+            isInMyFiveView={isInMyFiveView}
+            selectedMyFiveSong={selectedMyFiveSong}
+            onMyFiveSongChange={onMyFiveSongChange}
           />
         );
       case 'friends':

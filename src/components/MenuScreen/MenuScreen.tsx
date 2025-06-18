@@ -10,13 +10,19 @@ interface MenuScreenProps {
   selectedSettingsItem: number;
   isInSettingsView: boolean;
   onSettingsItemChange: (index: number) => void;
+  isInMyFiveView?: boolean;
+  selectedMyFiveSong?: number;
+  onMyFiveSongChange?: (index: number) => void;
 }
 
 const MenuScreen: React.FC<MenuScreenProps> = ({ 
   selectedMenuItem, 
   selectedSettingsItem,
   isInSettingsView,
-  onSettingsItemChange
+  onSettingsItemChange,
+  isInMyFiveView = false,
+  selectedMyFiveSong = 0,
+  onMyFiveSongChange
 }) => {
   const [menuItems, setMenuItems] = useState<string[]>([]);
   const [isSignedIn, setIsSignedIn] = useState(false);
@@ -102,6 +108,8 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
         selectedMenuItem={selectedMenuItem}
         isInSettingsView={isInSettingsView}
         isSignedIn={isSignedIn}
+        isInMyFiveView={isInMyFiveView}
+        selectedMyFiveSong={selectedMyFiveSong}
       />
     </div>
   );

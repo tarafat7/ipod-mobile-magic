@@ -14,6 +14,9 @@ const IPod = () => {
   const [menuItems, setMenuItems] = useState<string[]>([]);
   const [isInSettingsView, setIsInSettingsView] = useState(false);
   const [selectedSettingsItem, setSelectedSettingsItem] = useState(0);
+  const [isInMyFiveView, setIsInMyFiveView] = useState(false);
+  const [selectedMyFiveSong, setSelectedMyFiveSong] = useState(0);
+  const [myFiveSongsCount, setMyFiveSongsCount] = useState(0);
 
   useEffect(() => {
     const loadMenuItems = async () => {
@@ -21,11 +24,39 @@ const IPod = () => {
       setMenuItems(items);
     };
 
+    const loadMyFiveSongs = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data, error } = await supabase
+            .from('user_five_songs')
+            .select('*')
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+          if (data) {
+            const songUrls = [
+              data.song_1,
+              data.song_2,
+              data.song_3,
+              data.song_4,
+              data.song_5
+            ].filter(Boolean);
+            setMyFiveSongsCount(songUrls.length);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading my five songs count:', error);
+      }
+    };
+
     loadMenuItems();
+    loadMyFiveSongs();
 
     // Listen for auth changes to update menu
     const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
       loadMenuItems();
+      loadMyFiveSongs();
     });
 
     return () => subscription.unsubscribe();
@@ -67,7 +98,15 @@ const IPod = () => {
       const isClockwise = angleDiff > 0;
       
       if (currentScreen === 'menu') {
-        if (isInSettingsView) {
+        if (isInMyFiveView) {
+          // Navigate My Five songs
+          const newSelection = isClockwise 
+            ? (selectedMyFiveSong + 1) % Math.max(myFiveSongsCount, 1)
+            : (selectedMyFiveSong - 1 + Math.max(myFiveSongsCount, 1)) % Math.max(myFiveSongsCount, 1);
+          
+          console.log('My Five navigation:', { currentSelection: selectedMyFiveSong, newSelection });
+          setSelectedMyFiveSong(newSelection);
+        } else if (isInSettingsView) {
           // Navigate settings items
           const settingsItemsCount = 5; // Share Profile, Edit Account, Edit My Five, Logout, Delete Account
           const newSelection = isClockwise 
@@ -149,10 +188,14 @@ const IPod = () => {
     console.log('Selected menu item:', selectedMenuItem);
     console.log('Selected menu item name:', menuItems[selectedMenuItem]);
     console.log('Is in settings view:', isInSettingsView);
+    console.log('Is in My Five view:', isInMyFiveView);
     console.log('Selected settings item:', selectedSettingsItem);
     
     if (currentScreen === 'menu') {
-      if (isInSettingsView) {
+      if (isInMyFiveView) {
+        // Handle My Five song selection - this will be handled by the MyFiveFullView component
+        console.log('My Five song selected:', selectedMyFiveSong);
+      } else if (isInSettingsView) {
         // Handle settings item selection
         const settingsItems = ['Share Profile', 'Edit Account', 'Edit My Five', 'Logout', 'Delete Account'];
         const selectedSettingsAction = settingsItems[selectedSettingsItem];
@@ -183,7 +226,9 @@ const IPod = () => {
           const newWindow = window.open('/signin', '_blank');
           console.log('Window opened:', newWindow);
         } else if (selectedItem === 'My Five') {
-          console.log('My Five clicked');
+          console.log('Entering My Five view');
+          setIsInMyFiveView(true);
+          setSelectedMyFiveSong(0);
         } else if (selectedItem === 'Friends') {
           console.log('Navigating to friends screen');
           setCurrentScreen('friends');
@@ -202,9 +247,13 @@ const IPod = () => {
 
   const handleMenuClick = () => {
     console.log('Menu button clicked');
-    console.log('Current state - Screen:', currentScreen, 'InSettings:', isInSettingsView);
+    console.log('Current state - Screen:', currentScreen, 'InSettings:', isInSettingsView, 'InMyFive:', isInMyFiveView);
     
-    if (isInSettingsView) {
+    if (isInMyFiveView) {
+      console.log('Exiting My Five view');
+      setIsInMyFiveView(false);
+      setSelectedMyFiveSong(0);
+    } else if (isInSettingsView) {
       console.log('Exiting settings view');
       setIsInSettingsView(false);
       setSelectedSettingsItem(0);
@@ -217,6 +266,10 @@ const IPod = () => {
 
   const handleSettingsItemChange = (index: number) => {
     setSelectedSettingsItem(index);
+  };
+
+  const handleMyFiveSongChange = (index: number) => {
+    setSelectedMyFiveSong(index);
   };
 
   return (
@@ -235,6 +288,9 @@ const IPod = () => {
             selectedSettingsItem={selectedSettingsItem}
             isInSettingsView={isInSettingsView}
             onSettingsItemChange={handleSettingsItemChange}
+            isInMyFiveView={isInMyFiveView}
+            selectedMyFiveSong={selectedMyFiveSong}
+            onMyFiveSongChange={handleMyFiveSongChange}
           />
 
           {/* Click Wheel - Centered in remaining space, moved up slightly on mobile */}
