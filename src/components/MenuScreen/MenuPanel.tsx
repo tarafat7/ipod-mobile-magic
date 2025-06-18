@@ -34,10 +34,18 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   onSettingsItemClick,
   onSettingsItemHover
 }) => {
+  const [touchedItem, setTouchedItem] = useState<string | null>(null);
+  
   const currentMenuItems = isInSettingsView ? settingsMenuItems : menuItems;
   const currentSelectedIndex = isInSettingsView ? selectedSettingsItem : selectedMenuItem;
 
   const handleItemClick = (item: string, index: number) => {
+    // Clear any touched state first
+    setTouchedItem(null);
+    if (onSettingsItemHover) {
+      onSettingsItemHover(null);
+    }
+    
     if (isInSettingsView) {
       onSettingsItemClick(index);
       if (item === 'Edit My Five') {
@@ -60,9 +68,26 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   };
 
   const handleItemLeave = () => {
-    if (isInSettingsView && onSettingsItemHover) {
+    if (isInSettingsView && onSettingsItemHover && !touchedItem) {
       onSettingsItemHover(null);
     }
+  };
+
+  const handleTouchStart = (item: string) => {
+    if (isInSettingsView && onSettingsItemHover) {
+      setTouchedItem(item);
+      onSettingsItemHover(item);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    // Small delay to allow preview to be seen before clearing
+    setTimeout(() => {
+      setTouchedItem(null);
+      if (isInSettingsView && onSettingsItemHover) {
+        onSettingsItemHover(null);
+      }
+    }, 100);
   };
 
   return (
@@ -100,6 +125,8 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
               onClick={() => handleItemClick(item, index)}
               onMouseEnter={() => handleItemHover(item)}
               onMouseLeave={handleItemLeave}
+              onTouchStart={() => handleTouchStart(item)}
+              onTouchEnd={handleTouchEnd}
             >
               <span>{item}</span>
               {currentSelectedIndex === index && isInSettingsView && (
