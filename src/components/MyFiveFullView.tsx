@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Music, ExternalLink } from 'lucide-react';
 
@@ -26,41 +26,14 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
 }) => {
   const [songs, setSongs] = useState<SpotifyTrackInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadedUserId, setLoadedUserId] = useState<string>('');
 
-  useEffect(() => {
-    if (isSharedView) {
-      // For shared views, use the provided shared songs data directly
-      console.log('Using shared songs data:', sharedUserSongs);
-      setSongs(sharedUserSongs);
-      setIsLoading(false);
-    } else {
-      // For authenticated users viewing their own songs
-      loadMyFiveSongs();
-    }
-  }, [isSharedView, sharedUserSongs]);
-
-  useEffect(() => {
-    // Listen for song selection events from the center button
-    const handleSongSelect = (event: CustomEvent) => {
-      const { songIndex } = event.detail;
-      if (songs[songIndex]) {
-        handleSongClick(songs[songIndex].spotifyUrl);
-      }
-    };
-
-    window.addEventListener('myFiveSongSelect', handleSongSelect as EventListener);
-    
-    return () => {
-      window.removeEventListener('myFiveSongSelect', handleSongSelect as EventListener);
-    };
-  }, [songs]);
-
-  const extractSpotifyTrackId = (url: string): string | null => {
+  const extractSpotifyTrackId = useCallback((url: string): string | null => {
     const match = url.match(/track\/([a-zA-Z0-9]+)/);
     return match ? match[1] : null;
-  };
+  }, []);
 
-  const fetchSpotifyTrackInfo = async (trackId: string, addedDate: string): Promise<SpotifyTrackInfo | null> => {
+  const fetchSpotifyTrackInfo = useCallback(async (trackId: string, addedDate: string): Promise<SpotifyTrackInfo | null> => {
     try {
       const response = await fetch(`https://open.spotify.com/oembed?url=https://open.spotify.com/track/${trackId}`);
       const data = await response.json();
@@ -82,22 +55,28 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
       console.error('Error fetching Spotify track info:', error);
     }
     return null;
-  };
+  }, []);
 
-  const formatDate = (dateString: string): string => {
+  const formatDate = useCallback((dateString: string): string => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 
       year: 'numeric', 
       month: 'long', 
       day: 'numeric' 
     });
-  };
+  }, []);
 
-  const loadMyFiveSongs = async () => {
+  const loadMyFiveSongs = useCallback(async () => {
     setIsLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
+        setIsLoading(false);
+        return;
+      }
+
+      // Prevent reloading if we already loaded for this user
+      if (loadedUserId === user.id) {
         setIsLoading(false);
         return;
       }
@@ -136,13 +115,52 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
         const songInfos = await Promise.all(songInfoPromises);
         const validSongs = songInfos.filter((song): song is SpotifyTrackInfo => song !== null);
         setSongs(validSongs);
+        setLoadedUserId(user.id); // Remember that we loaded for this user
       }
     } catch (error) {
       console.error('Error loading user songs:', error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [extractSpotifyTrackId, fetchSpotifyTrackInfo, formatDate, loadedUserId]);
+
+  // Only run the effect when the view type changes or initial load
+  useEffect(() => {
+    if (isSharedView) {
+      // For shared views, use the provided shared songs data directly
+      console.log('Using shared songs data:', sharedUserSongs);
+      setSongs(sharedUserSongs);
+      setIsLoading(false);
+      setLoadedUserId(''); // Reset loaded user ID for shared views
+    } else {
+      // For authenticated users viewing their own songs
+      loadMyFiveSongs();
+    }
+  }, [isSharedView]); // Removed sharedUserSongs from dependencies to prevent reloading
+
+  // Update songs only when sharedUserSongs actually changes (not on every scroll)
+  useEffect(() => {
+    if (isSharedView && sharedUserSongs.length > 0 && songs.length !== sharedUserSongs.length) {
+      console.log('Updating shared songs data:', sharedUserSongs);
+      setSongs(sharedUserSongs);
+    }
+  }, [isSharedView, sharedUserSongs.length]); // Only depend on length, not the array itself
+
+  useEffect(() => {
+    // Listen for song selection events from the center button
+    const handleSongSelect = (event: CustomEvent) => {
+      const { songIndex } = event.detail;
+      if (songs[songIndex]) {
+        handleSongClick(songs[songIndex].spotifyUrl);
+      }
+    };
+
+    window.addEventListener('myFiveSongSelect', handleSongSelect as EventListener);
+    
+    return () => {
+      window.removeEventListener('myFiveSongSelect', handleSongSelect as EventListener);
+    };
+  }, [songs]);
 
   const handleSongClick = (spotifyUrl: string) => {
     window.open(spotifyUrl, '_blank');

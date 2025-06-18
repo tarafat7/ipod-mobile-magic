@@ -38,23 +38,48 @@ const IPod: React.FC<IPodProps> = ({
   const [selectedMyFiveSong, setSelectedMyFiveSong] = useState(0);
   const [myFiveSongsCount, setMyFiveSongsCount] = useState(0);
   const [isSharedView, setIsSharedView] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
-  // Check if we're on a shared route and have data
+  // Check authentication state and route context
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUser(user);
+    };
+    
+    checkAuth();
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setCurrentUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Handle route-based shared view detection
   useEffect(() => {
     const currentPath = window.location.pathname;
     const isMyFiveRoute = currentPath.includes('/my-five/');
     
     console.log('Route check:', { currentPath, isMyFiveRoute, hasProfile: !!sharedUserProfile, songsCount: sharedUserSongs.length });
     
-    if (isMyFiveRoute) {
+    if (isMyFiveRoute && sharedUserProfile) {
       console.log('Setting up shared view');
       setIsSharedView(true);
       setCurrentScreen('menu');
       setIsInMyFiveView(true);
       setSelectedMenuItem(0);
       setMyFiveSongsCount(sharedUserSongs.length);
+    } else {
+      // Reset shared view state when not on shared route
+      setIsSharedView(false);
+      if (isInMyFiveView && currentPath === '/') {
+        // User navigated back to home, reset My Five view
+        setIsInMyFiveView(false);
+        setSelectedMyFiveSong(0);
+      }
     }
-  }, [sharedUserProfile, sharedUserSongs]);
+  }, [sharedUserProfile, sharedUserSongs, window.location.pathname]);
 
   // Update songs count when shared songs change
   useEffect(() => {
@@ -71,28 +96,25 @@ const IPod: React.FC<IPodProps> = ({
     };
 
     const loadMyFiveSongs = async () => {
-      // Only load user's own songs if not in shared view
-      if (isSharedView) return;
+      // Only load user's own songs if not in shared view and user is authenticated
+      if (isSharedView || !currentUser) return;
       
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data, error } = await supabase
-            .from('user_five_songs')
-            .select('*')
-            .eq('user_id', user.id)
-            .maybeSingle();
+        const { data, error } = await supabase
+          .from('user_five_songs')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .maybeSingle();
 
-          if (data) {
-            const songUrls = [
-              data.song_1,
-              data.song_2,
-              data.song_3,
-              data.song_4,
-              data.song_5
-            ].filter(Boolean);
-            setMyFiveSongsCount(songUrls.length);
-          }
+        if (data) {
+          const songUrls = [
+            data.song_1,
+            data.song_2,
+            data.song_3,
+            data.song_4,
+            data.song_5
+          ].filter(Boolean);
+          setMyFiveSongsCount(songUrls.length);
         }
       } catch (error) {
         console.error('Error loading my five songs count:', error);
@@ -101,15 +123,7 @@ const IPod: React.FC<IPodProps> = ({
 
     loadMenuItems();
     loadMyFiveSongs();
-
-    // Listen for auth changes to update menu
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      loadMenuItems();
-      loadMyFiveSongs();
-    });
-
-    return () => subscription.unsubscribe();
-  }, [isSharedView]);
+  }, [isSharedView, currentUser]);
 
   const triggerHapticFeedback = () => {
     // Check if vibration API is available (mobile devices)
@@ -312,7 +326,11 @@ const IPod: React.FC<IPodProps> = ({
           const newWindow = window.open('/signin', '_blank');
           console.log('Window opened:', newWindow);
         } else if (selectedItem === 'My Five') {
-          console.log('Entering My Five view');
+          console.log('Entering My Five view - checking if shared view should be cleared');
+          // Clear shared view state when entering personal My Five
+          if (isSharedView) {
+            setIsSharedView(false);
+          }
           setIsInMyFiveView(true);
           setSelectedMyFiveSong(0);
         } else if (selectedItem === 'Friends') {
