@@ -1,5 +1,5 @@
 
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 
 interface UseWheelNavigationProps {
   currentScreen: string;
@@ -37,7 +37,13 @@ export const useWheelNavigation = ({
   setSelectedMyFiveSong
 }: UseWheelNavigationProps) => {
 
+  const lastAngleRef = useRef<number | null>(null);
+  const isNavigatingRef = useRef(false);
+
   const handleWheelMove = useCallback((e: React.MouseEvent) => {
+    // Prevent multiple rapid navigation calls
+    if (isNavigatingRef.current) return;
+    
     const rect = e.currentTarget.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
@@ -48,19 +54,26 @@ export const useWheelNavigation = ({
     const angle = Math.atan2(deltaY, deltaX);
     const normalizedAngle = ((angle + Math.PI * 2) % (Math.PI * 2));
     
-    let direction: 'up' | 'down' | 'left' | 'right';
-    
-    if (normalizedAngle >= 7 * Math.PI / 4 || normalizedAngle < Math.PI / 4) {
-      direction = 'right';
-    } else if (normalizedAngle >= Math.PI / 4 && normalizedAngle < 3 * Math.PI / 4) {
-      direction = 'down';
-    } else if (normalizedAngle >= 3 * Math.PI / 4 && normalizedAngle < 5 * Math.PI / 4) {
-      direction = 'left';
-    } else {
-      direction = 'up';
+    // Only proceed if we have a previous angle to compare to
+    if (lastAngleRef.current === null) {
+      lastAngleRef.current = normalizedAngle;
+      return;
     }
-
-    console.log('Wheel navigation - direction:', direction, 'currentScreen:', currentScreen, 'isInMyFiveView:', isInMyFiveView);
+    
+    // Calculate angular difference
+    let angleDiff = normalizedAngle - lastAngleRef.current;
+    if (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+    if (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+    
+    // Only navigate if the angle difference is significant enough
+    const threshold = 0.3; // Adjust this value to make navigation more/less sensitive
+    if (Math.abs(angleDiff) < threshold) return;
+    
+    isNavigatingRef.current = true;
+    
+    const isClockwise = angleDiff > 0;
+    
+    console.log('Wheel navigation - clockwise:', isClockwise, 'currentScreen:', currentScreen, 'isInMyFiveView:', isInMyFiveView);
 
     if (currentScreen === 'menu') {
       if (isInMyFiveView) {
@@ -68,11 +81,11 @@ export const useWheelNavigation = ({
         const songsCount = isSharedView ? sharedUserSongs.length : myFiveSongsCount;
         console.log('My Five navigation - songsCount:', songsCount, 'currentIndex:', selectedMyFiveSong);
         
-        if (direction === 'down') {
+        if (isClockwise && songsCount > 0) {
           const newIndex = (selectedMyFiveSong + 1) % songsCount;
           console.log('Moving to next song:', newIndex);
           setSelectedMyFiveSong(newIndex);
-        } else if (direction === 'up') {
+        } else if (!isClockwise && songsCount > 0) {
           const newIndex = (selectedMyFiveSong - 1 + songsCount) % songsCount;
           console.log('Moving to previous song:', newIndex);
           setSelectedMyFiveSong(newIndex);
@@ -80,19 +93,19 @@ export const useWheelNavigation = ({
       } else if (isInSettingsView) {
         // In Settings view - navigate through settings
         const settingsCount = 5; // Share Profile, Edit Account, Edit My Five, Logout, Delete Account
-        if (direction === 'down') {
+        if (isClockwise) {
           setSelectedSettingsItem((selectedSettingsItem + 1) % settingsCount);
-        } else if (direction === 'up') {
+        } else {
           setSelectedSettingsItem((selectedSettingsItem - 1 + settingsCount) % settingsCount);
         }
       } else {
         // In main menu - navigate through menu items
         console.log('Main menu navigation - menuItems.length:', menuItems.length, 'currentIndex:', selectedMenuItem);
-        if (direction === 'down') {
+        if (isClockwise && menuItems.length > 0) {
           const newIndex = (selectedMenuItem + 1) % menuItems.length;
           console.log('Moving to next menu item:', newIndex);
           setSelectedMenuItem(newIndex);
-        } else if (direction === 'up') {
+        } else if (!isClockwise && menuItems.length > 0) {
           const newIndex = (selectedMenuItem - 1 + menuItems.length) % menuItems.length;
           console.log('Moving to previous menu item:', newIndex);
           setSelectedMenuItem(newIndex);
@@ -101,12 +114,19 @@ export const useWheelNavigation = ({
     } else if (currentScreen === 'music') {
       // Music screen navigation
       const totalSongs = 10; // Default song count
-      if (direction === 'down') {
+      if (isClockwise) {
         setSelectedSong((selectedSong + 1) % totalSongs);
-      } else if (direction === 'up') {
+      } else {
         setSelectedSong((selectedSong - 1 + totalSongs) % totalSongs);
       }
     }
+    
+    lastAngleRef.current = normalizedAngle;
+    
+    // Reset navigation flag after a short delay
+    setTimeout(() => {
+      isNavigatingRef.current = false;
+    }, 100);
   }, [
     currentScreen,
     isInMyFiveView,
@@ -126,7 +146,8 @@ export const useWheelNavigation = ({
   ]);
 
   const handleWheelLeave = useCallback(() => {
-    // Handle wheel leave if needed
+    lastAngleRef.current = null;
+    isNavigatingRef.current = false;
   }, []);
 
   return { handleWheelMove, handleWheelLeave };

@@ -103,7 +103,7 @@ export const useCenterButtonActions = ({
       menuItems
     });
 
-    // Handle music screen
+    // Handle music screen - toggle playback
     if (currentScreen === 'music') {
       console.log('Music screen - toggling play state');
       setIsPlaying(!isPlaying);
@@ -113,9 +113,9 @@ export const useCenterButtonActions = ({
     // Handle menu screen
     if (currentScreen === 'menu') {
       
-      // Handle My Five full view - song selection
+      // Handle My Five full view - play selected song
       if (isInMyFiveView) {
-        console.log('=== IN MY FIVE VIEW - SELECTING SONG ===');
+        console.log('=== IN MY FIVE VIEW - PLAYING SONG ===');
         console.log('Selected song index:', selectedMyFiveSong);
         console.log('Is shared view:', isSharedView);
         
@@ -160,20 +160,19 @@ export const useCenterButtonActions = ({
         return;
       }
 
-      // Handle main menu items
+      // Handle main menu navigation
       const selectedItem = menuItems[selectedMenuItem];
       console.log('=== MAIN MENU SELECTION ===');
       console.log('Selected item:', selectedItem, 'at index:', selectedMenuItem);
       
       switch (selectedItem) {
         case 'Sign In':
-          console.log('Opening sign in page');
+          console.log('Navigating to sign in');
           window.open('/signin', '_blank');
           break;
           
         case 'My Five':
-          console.log('=== NAVIGATING TO MY FIVE VIEW ===');
-          console.log('Setting isInMyFiveView to true and selectedMyFiveSong to 0');
+          console.log('=== ENTERING MY FIVE VIEW ===');
           setIsInMyFiveView(true);
           setSelectedMyFiveSong(0);
           break;
@@ -184,14 +183,13 @@ export const useCenterButtonActions = ({
           break;
           
         case 'Settings':
-          console.log('Navigating to settings view');
+          console.log('Entering settings view');
           setIsInSettingsView(true);
           setSelectedSettingsItem(0);
           break;
           
         default:
-          console.log('Default action - toggling play state');
-          setIsPlaying(!isPlaying);
+          console.log('No specific action for:', selectedItem);
           break;
       }
     }
