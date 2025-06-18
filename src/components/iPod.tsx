@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import Screen from './Screen';
 import ClickWheel from './ClickWheel';
@@ -26,6 +27,12 @@ const IPod = () => {
       // Handle angle wrap-around
       if (angleDiff > 180) angleDiff -= 360;
       if (angleDiff < -180) angleDiff += 360;
+      
+      // Add sensitivity threshold - only move if angle difference is significant enough
+      const threshold = 15; // degrees
+      if (Math.abs(angleDiff) < threshold) {
+        return;
+      }
       
       // Determine direction: positive = clockwise, negative = counter-clockwise
       const isClockwise = angleDiff > 0;
