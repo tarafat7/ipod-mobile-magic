@@ -6,6 +6,7 @@ import { User } from 'lucide-react';
 interface UserProfile {
   full_name: string | null;
   email: string | null;
+  profile_picture_url: string | null;
 }
 
 const AccountPreview: React.FC = () => {
@@ -17,22 +18,18 @@ const AccountPreview: React.FC = () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          const { data: profileData, error } = await supabase
+          const { data: profileData } = await supabase
             .from('profiles')
-            .select('full_name, email')
+            .select('full_name, email, profile_picture_url')
             .eq('id', user.id)
             .single();
           
-          if (error) {
-            console.error('Error loading profile:', error);
-            setProfile(null);
-          } else if (profileData) {
+          if (profileData) {
             setProfile(profileData);
           }
         }
       } catch (error) {
         console.error('Error loading user profile:', error);
-        setProfile(null);
       } finally {
         setIsLoading(false);
       }
@@ -63,14 +60,19 @@ const AccountPreview: React.FC = () => {
     );
   }
 
-  // Extract username from email (part before @)
-  const username = profile.email ? profile.email.split('@')[0] : 'No username';
-
   return (
     <div className="h-full flex flex-col items-center justify-center p-4 text-center">
       {/* Profile Picture / Album Art */}
       <div className="w-16 h-16 mb-3 rounded-lg overflow-hidden bg-gray-200 flex items-center justify-center">
-        <User size={24} className="text-gray-500" />
+        {profile.profile_picture_url ? (
+          <img 
+            src={profile.profile_picture_url} 
+            alt="Profile" 
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <User size={24} className="text-gray-500" />
+        )}
       </div>
       
       {/* Full Name / Song Title */}
@@ -78,9 +80,9 @@ const AccountPreview: React.FC = () => {
         {profile.full_name || 'No name set'}
       </h3>
       
-      {/* Username / Artist */}
+      {/* Email / Date */}
       <p className="text-sm text-gray-600 text-center leading-tight">
-        @{username}
+        {profile.email || 'No email'}
       </p>
     </div>
   );

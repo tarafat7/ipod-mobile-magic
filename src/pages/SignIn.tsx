@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { useSignUp } from '../hooks/useSignUp';
@@ -10,21 +9,15 @@ const SignIn = () => {
   const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [userEmail, setUserEmail] = useState('');
-  const [isLoginMode, setIsLoginMode] = useState(false);
   const { signUp, isLoading, error, setError } = useSignUp();
 
   useEffect(() => {
     const checkAuth = async () => {
-      // Check URL parameters to determine mode
+      // Check if we're in edit mode
       const urlParams = new URLSearchParams(window.location.search);
       const mode = urlParams.get('mode');
       
-      if (mode === 'login') {
-        setIsLoginMode(true);
-        return; // Don't redirect if in login mode
-      }
-      
-      // Only redirect if user is logged in AND we're not in edit or login mode
+      // Only redirect if user is logged in AND we're not in edit mode
       if (mode !== 'edit') {
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
@@ -36,41 +29,15 @@ const SignIn = () => {
     checkAuth();
   }, []);
 
-  const handleModeToggle = () => {
-    setIsLoginMode(!isLoginMode);
-    setError(null); // Clear any existing errors when toggling
-  };
-
-  const handleSubmit = async (formData: { fullName: string; username: string; email: string; password: string }) => {
+  const handleSubmit = async (formData: { fullName: string; email: string; password: string }, profilePicture?: File | null) => {
     setUserEmail(formData.email);
+    const result = await signUp(formData, profilePicture);
     
-    if (isLoginMode) {
-      // Handle sign in for existing users
-      try {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: formData.email,
-          password: formData.password,
-        });
-        
-        if (error) {
-          setError(error.message);
-        } else {
-          // Successful login, redirect to main page
-          window.location.href = '/';
-        }
-      } catch (error) {
-        setError('An error occurred during sign in');
-      }
-    } else {
-      // Handle sign up for new users
-      const result = await signUp(formData);
-      
-      if (result) {
-        if (result.needsConfirmation) {
-          setShowEmailConfirmation(true);
-        } else {
-          setIsSubmitted(true);
-        }
+    if (result) {
+      if (result.needsConfirmation) {
+        setShowEmailConfirmation(true);
+      } else {
+        setIsSubmitted(true);
       }
     }
   };
@@ -105,8 +72,6 @@ const SignIn = () => {
       isLoading={isLoading}
       error={error}
       onErrorClear={handleErrorClear}
-      isLoginMode={isLoginMode}
-      onModeToggle={handleModeToggle}
     />
   );
 };
