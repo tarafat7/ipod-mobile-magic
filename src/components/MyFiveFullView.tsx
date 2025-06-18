@@ -1,7 +1,7 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Music, ExternalLink } from 'lucide-react';
-import { ScrollArea } from './ui/scroll-area';
 
 interface SpotifyTrackInfo {
   name: string;
@@ -201,8 +201,8 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
         </div>
       </div>
 
-      {/* Scrollable Song List */}
-      <ScrollArea className="flex-1">
+      {/* Scrollable Song List - Using native CSS overflow instead of ScrollArea */}
+      <div className="flex-1 overflow-y-auto">
         <div className="bg-white px-2">
           {songs.map((song, index) => (
             <div 
@@ -244,7 +244,7 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
             </div>
           ))}
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 };
