@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { getMenuItems } from '../data/iPodData';
 import FriendsScreen from './FriendsScreen';
 import SettingsScreen from './SettingsScreen';
-import { User, Music } from 'lucide-react';
+import { User, Music, Battery } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
 
 interface MenuScreenProps {
@@ -136,9 +136,9 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
         if (showSettingsMenu && isSignedIn) {
           return (
             <div className="h-full p-2">
-              <div className="flex items-center gap-1 mb-3 text-xs">
-                <div className="w-3 h-2 bg-green-500 rounded-sm"></div>
+              <div className="flex items-center justify-between mb-3 text-xs">
                 <span className="font-bold">Settings</span>
+                <Battery size={12} className="text-green-500" />
               </div>
               <div className="space-y-0">
                 {settingsMenuItems.map((item, index) => (
@@ -207,11 +207,11 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
   return (
     <div className="h-full flex">
       {/* Left menu panel */}
-      <div className="w-1/2 bg-white border-r border-gray-300 transition-all duration-300">
+      <div className="w-1/2 bg-white border-r border-gray-300 transition-all duration-300 relative">
         <div className="p-2">
-          <div className="flex items-center gap-1 mb-3 text-xs">
-            <div className="w-3 h-2 bg-green-500 rounded-sm"></div>
+          <div className="flex items-center justify-between mb-3 text-xs">
             <span className="font-bold">{isInSettingsView ? 'Settings' : 'FivePod'}</span>
+            <Battery size={12} className="text-green-500" />
           </div>
           <div className="space-y-0">
             {currentMenuItems.map((item, index) => (
