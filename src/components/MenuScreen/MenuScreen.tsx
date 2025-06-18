@@ -7,18 +7,37 @@ import ContentPanel from './ContentPanel';
 
 interface MenuScreenProps {
   selectedMenuItem: number;
+  selectedSettingsItem?: number;
+  isInSettingsView?: boolean;
+  onSettingsItemChange?: (index: number) => void;
 }
 
-const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
+const MenuScreen: React.FC<MenuScreenProps> = ({ 
+  selectedMenuItem, 
+  selectedSettingsItem = 0,
+  isInSettingsView = false,
+  onSettingsItemChange
+}) => {
   const [menuItems, setMenuItems] = useState<string[]>([]);
   const [isSignedIn, setIsSignedIn] = useState(false);
-  const [isInSettingsView, setIsInSettingsView] = useState(false);
-  const [selectedSettingsItem, setSelectedSettingsItem] = useState(0);
+  const [internalIsInSettingsView, setInternalIsInSettingsView] = useState(isInSettingsView);
+  const [internalSelectedSettingsItem, setInternalSelectedSettingsItem] = useState(selectedSettingsItem);
   const [currentSelectedMenuItem, setCurrentSelectedMenuItem] = useState(selectedMenuItem);
 
   useEffect(() => {
     setCurrentSelectedMenuItem(selectedMenuItem);
   }, [selectedMenuItem]);
+
+  useEffect(() => {
+    setInternalIsInSettingsView(isInSettingsView);
+  }, [isInSettingsView]);
+
+  useEffect(() => {
+    setInternalSelectedSettingsItem(selectedSettingsItem);
+    if (onSettingsItemChange) {
+      onSettingsItemChange(selectedSettingsItem);
+    }
+  }, [selectedSettingsItem, onSettingsItemChange]);
 
   useEffect(() => {
     const loadMenuItems = async () => {
@@ -42,17 +61,24 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
   }, []);
 
   const handleSettingsClick = () => {
-    setIsInSettingsView(true);
-    setSelectedSettingsItem(0);
+    setInternalIsInSettingsView(true);
+    setInternalSelectedSettingsItem(0);
   };
 
   const handleBackToMain = () => {
-    setIsInSettingsView(false);
-    setSelectedSettingsItem(0);
+    setInternalIsInSettingsView(false);
+    setInternalSelectedSettingsItem(0);
   };
 
   const handleMenuItemClick = (index: number) => {
     setCurrentSelectedMenuItem(index);
+  };
+
+  const handleSettingsItemClick = (index: number) => {
+    setInternalSelectedSettingsItem(index);
+    if (onSettingsItemChange) {
+      onSettingsItemChange(index);
+    }
   };
 
   const handleSettingsAction = async (action: string) => {
@@ -88,17 +114,18 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
       <MenuPanel
         menuItems={menuItems}
         selectedMenuItem={currentSelectedMenuItem}
-        isInSettingsView={isInSettingsView}
+        isInSettingsView={internalIsInSettingsView}
         isSignedIn={isSignedIn}
-        selectedSettingsItem={selectedSettingsItem}
+        selectedSettingsItem={internalSelectedSettingsItem}
         onSettingsClick={handleSettingsClick}
         onSettingsAction={handleSettingsAction}
         onMenuItemClick={handleMenuItemClick}
+        onSettingsItemClick={handleSettingsItemClick}
       />
       <ContentPanel
         menuItems={menuItems}
         selectedMenuItem={currentSelectedMenuItem}
-        isInSettingsView={isInSettingsView}
+        isInSettingsView={internalIsInSettingsView}
         isSignedIn={isSignedIn}
       />
     </div>

@@ -13,6 +13,9 @@ interface ScreenProps {
   selectedSong: number;
   isPlaying: boolean;
   currentTime: string;
+  selectedSettingsItem?: number;
+  isInSettingsView?: boolean;
+  onSettingsItemChange?: (index: number) => void;
 }
 
 const Screen: React.FC<ScreenProps> = ({ 
@@ -20,12 +23,22 @@ const Screen: React.FC<ScreenProps> = ({
   selectedMenuItem, 
   selectedSong, 
   isPlaying, 
-  currentTime 
+  currentTime,
+  selectedSettingsItem = 0,
+  isInSettingsView = false,
+  onSettingsItemChange
 }) => {
   const renderScreen = () => {
     switch (currentScreen) {
       case 'menu':
-        return <MenuScreen selectedMenuItem={selectedMenuItem} />;
+        return (
+          <MenuScreen 
+            selectedMenuItem={selectedMenuItem} 
+            selectedSettingsItem={selectedSettingsItem}
+            isInSettingsView={isInSettingsView}
+            onSettingsItemChange={onSettingsItemChange}
+          />
+        );
       case 'friends':
         return <FriendsScreen />;
       case 'settings':

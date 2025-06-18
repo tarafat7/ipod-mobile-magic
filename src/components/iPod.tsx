@@ -13,6 +13,8 @@ const IPod = () => {
   const [currentTime, setCurrentTime] = useState('0:00');
   const [lastAngle, setLastAngle] = useState<number | null>(null);
   const [menuItems, setMenuItems] = useState<string[]>([]);
+  const [isInSettingsView, setIsInSettingsView] = useState(false);
+  const [selectedSettingsItem, setSelectedSettingsItem] = useState(0);
 
   useEffect(() => {
     const loadMenuItems = async () => {
@@ -66,12 +68,24 @@ const IPod = () => {
       const isClockwise = angleDiff > 0;
       
       if (currentScreen === 'menu') {
-        const newSelection = isClockwise 
-          ? (selectedMenuItem + 1) % menuItems.length
-          : (selectedMenuItem - 1 + menuItems.length) % menuItems.length;
-        
-        console.log('Menu navigation:', { currentSelection: selectedMenuItem, newSelection, selectedItem: menuItems[newSelection] });
-        setSelectedMenuItem(newSelection);
+        if (isInSettingsView) {
+          // Navigate settings items
+          const settingsItemsCount = 5; // Share Profile, Edit Account, Edit My Five, Logout, Delete Account
+          const newSelection = isClockwise 
+            ? (selectedSettingsItem + 1) % settingsItemsCount
+            : (selectedSettingsItem - 1 + settingsItemsCount) % settingsItemsCount;
+          
+          console.log('Settings navigation:', { currentSelection: selectedSettingsItem, newSelection });
+          setSelectedSettingsItem(newSelection);
+        } else {
+          // Navigate main menu items
+          const newSelection = isClockwise 
+            ? (selectedMenuItem + 1) % menuItems.length
+            : (selectedMenuItem - 1 + menuItems.length) % menuItems.length;
+          
+          console.log('Menu navigation:', { currentSelection: selectedMenuItem, newSelection, selectedItem: menuItems[newSelection] });
+          setSelectedMenuItem(newSelection);
+        }
       } else if (currentScreen === 'music') {
         const newSelection = isClockwise 
           ? (selectedSong + 1) % songs.length
@@ -93,25 +107,34 @@ const IPod = () => {
     console.log('Current screen:', currentScreen);
     console.log('Selected menu item:', selectedMenuItem);
     console.log('Selected menu item name:', menuItems[selectedMenuItem]);
+    console.log('Is in settings view:', isInSettingsView);
+    console.log('Selected settings item:', selectedSettingsItem);
     
     if (currentScreen === 'menu') {
-      const selectedItem = menuItems[selectedMenuItem];
-      if (selectedItem === 'Sign In') {
-        console.log('Attempting to open sign-in page...');
-        // Open sign-in page in a new tab/window
-        const newWindow = window.open('/signin', '_blank');
-        console.log('Window opened:', newWindow);
-      } else if (selectedItem === 'My Five') {
-        console.log('My Five clicked');
-        // Future functionality for My Five feature
-      } else if (selectedItem === 'Friends') {
-        console.log('Navigating to friends screen');
-        setCurrentScreen('friends');
-      } else if (selectedItem === 'Settings') {
-        console.log('Navigating to settings screen');
-        setCurrentScreen('settings');
+      if (isInSettingsView) {
+        // Handle settings item selection
+        const settingsItems = ['Share Profile', 'Edit Account', 'Edit My Five', 'Logout', 'Delete Account'];
+        const selectedSettingsAction = settingsItems[selectedSettingsItem];
+        console.log('Settings action selected:', selectedSettingsAction);
       } else {
-        setIsPlaying(!isPlaying);
+        // Handle main menu item selection
+        const selectedItem = menuItems[selectedMenuItem];
+        if (selectedItem === 'Sign In') {
+          console.log('Attempting to open sign-in page...');
+          const newWindow = window.open('/signin', '_blank');
+          console.log('Window opened:', newWindow);
+        } else if (selectedItem === 'My Five') {
+          console.log('My Five clicked');
+        } else if (selectedItem === 'Friends') {
+          console.log('Navigating to friends screen');
+          setCurrentScreen('friends');
+        } else if (selectedItem === 'Settings') {
+          console.log('Navigating to settings screen');
+          setIsInSettingsView(true);
+          setSelectedSettingsItem(0);
+        } else {
+          setIsPlaying(!isPlaying);
+        }
       }
     } else if (currentScreen === 'music') {
       setIsPlaying(!isPlaying);
@@ -119,9 +142,20 @@ const IPod = () => {
   };
 
   const handleMenuClick = () => {
-    console.log('Menu button clicked - returning to main menu');
-    setCurrentScreen('menu');
-    setSelectedMenuItem(0); // Reset to first menu item
+    console.log('Menu button clicked');
+    if (isInSettingsView) {
+      console.log('Returning from settings to main menu');
+      setIsInSettingsView(false);
+      setSelectedSettingsItem(0);
+    } else {
+      console.log('Returning to main menu');
+      setCurrentScreen('menu');
+      setSelectedMenuItem(0);
+    }
+  };
+
+  const handleSettingsItemChange = (index: number) => {
+    setSelectedSettingsItem(index);
   };
 
   return (
@@ -137,6 +171,9 @@ const IPod = () => {
             selectedSong={selectedSong}
             isPlaying={isPlaying}
             currentTime={currentTime}
+            selectedSettingsItem={selectedSettingsItem}
+            isInSettingsView={isInSettingsView}
+            onSettingsItemChange={handleSettingsItemChange}
           />
 
           {/* Click Wheel - Centered in remaining space, moved up slightly on mobile */}

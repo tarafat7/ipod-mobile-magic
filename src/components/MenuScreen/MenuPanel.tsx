@@ -10,6 +10,7 @@ interface MenuPanelProps {
   onSettingsClick: () => void;
   onSettingsAction: (action: string) => void;
   onMenuItemClick: (index: number) => void;
+  onSettingsItemClick: (index: number) => void;
 }
 
 const settingsMenuItems = [
@@ -28,14 +29,15 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   selectedSettingsItem,
   onSettingsClick,
   onSettingsAction,
-  onMenuItemClick
+  onMenuItemClick,
+  onSettingsItemClick
 }) => {
   const currentMenuItems = isInSettingsView ? settingsMenuItems : menuItems;
   const currentSelectedIndex = isInSettingsView ? selectedSettingsItem : selectedMenuItem;
 
   return (
-    <div className={`w-1/2 bg-white border-r border-gray-300 transition-all duration-300 relative ${
-      isInSettingsView ? 'transform translate-x-0' : ''
+    <div className={`w-1/2 bg-white border-r border-gray-300 transition-transform duration-300 relative ${
+      isInSettingsView ? 'transform translate-x-0' : 'transform translate-x-0'
     }`}>
       {/* Battery indicator - only show in main menu */}
       {!isInSettingsView && (
@@ -66,6 +68,7 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
               } ${item === 'Delete Account' ? 'text-red-600' : ''}`}
               onClick={() => {
                 if (isInSettingsView) {
+                  onSettingsItemClick(index);
                   onSettingsAction(item);
                 } else {
                   onMenuItemClick(index);
