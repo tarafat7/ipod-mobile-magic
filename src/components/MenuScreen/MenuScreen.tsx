@@ -127,11 +127,14 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
 
   const handleSettingsAction = async (action: string) => {
     switch (action) {
-      case 'Share Profile':
+      case 'Share Your Five':
         await handleShareProfile();
         break;
       case 'Edit Account':
         window.location.href = '/signin?mode=edit';
+        break;
+      case 'Product Feedback':
+        window.open('https://app.formbricks.com/s/cmc2iwfd7d33uu2017tjqmhji', '_blank');
         break;
       case 'Logout':
         try {
