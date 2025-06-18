@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../integrations/supabase/client';
@@ -78,10 +79,8 @@ const MyFive: React.FC = () => {
       if (error) {
         console.error('Error loading user profile:', error);
       } else {
+        console.log('Loaded shared profile:', data);
         setProfile(data);
-        
-        // Store profile data globally for iPod component to access
-        (window as any).sharedUserProfile = data;
       }
     } catch (error) {
       console.error('Error loading user profile:', error);
@@ -112,8 +111,7 @@ const MyFive: React.FC = () => {
           data.song_5
         ].filter(Boolean);
 
-        // Store song URLs globally for iPod component to access
-        (window as any).sharedUserSongs = songUrls;
+        console.log('Loaded shared songs:', songUrls.length, 'songs');
 
         const addedDate = formatDate(data.created_at);
 
@@ -136,8 +134,8 @@ const MyFive: React.FC = () => {
     }
   };
 
-  // Render the iPod interface instead of the static view
-  return <IPod />;
+  // Pass the loaded data to the iPod component
+  return <IPod sharedUserProfile={profile} sharedUserSongs={songs} />;
 };
 
 export default MyFive;

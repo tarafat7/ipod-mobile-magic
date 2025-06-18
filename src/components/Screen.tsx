@@ -7,6 +7,18 @@ import SettingsScreen from './SettingsScreen';
 import { Song } from '../types/iPod';
 import { songs } from '../data/iPodData';
 
+interface SpotifyTrackInfo {
+  name: string;
+  artist: string;
+  albumArt: string;
+  spotifyUrl: string;
+  addedDate: string;
+}
+
+interface UserProfile {
+  full_name: string | null;
+}
+
 interface ScreenProps {
   currentScreen: string;
   selectedMenuItem: number;
@@ -20,8 +32,8 @@ interface ScreenProps {
   selectedMyFiveSong?: number;
   onMyFiveSongChange?: (index: number) => void;
   isSharedView?: boolean;
-  sharedUserProfile?: {full_name: string} | null;
-  sharedUserSongs?: string[];
+  sharedUserProfile?: UserProfile | null;
+  sharedUserSongs?: SpotifyTrackInfo[];
 }
 
 const Screen: React.FC<ScreenProps> = ({ 

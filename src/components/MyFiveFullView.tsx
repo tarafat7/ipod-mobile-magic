@@ -14,7 +14,7 @@ interface MyFiveFullViewProps {
   selectedSongIndex: number;
   isSharedView?: boolean;
   sharedUserProfile?: {full_name: string} | null;
-  sharedUserSongs?: string[];
+  sharedUserSongs?: SpotifyTrackInfo[];
 }
 
 const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({ 
@@ -28,8 +28,10 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
 
   useEffect(() => {
     if (isSharedView && sharedUserSongs.length > 0) {
-      // Use shared songs data instead of loading from database
-      loadSharedSongsInfo();
+      // Use the shared songs data directly
+      console.log('Using shared songs data:', sharedUserSongs);
+      setSongs(sharedUserSongs);
+      setIsLoading(false);
     } else {
       loadMyFiveSongs();
     }
@@ -87,29 +89,6 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
       month: 'long', 
       day: 'numeric' 
     });
-  };
-
-  const loadSharedSongsInfo = async () => {
-    setIsLoading(true);
-    try {
-      const addedDate = 'Recently added'; // Default date for shared view
-
-      const songInfoPromises = sharedUserSongs.map(async (url) => {
-        const trackId = extractSpotifyTrackId(url);
-        if (trackId) {
-          return await fetchSpotifyTrackInfo(trackId, addedDate);
-        }
-        return null;
-      });
-
-      const songInfos = await Promise.all(songInfoPromises);
-      const validSongs = songInfos.filter((song): song is SpotifyTrackInfo => song !== null);
-      setSongs(validSongs);
-    } catch (error) {
-      console.error('Error loading shared songs:', error);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const loadMyFiveSongs = async () => {
