@@ -67,20 +67,25 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
   }, []);
 
   const loadMyFiveSongs = useCallback(async () => {
+    console.log('MyFiveFullView: Starting loadMyFiveSongs');
     setIsLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
+      console.log('MyFiveFullView: Current user:', user?.id || 'No user');
       if (!user) {
+        console.log('MyFiveFullView: No user found, stopping load');
         setIsLoading(false);
         return;
       }
 
       // Prevent reloading if we already loaded for this user
       if (loadedUserId === user.id) {
+        console.log('MyFiveFullView: Already loaded for this user, stopping');
         setIsLoading(false);
         return;
       }
 
+      console.log('MyFiveFullView: Fetching songs from database for user:', user.id);
       const { data, error } = await supabase
         .from('user_five_songs')
         .select('*')
@@ -88,10 +93,12 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
         .maybeSingle();
 
       if (error) {
-        console.error('Error loading songs:', error);
+        console.error('MyFiveFullView: Error loading songs:', error);
         setIsLoading(false);
         return;
       }
+
+      console.log('MyFiveFullView: Database response:', data);
 
       if (data) {
         const songUrls = [
@@ -101,6 +108,16 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
           data.song_4,
           data.song_5
         ].filter(Boolean);
+
+        console.log('MyFiveFullView: Found song URLs:', songUrls);
+
+        if (songUrls.length === 0) {
+          console.log('MyFiveFullView: No songs found, setting empty array');
+          setSongs([]);
+          setLoadedUserId(user.id);
+          setIsLoading(false);
+          return;
+        }
 
         const addedDate = formatDate(data.created_at);
 
@@ -114,26 +131,34 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
 
         const songInfos = await Promise.all(songInfoPromises);
         const validSongs = songInfos.filter((song): song is SpotifyTrackInfo => song !== null);
+        console.log('MyFiveFullView: Processed valid songs:', validSongs);
         setSongs(validSongs);
         setLoadedUserId(user.id); // Remember that we loaded for this user
+      } else {
+        console.log('MyFiveFullView: No data returned from database');
+        setSongs([]);
+        setLoadedUserId(user.id);
       }
     } catch (error) {
-      console.error('Error loading user songs:', error);
+      console.error('MyFiveFullView: Error loading user songs:', error);
     } finally {
+      console.log('MyFiveFullView: Finished loading, setting isLoading to false');
       setIsLoading(false);
     }
   }, [extractSpotifyTrackId, fetchSpotifyTrackInfo, formatDate, loadedUserId]);
 
   // Only run the effect when the view type changes or initial load
   useEffect(() => {
+    console.log('MyFiveFullView: useEffect triggered - isSharedView:', isSharedView, 'sharedUserSongs length:', sharedUserSongs.length);
     if (isSharedView) {
       // For shared views, use the provided shared songs data directly
-      console.log('Using shared songs data:', sharedUserSongs);
+      console.log('MyFiveFullView: Using shared songs data:', sharedUserSongs);
       setSongs(sharedUserSongs);
       setIsLoading(false);
       setLoadedUserId(''); // Reset loaded user ID for shared views
     } else {
       // For authenticated users viewing their own songs
+      console.log('MyFiveFullView: Loading user songs');
       loadMyFiveSongs();
     }
   }, [isSharedView]); // Removed sharedUserSongs from dependencies to prevent reloading
@@ -141,7 +166,7 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
   // Update songs only when sharedUserSongs actually changes (not on every scroll)
   useEffect(() => {
     if (isSharedView && sharedUserSongs.length > 0 && songs.length !== sharedUserSongs.length) {
-      console.log('Updating shared songs data:', sharedUserSongs);
+      console.log('MyFiveFullView: Updating shared songs data:', sharedUserSongs);
       setSongs(sharedUserSongs);
     }
   }, [isSharedView, sharedUserSongs.length]); // Only depend on length, not the array itself
@@ -165,6 +190,8 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
   const handleSongClick = (spotifyUrl: string) => {
     window.open(spotifyUrl, '_blank');
   };
+
+  console.log('MyFiveFullView: Rendering - isLoading:', isLoading, 'songs length:', songs.length);
 
   if (isLoading) {
     const displayName = isSharedView && sharedUserProfile ? sharedUserProfile.full_name : 'your';
