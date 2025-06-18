@@ -17,10 +17,9 @@ interface MenuPanelProps {
 }
 
 const settingsMenuItems = [
-  'Share Your Five',
+  'Share Profile',
   'Edit Account', 
   'Edit My Five',
-  'Product Feedback',
   'Logout',
   'Delete Account'
 ];
@@ -83,10 +82,8 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
       onSettingsItemClick(index);
       if (item === 'Edit My Five') {
         window.location.href = '/edit-my-five';
-      } else if (item === 'Share Your Five') {
+      } else if (item === 'Share Profile') {
         handleShareProfile();
-      } else if (item === 'Product Feedback') {
-        window.open('https://app.formbricks.com/s/cmc2iwfd7d33uu2017tjqmhji', '_blank');
       } else {
         onSettingsAction(item);
       }
