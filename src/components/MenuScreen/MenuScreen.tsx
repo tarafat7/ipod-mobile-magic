@@ -43,13 +43,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
   }, []);
 
   const handleSettingsClick = () => {
-    // This will be handled by the parent iPod component
     console.log('Settings clicked');
-  };
-
-  const handleBackToMain = () => {
-    // This will be handled by the parent iPod component
-    console.log('Back to main');
   };
 
   const handleMenuItemClick = (index: number) => {
@@ -63,10 +57,14 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
   const handleSettingsAction = async (action: string) => {
     switch (action) {
       case 'Edit Account':
-        window.location.href = '/sign-in?mode=edit';
+        window.location.href = '/signin?mode=edit';
         break;
       case 'Logout':
-        await supabase.auth.signOut();
+        try {
+          await supabase.auth.signOut();
+        } catch (error) {
+          console.error('Error during logout:', error);
+        }
         break;
       case 'Delete Account':
         if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {

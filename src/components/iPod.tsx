@@ -102,6 +102,44 @@ const IPod = () => {
     setLastAngle(null);
   };
 
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      // Reset to main menu and clear settings view
+      setIsInSettingsView(false);
+      setSelectedSettingsItem(0);
+      setCurrentScreen('menu');
+      setSelectedMenuItem(0);
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          // Delete user profile first
+          await supabase.from('profiles').delete().eq('id', user.id);
+          // Then sign out
+          await supabase.auth.signOut();
+          // Reset to main menu
+          setIsInSettingsView(false);
+          setSelectedSettingsItem(0);
+          setCurrentScreen('menu');
+          setSelectedMenuItem(0);
+        }
+      } catch (error) {
+        console.error('Error deleting account:', error);
+      }
+    }
+  };
+
+  const handleEditAccount = () => {
+    window.location.href = '/signin?mode=edit';
+  };
+
   const handleCenterClick = () => {
     console.log('Center button clicked!');
     console.log('Current screen:', currentScreen);
@@ -116,6 +154,21 @@ const IPod = () => {
         const settingsItems = ['Share Profile', 'Edit Account', 'Edit My Five', 'Logout', 'Delete Account'];
         const selectedSettingsAction = settingsItems[selectedSettingsItem];
         console.log('Settings action selected:', selectedSettingsAction);
+        
+        switch (selectedSettingsAction) {
+          case 'Edit Account':
+            handleEditAccount();
+            break;
+          case 'Logout':
+            handleLogout();
+            break;
+          case 'Delete Account':
+            handleDeleteAccount();
+            break;
+          default:
+            console.log('Settings action not implemented:', selectedSettingsAction);
+            break;
+        }
       } else {
         // Handle main menu item selection
         const selectedItem = menuItems[selectedMenuItem];
