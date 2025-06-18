@@ -16,8 +16,8 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
-          profile_picture_url: string | null
           updated_at: string | null
+          username: string | null
         }
         Insert: {
           created_at?: string | null
@@ -25,8 +25,8 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
-          profile_picture_url?: string | null
           updated_at?: string | null
+          username?: string | null
         }
         Update: {
           created_at?: string | null
@@ -34,8 +34,8 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
-          profile_picture_url?: string | null
           updated_at?: string | null
+          username?: string | null
         }
         Relationships: []
       }

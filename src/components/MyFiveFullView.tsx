@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Music, ExternalLink } from 'lucide-react';
@@ -195,7 +194,7 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
     <div className="h-full bg-white">
       {/* Header */}
       <div className="p-2">
-        <div className="flex items-center justify-between mb-3 text-xs">
+        <div className="flex items-center justify-between mb-2 text-xs">
           <span className="font-bold">{displayName} Five</span>
           <div className="w-6 h-3 bg-green-500 rounded-sm"></div>
         </div>
@@ -206,13 +205,13 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
         {songs.map((song, index) => (
           <div 
             key={index} 
-            className={`flex items-center p-2 border-b border-gray-200 transition-colors ${
+            className={`flex items-center p-1.5 border-b border-gray-200 transition-colors ${
               selectedSongIndex === index 
                 ? 'bg-blue-500 text-white' 
                 : 'bg-white hover:bg-gray-50'
             }`}
           >
-            <div className="w-12 h-12 bg-gray-200 rounded flex-shrink-0 overflow-hidden mr-3">
+            <div className="w-8 h-8 bg-gray-200 rounded flex-shrink-0 overflow-hidden mr-2">
               {song.albumArt ? (
                 <img 
                   src={song.albumArt} 
@@ -221,24 +220,24 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <Music size={20} className="text-gray-400" />
+                  <Music size={14} className="text-gray-400" />
                 </div>
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className={`font-semibold text-base truncate ${
+              <h3 className={`font-semibold text-sm truncate ${
                 selectedSongIndex === index ? 'text-white' : 'text-black'
               }`}>
                 {song.name}
               </h3>
-              <p className={`text-sm truncate ${
+              <p className={`text-xs truncate ${
                 selectedSongIndex === index ? 'text-blue-100' : 'text-gray-600'
               }`}>
                 {song.artist || song.addedDate}
               </p>
             </div>
             {selectedSongIndex === index && (
-              <div className="text-white text-xl">▶</div>
+              <div className="text-white text-sm">▶</div>
             )}
           </div>
         ))}
