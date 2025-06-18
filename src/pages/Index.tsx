@@ -1,8 +1,8 @@
 
-import iPod from '../components/iPod';
+import IPod from '../components/iPod';
 
 const Index = () => {
-  return <iPod />;
+  return <IPod />;
 };
 
 export default Index;

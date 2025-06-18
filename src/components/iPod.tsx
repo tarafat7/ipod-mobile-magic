@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Play, Pause, SkipForward, SkipBack, Volume2 } from 'lucide-react';
 
@@ -9,7 +8,7 @@ interface Song {
   duration: string;
 }
 
-const iPod = () => {
+const IPod = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentScreen, setCurrentScreen] = useState('menu');
   const [selectedMenuItem, setSelectedMenuItem] = useState(0);
@@ -201,4 +200,4 @@ const iPod = () => {
   );
 };
 
-export default iPod;
+export default IPod;
