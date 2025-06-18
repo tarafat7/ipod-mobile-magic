@@ -1,6 +1,6 @@
 
 import React from 'react';
-import MenuScreen from './MenuScreen';
+import MenuScreen from './MenuScreen/MenuScreen';
 import MusicScreen from './MusicScreen';
 import FriendsScreen from './FriendsScreen';
 import SettingsScreen from './SettingsScreen';
