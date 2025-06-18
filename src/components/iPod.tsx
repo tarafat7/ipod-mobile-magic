@@ -304,10 +304,14 @@ const IPod: React.FC<IPodProps> = ({
     console.log('Current state - Screen:', currentScreen, 'InSettings:', isInSettingsView, 'InMyFive:', isInMyFiveView);
     
     if (isInMyFiveView) {
+      if (isSharedView) {
+        // In shared view, don't allow exiting My Five view
+        console.log('Cannot exit My Five view in shared mode');
+        return;
+      }
       console.log('Exiting My Five view');
       setIsInMyFiveView(false);
       setSelectedMyFiveSong(0);
-      setSelectedMenuItem(0); // Reset to first menu item when exiting My Five view
     } else if (isInSettingsView) {
       console.log('Exiting settings view');
       setIsInSettingsView(false);
