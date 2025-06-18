@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { supabase } from '../integrations/supabase/client';
+import { useToast } from '../hooks/use-toast';
 
 const SignIn = () => {
   const [formData, setFormData] = useState({
@@ -14,8 +14,9 @@ const SignIn = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
+  const { toast } = useToast();
 
-  // Check if user is already authenticated
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -78,51 +79,18 @@ const SignIn = () => {
       if (data.user) {
         console.log('User created successfully:', data.user.id);
         
-        // Wait a moment for the trigger to execute
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Check if profile was created by the trigger
-        const { data: profileData, error: profileCheckError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', data.user.id)
-          .single();
-        
-        console.log('Profile check result:', { profileData, profileCheckError });
-        
-        if (!profileData && !profileCheckError) {
-          console.log('No profile found, manually creating one...');
-          // If trigger didn't create profile, create it manually
-          const { error: profileCreateError } = await supabase
-            .from('profiles')
-            .insert({
-              id: data.user.id,
-              full_name: formData.fullName,
-              email: formData.email,
-              device_id: deviceId
-            });
-          
-          if (profileCreateError) {
-            console.error('Manual profile creation error:', profileCreateError);
-          } else {
-            console.log('Profile created manually');
-          }
-        } else if (profileData) {
-          console.log('Profile found, updating with device_id...');
-          // Update the profile with device_id
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .update({ device_id: deviceId })
-            .eq('id', data.user.id);
-
-          if (profileError) {
-            console.error('Error updating profile:', profileError);
-          } else {
-            console.log('Profile updated with device_id');
-          }
+        // Check if the user needs email confirmation
+        if (!data.session) {
+          // User needs to confirm email
+          setShowEmailConfirmation(true);
+          toast({
+            title: "Check your email!",
+            description: `We've sent a confirmation link to ${formData.email}. Please click the link to activate your account.`,
+          });
+        } else {
+          // User is immediately logged in (email confirmation disabled)
+          setIsSubmitted(true);
         }
-
-        setIsSubmitted(true);
       }
     } catch (err) {
       console.error('Unexpected signup error:', err);
@@ -136,6 +104,34 @@ const SignIn = () => {
     // Redirect to the main iPod page
     window.location.href = '/';
   };
+
+  if (showEmailConfirmation) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black flex items-center justify-center p-4">
+        <div className="bg-white rounded-xl p-8 max-w-md w-full text-center shadow-2xl">
+          <div className="w-16 h-16 bg-blue-500 rounded-full mx-auto mb-4 flex items-center justify-center">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Check Your Email</h2>
+          <p className="text-gray-600 mb-4">
+            We've sent a confirmation link to <strong>{formData.email}</strong>
+          </p>
+          <p className="text-gray-500 text-sm mb-6">
+            Please click the link in your email to activate your account and complete the signup process.
+          </p>
+          <Button 
+            onClick={handleReturnToiPod}
+            variant="outline"
+            className="w-full"
+          >
+            Return to iPod
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (isSubmitted) {
     return (
