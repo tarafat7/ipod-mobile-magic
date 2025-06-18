@@ -1,12 +1,14 @@
-import React, { useEffect } from 'react';
+
+import React from 'react';
 import Screen from './Screen';
 import ClickWheel from './ClickWheel';
-import { getMenuItems } from '../data/iPodData';
-import { supabase } from '../integrations/supabase/client';
+import IPodContainer from './IPodContainer';
 import { useIPodState } from '../hooks/useIPodState';
 import { useWheelNavigation } from '../hooks/useWheelNavigation';
 import { useCenterButtonActions } from '../hooks/useCenterButtonActions';
 import { useMenuButtonActions } from '../hooks/useMenuButtonActions';
+import { useSharedViewState } from '../hooks/useSharedViewState';
+import { useAuthAndData } from '../hooks/useAuthAndData';
 
 interface SpotifyTrackInfo {
   name: string;
@@ -31,89 +33,27 @@ const IPod: React.FC<IPodProps> = ({
 }) => {
   const state = useIPodState();
 
-  // Check authentication state and route context
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      state.setCurrentUser(user);
-    };
-    
-    checkAuth();
-    
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      state.setCurrentUser(session?.user || null);
-    });
+  // Handle shared view state management
+  useSharedViewState({
+    sharedUserProfile,
+    sharedUserSongs,
+    isSharedView: state.isSharedView,
+    setIsSharedView: state.setIsSharedView,
+    setCurrentScreen: state.setCurrentScreen,
+    setIsInMyFiveView: state.setIsInMyFiveView,
+    setSelectedMenuItem: state.setSelectedMenuItem,
+    setMyFiveSongsCount: state.setMyFiveSongsCount,
+    setSelectedMyFiveSong: state.setSelectedMyFiveSong
+  });
 
-    return () => subscription.unsubscribe();
-  }, []);
-
-  // Handle route-based shared view detection
-  useEffect(() => {
-    const currentPath = window.location.pathname;
-    const isMyFiveRoute = currentPath.includes('/my-five/');
-    const wasSharedView = state.isSharedView;
-    
-    if (isMyFiveRoute && sharedUserProfile) {
-      // We're on a shared route with shared data
-      state.setIsSharedView(true);
-      state.setCurrentScreen('menu');
-      state.setIsInMyFiveView(true);
-      state.setSelectedMenuItem(0);
-      state.setMyFiveSongsCount(sharedUserSongs.length);
-    } else {
-      // We're not on a shared route, reset shared view state
-      state.setIsSharedView(false);
-      state.setIsInMyFiveView(false);
-      state.setSelectedMyFiveSong(0);
-      // Reset to main menu when leaving shared view
-      if (wasSharedView) {
-        state.setCurrentScreen('menu');
-        state.setSelectedMenuItem(0);
-      }
-    }
-  }, [sharedUserProfile, sharedUserSongs, window.location.pathname]);
-
-  // Update songs count when shared songs change
-  useEffect(() => {
-    if (state.isSharedView && sharedUserSongs.length > 0) {
-      state.setMyFiveSongsCount(sharedUserSongs.length);
-    }
-  }, [sharedUserSongs, state.isSharedView]);
-
-  useEffect(() => {
-    const loadMenuItems = async () => {
-      const items = await getMenuItems();
-      state.setMenuItems(items);
-    };
-
-    const loadMyFiveSongs = async () => {
-      if (state.isSharedView || !state.currentUser) return;
-      
-      try {
-        const { data, error } = await supabase
-          .from('user_five_songs')
-          .select('*')
-          .eq('user_id', state.currentUser.id)
-          .maybeSingle();
-
-        if (data) {
-          const songUrls = [
-            data.song_1,
-            data.song_2,
-            data.song_3,
-            data.song_4,
-            data.song_5
-          ].filter(Boolean);
-          state.setMyFiveSongsCount(songUrls.length);
-        }
-      } catch (error) {
-        console.error('Error loading my five songs count:', error);
-      }
-    };
-
-    loadMenuItems();
-    loadMyFiveSongs();
-  }, [state.isSharedView, state.currentUser]);
+  // Handle authentication and data loading
+  useAuthAndData({
+    isSharedView: state.isSharedView,
+    currentUser: state.currentUser,
+    setCurrentUser: state.setCurrentUser,
+    setMenuItems: state.setMenuItems,
+    setMyFiveSongsCount: state.setMyFiveSongsCount
+  });
 
   const wheelNavigation = useWheelNavigation({
     currentScreen: state.currentScreen,
@@ -173,40 +113,33 @@ const IPod: React.FC<IPodProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center md:p-4 overflow-hidden">
-      <div className="relative w-full h-screen md:w-auto md:h-auto">
-        <div className="bg-gradient-to-br from-gray-300 via-gray-200 to-gray-400 w-full h-full md:rounded-3xl md:p-6 shadow-2xl border border-gray-400 md:w-96 md:h-[680px] flex flex-col touch-none select-none">
-          
-          <Screen 
-            currentScreen={state.currentScreen}
-            selectedMenuItem={state.selectedMenuItem}
-            selectedSong={state.selectedSong}
-            isPlaying={state.isPlaying}
-            currentTime={state.currentTime}
-            selectedSettingsItem={state.selectedSettingsItem}
-            isInSettingsView={state.isInSettingsView}
-            onSettingsItemChange={handleSettingsItemChange}
-            isInMyFiveView={state.isInMyFiveView}
-            selectedMyFiveSong={state.selectedMyFiveSong}
-            onMyFiveSongChange={handleMyFiveSongChange}
-            isSharedView={state.isSharedView}
-            sharedUserProfile={sharedUserProfile}
-            sharedUserSongs={sharedUserSongs}
-          />
+    <IPodContainer>
+      <Screen 
+        currentScreen={state.currentScreen}
+        selectedMenuItem={state.selectedMenuItem}
+        selectedSong={state.selectedSong}
+        isPlaying={state.isPlaying}
+        currentTime={state.currentTime}
+        selectedSettingsItem={state.selectedSettingsItem}
+        isInSettingsView={state.isInSettingsView}
+        onSettingsItemChange={handleSettingsItemChange}
+        isInMyFiveView={state.isInMyFiveView}
+        selectedMyFiveSong={state.selectedMyFiveSong}
+        onMyFiveSongChange={handleMyFiveSongChange}
+        isSharedView={state.isSharedView}
+        sharedUserProfile={sharedUserProfile}
+        sharedUserSongs={sharedUserSongs}
+      />
 
-          <div className="flex-1 flex items-center justify-center md:items-center" style={{ alignItems: 'center', paddingBottom: '2rem' }}>
-            <ClickWheel 
-              onWheelMove={wheelNavigation.handleWheelMove}
-              onWheelLeave={wheelNavigation.handleWheelLeave}
-              onCenterClick={centerButtonActions.handleCenterClick}
-              onMenuClick={menuButtonActions.handleMenuClick}
-            />
-          </div>
-        </div>
-
-        <div className="absolute top-6 left-6 right-6 h-1/3 bg-gradient-to-b from-white/20 to-transparent rounded-t-3xl pointer-events-none hidden md:block"></div>
+      <div className="flex-1 flex items-center justify-center md:items-center" style={{ alignItems: 'center', paddingBottom: '2rem' }}>
+        <ClickWheel 
+          onWheelMove={wheelNavigation.handleWheelMove}
+          onWheelLeave={wheelNavigation.handleWheelLeave}
+          onCenterClick={centerButtonActions.handleCenterClick}
+          onMenuClick={menuButtonActions.handleMenuClick}
+        />
       </div>
-    </div>
+    </IPodContainer>
   );
 };
 
