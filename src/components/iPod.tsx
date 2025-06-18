@@ -87,9 +87,12 @@ const IPod: React.FC<IPodProps> = ({
     const currentPath = window.location.pathname;
     const isMyFiveRoute = currentPath.includes('/my-five/');
     
-    if (isMyFiveRoute) {
-      console.log('Detected shared view with profile:', sharedUserProfile);
-      console.log('Shared songs count:', sharedUserSongs.length);
+    if (isMyFiveRoute && (sharedUserProfile || sharedUserSongs.length > 0)) {
+      console.log('Setting up shared view with:', { 
+        profile: sharedUserProfile, 
+        songsCount: sharedUserSongs.length,
+        songs: sharedUserSongs 
+      });
       setIsSharedView(true);
       setCurrentScreen('menu');
       setIsInMyFiveView(true);

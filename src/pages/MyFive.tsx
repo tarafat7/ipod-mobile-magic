@@ -25,10 +25,29 @@ const MyFive: React.FC = () => {
 
   useEffect(() => {
     if (userId) {
-      loadUserProfile();
-      loadUserSongs();
+      console.log('Loading data for user ID:', userId);
+      loadData();
     }
   }, [userId]);
+
+  const loadData = async () => {
+    console.log('Starting to load user data...');
+    setIsLoading(true);
+    
+    try {
+      // Load both profile and songs in parallel
+      const [profileResult, songsResult] = await Promise.all([
+        loadUserProfile(),
+        loadUserSongs()
+      ]);
+      
+      console.log('Data loading completed:', { profile: profileResult, songs: songsResult });
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const extractSpotifyTrackId = (url: string): string | null => {
     const match = url.match(/track\/([a-zA-Z0-9]+)/);
@@ -70,6 +89,7 @@ const MyFive: React.FC = () => {
 
   const loadUserProfile = async () => {
     try {
+      console.log('Loading profile for user:', userId);
       // Make this completely public - no authentication required
       const { data, error } = await supabase
         .from('profiles')
@@ -79,18 +99,21 @@ const MyFive: React.FC = () => {
 
       if (error) {
         console.error('Error loading user profile:', error);
+        return null;
       } else {
         console.log('Loaded shared profile:', data);
         setProfile(data);
+        return data;
       }
     } catch (error) {
       console.error('Error loading user profile:', error);
+      return null;
     }
   };
 
   const loadUserSongs = async () => {
-    setIsLoading(true);
     try {
+      console.log('Loading songs for user:', userId);
       // Make this completely public - no authentication required
       const { data, error } = await supabase
         .from('user_five_songs')
@@ -100,8 +123,7 @@ const MyFive: React.FC = () => {
 
       if (error) {
         console.error('Error loading songs:', error);
-        setIsLoading(false);
-        return;
+        return [];
       }
 
       if (data) {
@@ -113,7 +135,7 @@ const MyFive: React.FC = () => {
           data.song_5
         ].filter(Boolean);
 
-        console.log('Loaded shared songs:', songUrls.length, 'songs');
+        console.log('Found song URLs:', songUrls);
 
         const addedDate = formatDate(data.created_at);
 
@@ -127,14 +149,29 @@ const MyFive: React.FC = () => {
 
         const songInfos = await Promise.all(songInfoPromises);
         const validSongs = songInfos.filter((song): song is SpotifyTrackInfo => song !== null);
+        
+        console.log('Processed songs:', validSongs);
         setSongs(validSongs);
+        return validSongs;
       }
+      
+      return [];
     } catch (error) {
       console.error('Error loading user songs:', error);
-    } finally {
-      setIsLoading(false);
+      return [];
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center">
+        <div className="text-white text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white mx-auto mb-4"></div>
+          <p>Loading shared songs...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Pass the loaded data to the iPod component
   return <IPod sharedUserProfile={profile} sharedUserSongs={songs} />;
