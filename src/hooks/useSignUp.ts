@@ -14,14 +14,42 @@ export const useSignUp = () => {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const signUp = async (formData: FormData) => {
+  const uploadProfilePicture = async (file: File, userId: string): Promise<string | null> => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${userId}/profile.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('profile-pictures')
+        .upload(fileName, file, {
+          upsert: true
+        });
+
+      if (uploadError) {
+        console.error('Profile picture upload error:', uploadError);
+        return null;
+      }
+
+      const { data } = supabase.storage
+        .from('profile-pictures')
+        .getPublicUrl(fileName);
+
+      return data.publicUrl;
+    } catch (error) {
+      console.error('Unexpected profile picture upload error:', error);
+      return null;
+    }
+  };
+
+  const signUp = async (formData: FormData, profilePicture?: File | null) => {
     setIsLoading(true);
     setError(null);
     
     try {
       console.log('Starting signup process with data:', { 
         email: formData.email, 
-        fullName: formData.fullName 
+        fullName: formData.fullName,
+        hasProfilePicture: !!profilePicture
       });
 
       // Generate a device ID if one doesn't exist
@@ -32,15 +60,18 @@ export const useSignUp = () => {
       }
       console.log('Device ID:', deviceId);
 
-      // Sign up with Supabase
+      // Prepare user metadata
+      const userMetadata: any = {
+        full_name: formData.fullName
+      };
+
+      // Sign up with Supabase first
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
           emailRedirectTo: `${window.location.origin}/`,
-          data: {
-            full_name: formData.fullName
-          }
+          data: userMetadata
         }
       });
 
@@ -54,6 +85,25 @@ export const useSignUp = () => {
 
       if (data.user) {
         console.log('User created successfully:', data.user.id);
+        
+        // Upload profile picture if provided
+        let profilePictureUrl = null;
+        if (profilePicture) {
+          console.log('Uploading profile picture...');
+          profilePictureUrl = await uploadProfilePicture(profilePicture, data.user.id);
+          
+          if (profilePictureUrl) {
+            console.log('Profile picture uploaded successfully:', profilePictureUrl);
+            
+            // Update the user metadata with profile picture URL
+            await supabase.auth.updateUser({
+              data: {
+                ...userMetadata,
+                profile_picture_url: profilePictureUrl
+              }
+            });
+          }
+        }
         
         // Check if the user needs email confirmation
         if (!data.session) {

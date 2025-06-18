@@ -3,6 +3,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { supabase } from '../integrations/supabase/client';
+import ProfilePictureUpload from './ProfilePictureUpload';
 
 interface FormData {
   fullName: string;
@@ -11,7 +12,7 @@ interface FormData {
 }
 
 interface SignInFormProps {
-  onSubmit: (formData: FormData) => void;
+  onSubmit: (formData: FormData, profilePicture?: File | null) => void;
   isLoading: boolean;
   error: string | null;
   onErrorClear: () => void;
@@ -23,6 +24,7 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
     email: '',
     password: ''
   });
+  const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isSignInMode, setIsSignInMode] = useState(false);
 
@@ -67,6 +69,10 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
       [name]: value
     }));
     onErrorClear();
+  };
+
+  const handleProfilePictureSelect = (file: File | null) => {
+    setProfilePicture(file);
   };
 
   const handleSignIn = async () => {
@@ -138,7 +144,7 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
         console.error('Error updating account:', error);
       }
     } else {
-      onSubmit(formData);
+      onSubmit(formData, profilePicture);
     }
   };
 
@@ -186,19 +192,28 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
         
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isSignInMode && (
-            <div>
-              <Label htmlFor="fullName">Full Name</Label>
-              <Input
-                id="fullName"
-                name="fullName"
-                type="text"
-                value={formData.fullName}
-                onChange={handleInputChange}
-                required
-                className="mt-1"
-                disabled={isLoading}
-              />
-            </div>
+            <>
+              <div>
+                <Label htmlFor="fullName">Full Name</Label>
+                <Input
+                  id="fullName"
+                  name="fullName"
+                  type="text"
+                  value={formData.fullName}
+                  onChange={handleInputChange}
+                  required
+                  className="mt-1"
+                  disabled={isLoading}
+                />
+              </div>
+              
+              {!isEditMode && (
+                <ProfilePictureUpload
+                  onImageSelect={handleProfilePictureSelect}
+                  disabled={isLoading}
+                />
+              )}
+            </>
           )}
           
           <div>
