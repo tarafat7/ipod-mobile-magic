@@ -50,7 +50,7 @@ const MyFive: React.FC = () => {
         setProfile(profileData);
       }
 
-      // Load songs data
+      // Load songs data - this will work for both authenticated and unauthenticated users
       console.log('Loading songs for user:', userId);
       const { data: songsData, error: songsError } = await supabase
         .from('user_five_songs')
