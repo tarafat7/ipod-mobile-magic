@@ -30,9 +30,9 @@ const SignIn = () => {
     checkAuth();
   }, []);
 
-  const handleSubmit = async (formData: { fullName: string; username: string; email: string; password: string }, profilePicture?: File | null) => {
+  const handleSubmit = async (formData: { fullName: string; username: string; email: string; password: string }) => {
     setUserEmail(formData.email);
-    const result = await signUp(formData, profilePicture);
+    const result = await signUp(formData);
     
     if (result) {
       if (result.needsConfirmation) {

@@ -15,55 +15,28 @@ export const useSignUp = () => {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const uploadProfilePicture = async (file: File, userId: string): Promise<string | null> => {
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${userId}/profile.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('profile-pictures')
-        .upload(fileName, file, {
-          upsert: true
-        });
-
-      if (uploadError) {
-        console.error('Profile picture upload error:', uploadError);
-        return null;
-      }
-
-      const { data } = supabase.storage
-        .from('profile-pictures')
-        .getPublicUrl(fileName);
-
-      return data.publicUrl;
-    } catch (error) {
-      console.error('Unexpected profile picture upload error:', error);
-      return null;
-    }
-  };
-
   const checkUsernameAvailability = async (username: string): Promise<boolean> => {
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('username')
         .eq('username', username)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code === 'PGRST116') {
-        // No rows found, username is available
-        return true;
+      if (error) {
+        console.error('Error checking username availability:', error);
+        return false;
       }
 
-      // Username exists
-      return false;
+      // If data is null, username is available
+      return data === null;
     } catch (error) {
-      console.error('Error checking username availability:', error);
+      console.error('Unexpected error checking username availability:', error);
       return false;
     }
   };
 
-  const signUp = async (formData: FormData, profilePicture?: File | null) => {
+  const signUp = async (formData: FormData) => {
     setIsLoading(true);
     setError(null);
     
@@ -71,8 +44,7 @@ export const useSignUp = () => {
       console.log('Starting signup process with data:', { 
         email: formData.email, 
         fullName: formData.fullName,
-        username: formData.username,
-        hasProfilePicture: !!profilePicture
+        username: formData.username
       });
 
       // Check if username is available
@@ -96,7 +68,7 @@ export const useSignUp = () => {
         username: formData.username
       };
 
-      // Sign up with Supabase first
+      // Sign up with Supabase
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -116,25 +88,6 @@ export const useSignUp = () => {
 
       if (data.user) {
         console.log('User created successfully:', data.user.id);
-        
-        // Upload profile picture if provided
-        let profilePictureUrl = null;
-        if (profilePicture) {
-          console.log('Uploading profile picture...');
-          profilePictureUrl = await uploadProfilePicture(profilePicture, data.user.id);
-          
-          if (profilePictureUrl) {
-            console.log('Profile picture uploaded successfully:', profilePictureUrl);
-            
-            // Update the user metadata with profile picture URL
-            await supabase.auth.updateUser({
-              data: {
-                ...userMetadata,
-                profile_picture_url: profilePictureUrl
-              }
-            });
-          }
-        }
         
         // Check if the user needs email confirmation
         if (!data.session) {
