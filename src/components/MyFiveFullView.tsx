@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useMyFiveSongs } from './MyFive/useMyFiveSongs';
 import MyFiveHeader from './MyFive/MyFiveHeader';
 import SongList from './MyFive/SongList';
@@ -35,22 +35,6 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
     sharedUserSongs,
     viewingFriendProfile
   });
-
-  // Listen for song selection events from the center button
-  useEffect(() => {
-    const handleSongSelect = (event: CustomEvent) => {
-      const { songIndex } = event.detail;
-      if (songs[songIndex]) {
-        window.open(songs[songIndex].spotifyUrl, '_blank');
-      }
-    };
-
-    window.addEventListener('myFiveSongSelect', handleSongSelect as EventListener);
-    
-    return () => {
-      window.removeEventListener('myFiveSongSelect', handleSongSelect as EventListener);
-    };
-  }, [songs]);
 
   const displayName = (viewingFriendProfile || sharedUserProfile) ? 
     (viewingFriendProfile?.full_name || sharedUserProfile?.full_name) : 'My';
