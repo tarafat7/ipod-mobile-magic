@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Music, ExternalLink } from 'lucide-react';
@@ -68,10 +69,15 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
   }, []);
 
   const loadMyFiveSongs = useCallback(async () => {
-    // CRITICAL FIX: Never load user's own songs when viewing a friend's profile
+    // CRITICAL: Never load user's own songs when viewing a friend's profile
     if (viewingFriendProfile) {
-      console.log('Skipping loadMyFiveSongs - viewing friend profile:', viewingFriendProfile);
-      setIsLoading(false);
+      console.log('BLOCKED: Not loading own songs because viewing friend profile:', viewingFriendProfile);
+      return;
+    }
+
+    // Also don't load if we're in a shared view context
+    if (isSharedView && sharedUserProfile) {
+      console.log('BLOCKED: Not loading own songs because in shared view');
       return;
     }
 
@@ -88,6 +94,8 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
         setIsLoading(false);
         return;
       }
+
+      console.log('Loading My Five songs for current user:', user.id);
 
       const { data, error } = await supabase
         .from('user_five_songs')
@@ -130,63 +138,48 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [extractSpotifyTrackId, fetchSpotifyTrackInfo, formatDate, loadedUserId, viewingFriendProfile]);
+  }, [extractSpotifyTrackId, fetchSpotifyTrackInfo, formatDate, loadedUserId, viewingFriendProfile, isSharedView, sharedUserProfile]);
 
-  // Main effect - handles different view states
+  // Main effect - determine which songs to display
   useEffect(() => {
-    console.log('MyFiveFullView main effect:', {
+    console.log('MyFiveFullView main effect triggered:', {
+      viewingFriendProfile: !!viewingFriendProfile,
       isSharedView,
       hasSharedProfile: !!sharedUserProfile,
-      hasViewingFriendProfile: !!viewingFriendProfile,
       sharedSongsCount: sharedUserSongs.length
     });
 
     if (viewingFriendProfile) {
       // When viewing a friend's profile, use the friend's songs directly
-      console.log('Using friend songs data:', sharedUserSongs);
-      setSongs(sharedUserSongs);
+      console.log('Using friend songs data:', sharedUserSongs.length, 'songs');
+      setSongs([...sharedUserSongs]); // Create a new array to avoid reference issues
       setIsLoading(false);
-      setLoadedUserId(''); // Reset for friend view
+      setLoadedUserId('friend-view'); // Mark as friend view
     } else if (isSharedView && sharedUserProfile) {
       // For public shared views (URL sharing)
-      console.log('Using shared user songs data:', sharedUserSongs);
-      setSongs(sharedUserSongs);
+      console.log('Using shared user songs data:', sharedUserSongs.length, 'songs');
+      setSongs([...sharedUserSongs]);
       setIsLoading(false);
-      setLoadedUserId('');
+      setLoadedUserId('shared-view');
     } else {
       // For authenticated users viewing their own songs
+      console.log('Loading own songs');
       loadMyFiveSongs();
     }
-  }, [isSharedView, viewingFriendProfile, sharedUserSongs.length]); // Critical dependencies only
+  }, [viewingFriendProfile, isSharedView, sharedUserProfile]); // Only these core dependencies
 
-  // CRITICAL FIX: Only run the effect when the view type changes or initial load
+  // Update shared songs when they change (but only if we're in the right context)
   useEffect(() => {
-    console.log('MyFiveFullView useEffect triggered:', {
-      isSharedView,
-      hasSharedProfile: !!sharedUserProfile,
-      sharedSongsCount: sharedUserSongs.length,
-      currentSongsCount: songs.length
-    });
-
-    if (isSharedView) {
-      // For shared views, use the provided shared songs data directly
-      console.log('Using shared songs data:', sharedUserSongs);
-      setSongs(sharedUserSongs);
-      setIsLoading(false);
-      setLoadedUserId(''); // Reset loaded user ID for shared views
-    } else {
-      // For authenticated users viewing their own songs
-      loadMyFiveSongs();
+    if ((viewingFriendProfile || (isSharedView && sharedUserProfile)) && sharedUserSongs.length > 0) {
+      const currentSongsLength = songs.length;
+      const newSongsLength = sharedUserSongs.length;
+      
+      if (currentSongsLength !== newSongsLength) {
+        console.log('Updating songs due to length change:', currentSongsLength, '->', newSongsLength);
+        setSongs([...sharedUserSongs]);
+      }
     }
-  }, [isSharedView]); // CRITICAL: Only depend on isSharedView, not sharedUserSongs
-
-  // CRITICAL FIX: Update songs only when sharedUserSongs actually changes (not on every scroll)
-  useEffect(() => {
-    if (isSharedView && sharedUserSongs.length > 0 && songs.length !== sharedUserSongs.length) {
-      console.log('Updating shared songs data due to length change:', sharedUserSongs);
-      setSongs(sharedUserSongs);
-    }
-  }, [isSharedView, sharedUserSongs.length]); // Only depend on length, not the array itself
+  }, [sharedUserSongs.length, viewingFriendProfile, isSharedView, sharedUserProfile]); // Only depend on length
 
   // Listen for song selection events from the center button
   useEffect(() => {
