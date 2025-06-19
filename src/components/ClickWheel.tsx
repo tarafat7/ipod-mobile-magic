@@ -1,5 +1,4 @@
 
-
 import React, { useRef } from 'react';
 import { SkipForward, SkipBack } from 'lucide-react';
 
@@ -45,15 +44,59 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCe
   const handleMenuTouch = (e: React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Menu button touched on mobile - immediate response');
+    console.log('Menu button touched - IMMEDIATE RESPONSE');
+    onMenuClick();
+  };
+
+  const handleMenuTouchStart = (e: React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Menu button touch started');
+    // Add visual feedback immediately
+    const target = e.currentTarget as HTMLElement;
+    target.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';
+    target.style.transform = 'scale(0.95)';
+  };
+
+  const handleMenuTouchEnd = (e: React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Menu button touch ended - TRIGGERING MENU');
+    
+    // Reset visual feedback
+    const target = e.currentTarget as HTMLElement;
+    target.style.backgroundColor = '';
+    target.style.transform = '';
+    
+    // Trigger the menu action
     onMenuClick();
   };
 
   const handleMenuClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Menu button clicked - immediate response');
+    console.log('Menu button clicked - IMMEDIATE RESPONSE');
     onMenuClick();
+  };
+
+  const handleMenuMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Menu button mouse down');
+    // Add visual feedback
+    const target = e.currentTarget as HTMLElement;
+    target.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';
+    target.style.transform = 'scale(0.95)';
+  };
+
+  const handleMenuMouseUp = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Menu button mouse up');
+    // Reset visual feedback
+    const target = e.currentTarget as HTMLElement;
+    target.style.backgroundColor = '';
+    target.style.transform = '';
   };
 
   return (
@@ -68,16 +111,23 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCe
         onTouchEnd={handleTouchEnd}
       >
         
-        {/* MENU Text - Much more responsive */}
-        <div className="absolute top-8 left-1/2 transform -translate-x-1/2">
+        {/* MENU Button - Much more responsive with larger touch area */}
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 -translate-y-2">
           <button 
-            className="text-gray-700 hover:text-gray-900 transition-colors font-medium text-sm tracking-wider touch-manipulation bg-transparent border-none p-2 -m-2 active:scale-95 active:bg-gray-200 rounded"
-            onClick={handleMenuClick}
-            onTouchStart={handleMenuTouch}
+            className="text-gray-700 hover:text-gray-900 transition-all duration-100 font-medium text-sm tracking-wider touch-manipulation bg-transparent border-none rounded-lg active:scale-95"
             style={{ 
               WebkitTapHighlightColor: 'transparent',
-              touchAction: 'manipulation'
+              touchAction: 'manipulation',
+              padding: '12px 16px',
+              margin: '-8px',
+              minWidth: '60px',
+              minHeight: '40px'
             }}
+            onClick={handleMenuClick}
+            onMouseDown={handleMenuMouseDown}
+            onMouseUp={handleMenuMouseUp}
+            onTouchStart={handleMenuTouchStart}
+            onTouchEnd={handleMenuTouchEnd}
           >
             MENU
           </button>
@@ -116,4 +166,3 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCe
 };
 
 export default ClickWheel;
-
