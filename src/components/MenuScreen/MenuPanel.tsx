@@ -27,6 +27,7 @@ interface MenuPanelProps {
 }
 
 const settingsMenuItems = [
+  'About',
   'Edit Account',
   'Product Feedback',
   'Logout',
@@ -133,6 +134,8 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
       onSettingsItemClick(index);
       if (item === 'Product Feedback') {
         handleProductFeedback();
+      } else if (item === 'About') {
+        // About is just for display, no action needed
       } else {
         onSettingsAction(item);
       }

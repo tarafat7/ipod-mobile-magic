@@ -151,7 +151,7 @@ export const useIPodNavigation = (props: NavigationProps) => {
         
         setSelectedFriendsItem(newSelection);
       } else if (isInSettingsView) {
-        const settingsItemsCount = 4; // Updated from 6 to 4 (removed Share Profile and Edit My Five)
+        const settingsItemsCount = 5; // Updated from 4 to 5 (added About)
         const newSelection = isClockwise 
           ? (selectedSettingsItem + 1) % settingsItemsCount
           : (selectedSettingsItem - 1 + settingsItemsCount) % settingsItemsCount;

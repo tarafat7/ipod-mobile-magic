@@ -95,6 +95,22 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
   }
 
   if (isInSettingsView) {
+    // Show about text when hovering over "About"
+    if (hoveredSettingsItem === 'About') {
+      return (
+        <div className="w-1/2 bg-gray-50">
+          <div className="h-full flex flex-col justify-center p-6 text-center">
+            <h3 className="font-bold text-lg mb-4">About FivePod</h3>
+            <p className="text-sm text-gray-700 leading-relaxed text-left">
+              FivePod is a small experiment in sharing music the way we used to. It's meant to feel quiet and low-pressure, like handing someone your iPod and saying "just listen." There are no profiles to perfect and nothing to perform. Just five songs that say what you might not feel like putting into words. I built it to feel a little like the early 2000s, a way to check in with people without needing to say much at all.
+              <br /><br />
+              I hope you enjoy it.
+            </p>
+          </div>
+        </div>
+      );
+    }
+    
     // Show account preview when hovering over "Edit Account"
     if (hoveredSettingsItem === 'Edit Account') {
       return (
