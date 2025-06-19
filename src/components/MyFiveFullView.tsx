@@ -52,7 +52,7 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
   const headerDisplayName = isViewingOthers ? `${displayName}'s` : displayName;
 
   return (
-    <div className="h-full bg-white">
+    <div className="h-full bg-white relative">
       <MyFiveHeader displayName={headerDisplayName} />
       <SongList 
         songs={songs} 
