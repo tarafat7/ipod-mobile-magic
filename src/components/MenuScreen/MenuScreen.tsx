@@ -23,6 +23,9 @@ interface MenuScreenProps {
   isSharedView?: boolean;
   sharedUserProfile?: {full_name: string} | null;
   sharedUserSongs?: SpotifyTrackInfo[];
+  isInFriendsView?: boolean;
+  selectedFriendsItem?: number;
+  onFriendsItemChange?: (index: number) => void;
 }
 
 const MenuScreen: React.FC<MenuScreenProps> = ({ 
@@ -35,11 +38,15 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
   onMyFiveSongChange,
   isSharedView = false,
   sharedUserProfile = null,
-  sharedUserSongs = []
+  sharedUserSongs = [],
+  isInFriendsView = false,
+  selectedFriendsItem = 0,
+  onFriendsItemChange
 }) => {
   const [menuItems, setMenuItems] = useState<string[]>([]);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [hoveredSettingsItem, setHoveredSettingsItem] = useState<string | null>(null);
+  const [hoveredFriendsItem, setHoveredFriendsItem] = useState<string | null>(null);
 
   useEffect(() => {
     const loadMenuItems = async () => {
@@ -89,6 +96,10 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
     console.log('Settings clicked');
   };
 
+  const handleFriendsClick = () => {
+    console.log('Friends clicked');
+  };
+
   const handleMenuItemClick = (index: number) => {
     console.log('Menu item clicked:', index);
   };
@@ -97,8 +108,18 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
     onSettingsItemChange(index);
   };
 
+  const handleFriendsItemClick = (index: number) => {
+    if (onFriendsItemChange) {
+      onFriendsItemChange(index);
+    }
+  };
+
   const handleSettingsItemHover = (item: string | null) => {
     setHoveredSettingsItem(item);
+  };
+
+  const handleFriendsItemHover = (item: string | null) => {
+    setHoveredFriendsItem(item);
   };
 
   const handleShareProfile = async () => {
@@ -158,6 +179,16 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
     }
   };
 
+  const handleFriendsAction = async (action: string) => {
+    switch (action) {
+      case 'Add a friend':
+        window.location.href = '/search-friends';
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
     <div className="h-full flex">
       {!isInMyFiveView && (
@@ -173,6 +204,12 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
           onSettingsItemClick={handleSettingsItemClick}
           onSettingsItemHover={handleSettingsItemHover}
           isSharedView={isSharedView}
+          isInFriendsView={isInFriendsView}
+          selectedFriendsItem={selectedFriendsItem}
+          onFriendsClick={handleFriendsClick}
+          onFriendsAction={handleFriendsAction}
+          onFriendsItemClick={handleFriendsItemClick}
+          onFriendsItemHover={handleFriendsItemHover}
         />
       )}
       <ContentPanel
@@ -186,6 +223,9 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
         isSharedView={isSharedView}
         sharedUserProfile={sharedUserProfile}
         sharedUserSongs={sharedUserSongs}
+        isInFriendsView={isInFriendsView}
+        selectedFriendsItem={selectedFriendsItem}
+        hoveredFriendsItem={hoveredFriendsItem}
       />
     </div>
   );

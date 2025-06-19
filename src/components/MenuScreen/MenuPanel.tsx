@@ -13,6 +13,12 @@ interface MenuPanelProps {
   onSettingsItemClick: (index: number) => void;
   onSettingsItemHover?: (item: string | null) => void;
   isSharedView?: boolean;
+  isInFriendsView?: boolean;
+  selectedFriendsItem?: number;
+  onFriendsClick?: () => void;
+  onFriendsAction?: (action: string) => void;
+  onFriendsItemClick?: (index: number) => void;
+  onFriendsItemHover?: (item: string | null) => void;
 }
 
 const settingsMenuItems = [
@@ -21,6 +27,12 @@ const settingsMenuItems = [
   'Edit My Five',
   'Logout',
   'Delete Account'
+];
+
+const friendsMenuItems = [
+  'Add a friend',
+  'My Friends',
+  'Friend Requests'
 ];
 
 const MenuPanel: React.FC<MenuPanelProps> = ({
@@ -34,17 +46,31 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   onMenuItemClick,
   onSettingsItemClick,
   onSettingsItemHover,
-  isSharedView = false
+  isSharedView = false,
+  isInFriendsView = false,
+  selectedFriendsItem = 0,
+  onFriendsClick,
+  onFriendsAction,
+  onFriendsItemClick,
+  onFriendsItemHover
 }) => {
   const [touchedItem, setTouchedItem] = useState<string | null>(null);
   
   // Modify menu items for shared view
   const displayMenuItems = isSharedView && !isSignedIn 
     ? ['Sign In', ...menuItems.filter(item => item !== 'Sign In')] 
-    : (isInSettingsView ? settingsMenuItems : menuItems);
+    : menuItems;
   
-  const currentMenuItems = displayMenuItems;
-  const currentSelectedIndex = isInSettingsView ? selectedSettingsItem : selectedMenuItem;
+  let currentMenuItems = displayMenuItems;
+  let currentSelectedIndex = selectedMenuItem;
+  
+  if (isInSettingsView) {
+    currentMenuItems = settingsMenuItems;
+    currentSelectedIndex = selectedSettingsItem;
+  } else if (isInFriendsView) {
+    currentMenuItems = friendsMenuItems;
+    currentSelectedIndex = selectedFriendsItem;
+  }
 
   const handleShareProfile = async () => {
     try {
@@ -76,6 +102,9 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
     if (onSettingsItemHover) {
       onSettingsItemHover(null);
     }
+    if (onFriendsItemHover) {
+      onFriendsItemHover(null);
+    }
     
     if (isInSettingsView) {
       onSettingsItemClick(index);
@@ -86,10 +115,19 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
       } else {
         onSettingsAction(item);
       }
+    } else if (isInFriendsView) {
+      if (onFriendsItemClick) {
+        onFriendsItemClick(index);
+      }
+      if (onFriendsAction) {
+        onFriendsAction(item);
+      }
     } else {
       onMenuItemClick(index);
       if (item === 'Settings' && isSignedIn) {
         onSettingsClick();
+      } else if (item === 'Friends' && isSignedIn && onFriendsClick) {
+        onFriendsClick();
       }
     }
   };
@@ -97,12 +135,16 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   const handleItemHover = (item: string) => {
     if (isInSettingsView && onSettingsItemHover) {
       onSettingsItemHover(item);
+    } else if (isInFriendsView && onFriendsItemHover) {
+      onFriendsItemHover(item);
     }
   };
 
   const handleItemLeave = () => {
     if (isInSettingsView && onSettingsItemHover && !touchedItem) {
       onSettingsItemHover(null);
+    } else if (isInFriendsView && onFriendsItemHover && !touchedItem) {
+      onFriendsItemHover(null);
     }
   };
 
@@ -110,6 +152,9 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
     if (isInSettingsView && onSettingsItemHover) {
       setTouchedItem(item);
       onSettingsItemHover(item);
+    } else if (isInFriendsView && onFriendsItemHover) {
+      setTouchedItem(item);
+      onFriendsItemHover(item);
     }
   };
 
@@ -119,16 +164,24 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
       setTouchedItem(null);
       if (isInSettingsView && onSettingsItemHover) {
         onSettingsItemHover(null);
+      } else if (isInFriendsView && onFriendsItemHover) {
+        onFriendsItemHover(null);
       }
     }, 100);
   };
 
+  const getHeaderTitle = () => {
+    if (isInSettingsView) return 'Settings';
+    if (isInFriendsView) return 'Friends';
+    return 'FivePod';
+  };
+
   return (
     <div className={`w-1/2 bg-white border-r border-gray-300 transition-transform duration-300 relative ${
-      isInSettingsView ? 'transform translate-x-0' : 'transform translate-x-0'
+      (isInSettingsView || isInFriendsView) ? 'transform translate-x-0' : 'transform translate-x-0'
     }`}>
       {/* Battery indicator - only show in main menu */}
-      {!isInSettingsView && (
+      {!isInSettingsView && !isInFriendsView && (
         <div className="absolute top-2 right-2">
           <div className="w-6 h-3 bg-green-500 rounded-sm"></div>
         </div>
@@ -136,9 +189,9 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
       
       <div className="p-2">
         <div className="flex items-center justify-between mb-3 text-xs">
-          <span className="font-bold">{isInSettingsView ? 'Settings' : 'FivePod'}</span>
-          {/* Battery indicator for Settings view */}
-          {isInSettingsView && (
+          <span className="font-bold">{getHeaderTitle()}</span>
+          {/* Battery indicator for Settings and Friends view */}
+          {(isInSettingsView || isInFriendsView) && (
             <div className="w-6 h-3 bg-green-500 rounded-sm"></div>
           )}
         </div>
@@ -162,10 +215,11 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
               onTouchEnd={handleTouchEnd}
             >
               <span>{item}</span>
-              {currentSelectedIndex === index && isInSettingsView && (
+              {currentSelectedIndex === index && (isInSettingsView || isInFriendsView) && (
                 <span className="text-white">▶</span>
               )}
-              {currentSelectedIndex === index && !isInSettingsView && item === 'Settings' && isSignedIn && (
+              {currentSelectedIndex === index && !isInSettingsView && !isInFriendsView && 
+               ((item === 'Settings' && isSignedIn) || (item === 'Friends' && isSignedIn)) && (
                 <span className="text-white">▶</span>
               )}
             </div>

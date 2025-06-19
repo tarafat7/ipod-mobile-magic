@@ -1,10 +1,11 @@
+
 import React from 'react';
 import FriendsScreen from '../FriendsScreen';
 import SettingsScreen from '../SettingsScreen';
 import MyFivePreview from '../MyFivePreview';
 import MyFiveFullView from '../MyFiveFullView';
 import AccountPreview from '../AccountPreview';
-import { User, Settings } from 'lucide-react';
+import { User, Settings, Users } from 'lucide-react';
 
 interface SpotifyTrackInfo {
   name: string;
@@ -25,6 +26,9 @@ interface ContentPanelProps {
   isSharedView?: boolean;
   sharedUserProfile?: {full_name: string} | null;
   sharedUserSongs?: SpotifyTrackInfo[];
+  isInFriendsView?: boolean;
+  selectedFriendsItem?: number;
+  hoveredFriendsItem?: string | null;
 }
 
 const ContentPanel: React.FC<ContentPanelProps> = ({
@@ -37,7 +41,10 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
   hoveredSettingsItem = null,
   isSharedView = false,
   sharedUserProfile = null,
-  sharedUserSongs = []
+  sharedUserSongs = [],
+  isInFriendsView = false,
+  selectedFriendsItem = 0,
+  hoveredFriendsItem = null
 }) => {
   if (isInMyFiveView) {
     return (
@@ -48,6 +55,21 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
           sharedUserProfile={sharedUserProfile}
           sharedUserSongs={sharedUserSongs}
         />
+      </div>
+    );
+  }
+
+  if (isInFriendsView) {
+    return (
+      <div className="w-1/2 bg-gray-50 transition-all duration-300">
+        <div className="h-full flex flex-col items-center justify-center p-4 text-center">
+          <Users size={32} className="text-gray-600 mb-3" />
+          <h3 className="font-bold text-lg mb-1">Friends</h3>
+          <p className="text-sm text-gray-600 text-center leading-tight">
+            Connect with friends<br />
+            and share music
+          </p>
+        </div>
       </div>
     );
   }
@@ -80,6 +102,18 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
   const renderContent = () => {
     switch (selectedItem) {
       case 'Friends':
+        if (isSignedIn) {
+          return (
+            <div className="h-full flex flex-col items-center justify-center p-4 text-center">
+              <Users size={32} className="text-gray-600 mb-3" />
+              <h3 className="font-bold text-lg mb-1">Friends</h3>
+              <p className="text-sm text-gray-600 text-center leading-tight">
+                Connect with friends<br />
+                and share music
+              </p>
+            </div>
+          );
+        }
         return <FriendsScreen />;
       case 'Settings':
         if (isSignedIn) {

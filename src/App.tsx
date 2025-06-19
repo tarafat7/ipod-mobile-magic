@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import SignIn from "./pages/SignIn";
 import EditMyFive from "./pages/EditMyFive";
 import MyFive from "./pages/MyFive";
+import SearchFriends from "./pages/SearchFriends";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/signin" element={<SignIn />} />
           <Route path="/edit-my-five" element={<EditMyFive />} />
           <Route path="/my-five/:userId" element={<MyFive />} />
+          <Route path="/search-friends" element={<SearchFriends />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

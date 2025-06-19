@@ -34,6 +34,9 @@ interface ScreenProps {
   isSharedView?: boolean;
   sharedUserProfile?: UserProfile | null;
   sharedUserSongs?: SpotifyTrackInfo[];
+  isInFriendsView?: boolean;
+  selectedFriendsItem?: number;
+  onFriendsItemChange?: (index: number) => void;
 }
 
 const Screen: React.FC<ScreenProps> = ({ 
@@ -50,7 +53,10 @@ const Screen: React.FC<ScreenProps> = ({
   onMyFiveSongChange,
   isSharedView = false,
   sharedUserProfile = null,
-  sharedUserSongs = []
+  sharedUserSongs = [],
+  isInFriendsView = false,
+  selectedFriendsItem = 0,
+  onFriendsItemChange
 }) => {
   const renderScreen = () => {
     switch (currentScreen) {
@@ -67,6 +73,9 @@ const Screen: React.FC<ScreenProps> = ({
             isSharedView={isSharedView}
             sharedUserProfile={sharedUserProfile}
             sharedUserSongs={sharedUserSongs}
+            isInFriendsView={isInFriendsView}
+            selectedFriendsItem={selectedFriendsItem}
+            onFriendsItemChange={onFriendsItemChange}
           />
         );
       case 'friends':
