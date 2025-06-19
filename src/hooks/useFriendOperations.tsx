@@ -63,9 +63,11 @@ export const useFriendOperations = (
 
   const loadFriendSongs = async (friendId: string, friendName: string) => {
     try {
+      console.log('=== START loadFriendSongs ===');
       console.log('Loading songs for friend:', friendId, friendName);
       
-      // Clear previous friend's data immediately
+      // Clear previous friend's data immediately and set new friend profile
+      console.log('Clearing previous friend data and setting new friend profile');
       setViewingFriendSongs([]);
       setViewingFriendProfile({ full_name: friendName });
       
@@ -82,6 +84,7 @@ export const useFriendOperations = (
       }
 
       if (data) {
+        console.log('Friend songs data found:', data);
         const songUrls = [
           data.song_1,
           data.song_2,
@@ -91,6 +94,7 @@ export const useFriendOperations = (
         ].filter(Boolean);
 
         if (songUrls.length > 0) {
+          console.log('Processing', songUrls.length, 'song URLs');
           const addedDate = formatDate(data.created_at);
           const songInfoPromises = songUrls.map(async (url) => {
             const trackId = extractSpotifyTrackId(url);
@@ -102,17 +106,22 @@ export const useFriendOperations = (
 
           const songInfos = await Promise.all(songInfoPromises);
           const validSongs = songInfos.filter((song): song is SpotifyTrackInfo => song !== null);
-          console.log('Loaded friend songs:', validSongs);
+          console.log('Successfully loaded friend songs:', validSongs.length, 'valid songs');
+          console.log('Song details:', validSongs.map(s => ({ name: s.name, artist: s.artist })));
           
-          // Only set songs if we're still viewing the same friend
-          // This prevents race conditions when switching friends quickly
+          // Set the friend's songs
           setViewingFriendSongs(validSongs);
+          console.log('=== Friend songs set successfully ===');
         } else {
+          console.log('No song URLs found for friend');
           setViewingFriendSongs([]);
         }
       } else {
+        console.log('No song data found for friend');
         setViewingFriendSongs([]);
       }
+      
+      console.log('=== END loadFriendSongs ===');
     } catch (error) {
       console.error('Error loading friend songs:', error);
       setViewingFriendSongs([]);
