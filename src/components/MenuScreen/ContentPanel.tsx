@@ -6,6 +6,7 @@ import MyFiveFullView from '../MyFiveFullView';
 import AccountPreview from '../AccountPreview';
 import FriendSongsPreview from '../FriendSongsPreview';
 import FriendsListPreview from '../FriendsListPreview';
+import AboutScreen from '../AboutScreen';
 import { User, Settings, Users, Music, Share, Info } from 'lucide-react';
 
 interface SpotifyTrackInfo {
@@ -34,6 +35,7 @@ interface ContentPanelProps {
   selectedFriendsListItem?: number;
   hoveredFriendsListItem?: any;
   friendsList?: any[];
+  isInAboutView?: boolean;
 }
 
 const ContentPanel: React.FC<ContentPanelProps> = ({
@@ -53,8 +55,13 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
   isInFriendsListView = false,
   selectedFriendsListItem = 0,
   hoveredFriendsListItem = null,
-  friendsList = []
+  friendsList = [],
+  isInAboutView = false
 }) => {
+  if (isInAboutView) {
+    return <AboutScreen />;
+  }
+
   if (isInMyFiveView) {
     return (
       <div className="w-full bg-gray-50">
