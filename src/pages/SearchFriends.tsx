@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Search, UserPlus, ArrowLeft, Check } from 'lucide-react';
@@ -67,7 +66,7 @@ const SearchFriends: React.FC = () => {
       const { data, error } = await supabase
         .from('profiles')
         .select('id, username, full_name')
-        .ilike('username', `%${searchQuery}%`)
+        .or(`username.ilike.%${searchQuery}%,full_name.ilike.%${searchQuery}%`)
         .neq('id', currentUser?.id)
         .limit(10);
 
@@ -145,7 +144,7 @@ const SearchFriends: React.FC = () => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                 <Input
                   type="text"
-                  placeholder="Search by username..."
+                  placeholder="Search by username or name..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={handleKeyPress}
@@ -202,7 +201,7 @@ const SearchFriends: React.FC = () => {
             {!searchQuery && (
               <div className="text-center py-8 text-gray-500">
                 <Search size={48} className="mx-auto mb-4 text-gray-300" />
-                <p>Search for friends by their username</p>
+                <p>Search for friends by their username or name</p>
               </div>
             )}
           </div>
