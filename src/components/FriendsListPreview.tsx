@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Music } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
@@ -92,9 +91,9 @@ const FriendsListPreview: React.FC<FriendsListPreviewProps> = ({
   }
 
   return (
-    <div className="h-full p-4 bg-gray-50">
-      <div className="mb-4">
-        <h3 className="font-bold text-lg mb-1">{selectedFriend.full_name}'s Five</h3>
+    <div className="h-full p-2 overflow-y-auto">
+      <div className="text-center mb-2">
+        <h3 className="font-bold text-sm mb-1">{selectedFriend.full_name}'s Five</h3>
       </div>
       
       {isLoading ? (
@@ -108,31 +107,31 @@ const FriendsListPreview: React.FC<FriendsListPreviewProps> = ({
           <p className="text-sm">{selectedFriend.full_name} hasn't added their five songs yet</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {friendSongs.map((song, index) => (
             <div
               key={index}
-              className="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
+              className="flex items-center space-x-2 p-1 bg-white rounded border"
               onClick={() => window.open(song.spotifyUrl, '_blank')}
             >
-              <div className="w-12 h-12 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden">
+              <div className="w-8 h-8 bg-gray-200 rounded flex-shrink-0 overflow-hidden">
                 {song.albumArt ? (
                   <img 
                     src={song.albumArt} 
                     alt={`${song.name} album art`}
-                    className="w-full h-full object-cover rounded-lg"
+                    className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-300 rounded-lg">
-                    <Music size={16} className="text-gray-500" />
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Music size={12} className="text-gray-400" />
                   </div>
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-base text-gray-900 truncate">
+                <p className="text-xs font-medium text-gray-900 truncate">
                   {song.name}
                 </p>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 truncate">
                   {song.addedDate}
                 </p>
               </div>
