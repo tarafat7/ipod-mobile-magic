@@ -1,7 +1,8 @@
 
 import { useState } from 'react';
 import { supabase } from '../integrations/supabase/client';
-import { extractSpotifyTrackId, fetchSpotifyTrackInfo, formatDate } from '../utils/spotifyUtils';
+import { searchSpotifyTracks } from '../utils/spotifySearch';
+import { extractSpotifyTrackId, formatDate } from '../utils/spotifyUtils';
 
 interface SpotifyTrackInfo {
   name: string;
@@ -19,6 +20,26 @@ export const useIPodFriends = () => {
   const [friendsList, setFriendsList] = useState<any[]>([]);
   const [viewingFriendProfile, setViewingFriendProfile] = useState<UserProfile | null>(null);
   const [viewingFriendSongs, setViewingFriendSongs] = useState<SpotifyTrackInfo[]>([]);
+
+  const fetchSpotifyTrackInfo = async (trackId: string, addedDate: string): Promise<SpotifyTrackInfo | null> => {
+    try {
+      const tracks = await searchSpotifyTracks(`track:${trackId}`);
+      const trackInfo = tracks.find(track => track.id === trackId);
+      
+      if (trackInfo) {
+        return {
+          name: trackInfo.name,
+          artist: trackInfo.artist,
+          albumArt: trackInfo.albumArt,
+          spotifyUrl: trackInfo.spotifyUrl,
+          addedDate
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching Spotify track info:', error);
+    }
+    return null;
+  };
 
   const loadFriendsList = async (currentUser: any) => {
     if (!currentUser) return;
