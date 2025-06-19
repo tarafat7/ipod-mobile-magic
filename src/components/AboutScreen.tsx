@@ -13,6 +13,15 @@ const AboutScreen: React.FC = () => {
             I hope it helps you feel a little more connected, without needing to say anything at all.
           </p>
         </div>
+        
+        {/* Centered FivePod Logo */}
+        <div className="flex justify-center mt-6">
+          <img 
+            src="/lovable-uploads/8fdb521b-7f3f-44e6-b610-90daa405530c.png" 
+            alt="FivePod Logo" 
+            className="w-16 h-16 object-contain"
+          />
+        </div>
       </div>
     </div>
   );
