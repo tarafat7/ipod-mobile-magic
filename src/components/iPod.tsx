@@ -174,8 +174,8 @@ const IPod: React.FC<IPodProps> = ({
           console.log('My Five navigation:', { currentSelection: selectedMyFiveSong, newSelection });
           setSelectedMyFiveSong(newSelection);
         } else if (isInFriendsView) {
-          // Navigate friends items
-          const friendsItemsCount = 3; // Add a friend, My Friends, Friend Requests
+          // Navigate friends items - only 2 items now
+          const friendsItemsCount = 2; // Add a friend, My Friends
           const newSelection = isClockwise 
             ? (selectedFriendsItem + 1) % friendsItemsCount
             : (selectedFriendsItem - 1 + friendsItemsCount) % friendsItemsCount;
@@ -308,7 +308,7 @@ const IPod: React.FC<IPodProps> = ({
         }
       } else if (isInFriendsView) {
         // Handle friends item selection
-        const friendsItems = ['Add a friend', 'My Friends', 'Friend Requests'];
+        const friendsItems = ['Add a friend', 'My Friends'];
         const selectedFriendsAction = friendsItems[selectedFriendsItem];
         console.log('Friends action selected:', selectedFriendsAction);
         
@@ -317,12 +317,7 @@ const IPod: React.FC<IPodProps> = ({
             window.location.href = '/search-friends';
             break;
           case 'My Friends':
-            // Handle My Friends action
-            console.log('My Friends selected');
-            break;
-          case 'Friend Requests':
-            // Handle Friend Requests action
-            console.log('Friend Requests selected');
+            window.location.href = '/my-friends';
             break;
           default:
             console.log('Friends action not implemented:', selectedFriendsAction);
