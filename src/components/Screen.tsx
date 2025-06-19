@@ -70,53 +70,41 @@ const Screen: React.FC<ScreenProps> = ({
     switch (currentScreen) {
       case 'menu':
         return (
-          <div className="animate-fade-in">
-            <MenuScreen 
-              selectedMenuItem={selectedMenuItem} 
-              selectedSettingsItem={selectedSettingsItem}
-              isInSettingsView={isInSettingsView}
-              onSettingsItemChange={onSettingsItemChange}
-              isInMyFiveView={isInMyFiveView}
-              selectedMyFiveSong={selectedMyFiveSong}
-              onMyFiveSongChange={onMyFiveSongChange}
-              isSharedView={isSharedView}
-              sharedUserProfile={sharedUserProfile}
-              sharedUserSongs={sharedUserSongs}
-              isInFriendsView={isInFriendsView}
-              selectedFriendsItem={selectedFriendsItem}
-              onFriendsItemChange={onFriendsItemChange}
-              isInFriendsListView={isInFriendsListView}
-              selectedFriendsListItem={selectedFriendsListItem}
-              onFriendsListItemChange={onFriendsListItemChange}
-              friendsList={friendsList}
-            />
-          </div>
+          <MenuScreen 
+            selectedMenuItem={selectedMenuItem} 
+            selectedSettingsItem={selectedSettingsItem}
+            isInSettingsView={isInSettingsView}
+            onSettingsItemChange={onSettingsItemChange}
+            isInMyFiveView={isInMyFiveView}
+            selectedMyFiveSong={selectedMyFiveSong}
+            onMyFiveSongChange={onMyFiveSongChange}
+            isSharedView={isSharedView}
+            sharedUserProfile={sharedUserProfile}
+            sharedUserSongs={sharedUserSongs}
+            isInFriendsView={isInFriendsView}
+            selectedFriendsItem={selectedFriendsItem}
+            onFriendsItemChange={onFriendsItemChange}
+            isInFriendsListView={isInFriendsListView}
+            selectedFriendsListItem={selectedFriendsListItem}
+            onFriendsListItemChange={onFriendsListItemChange}
+            friendsList={friendsList}
+          />
         );
       case 'friends':
-        return (
-          <div className="animate-fade-in">
-            <FriendsScreen />
-          </div>
-        );
+        return <FriendsScreen />;
       case 'settings':
-        return (
-          <div className="animate-fade-in">
-            <SettingsScreen />
-          </div>
-        );
+        return <SettingsScreen />;
       case 'music':
         return (
-          <div className="animate-fade-in">
-            <MusicScreen 
-              selectedSong={songs[selectedSong]} 
-              isPlaying={isPlaying} 
-              currentTime={currentTime} 
-            />
-          </div>
+          <MusicScreen 
+            selectedSong={songs[selectedSong]} 
+            isPlaying={isPlaying} 
+            currentTime={currentTime} 
+          />
         );
       default:
         return (
-          <div className="bg-white h-full flex items-center justify-center text-black animate-fade-in">
+          <div className="bg-white h-full flex items-center justify-center text-black">
             iPod
           </div>
         );
