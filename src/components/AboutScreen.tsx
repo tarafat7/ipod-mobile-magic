@@ -3,7 +3,7 @@ import React from 'react';
 
 const AboutScreen: React.FC = () => {
   return (
-    <div className="h-full bg-white p-4 flex flex-col justify-center">
+    <div className="h-full bg-white p-4 flex flex-col justify-center md:justify-center justify-start">
       <div className="max-w-full">
         <div className="text-sm leading-relaxed text-gray-800 space-y-3">
           <p>
