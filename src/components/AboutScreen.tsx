@@ -7,13 +7,10 @@ const AboutScreen: React.FC = () => {
       <div className="max-w-full">
         <div className="text-sm leading-relaxed text-gray-800 space-y-3">
           <p>
-            FivePod is a small experiment in sharing music the way we used to. It's meant to feel quiet and low-pressure, like handing someone your iPod and saying "just listen."
+            FivePod is a small experiment in sharing music the way we used to. It's meant to feel quiet and low-pressure, like handing someone your iPod and saying, "just listen."
           </p>
           <p>
-            There are no profiles to perfect. Just five songs that show where your head is at, without needing to put it into words.
-          </p>
-          <p>
-            I built it to feel a little like the early 2000s, a way to check in with people without needing to say much at all. I hope you enjoy it.
+            I hope it helps you feel a little more connected, without needing to say anything at all.
           </p>
         </div>
       </div>
