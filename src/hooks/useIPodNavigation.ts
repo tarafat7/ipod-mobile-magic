@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { getMenuItems } from '../data/iPodData';
 import { supabase } from '../integrations/supabase/client';
@@ -38,8 +37,6 @@ interface NavigationProps {
   setViewingFriendProfile: (profile: any) => void;
   setViewingFriendSongs: (songs: any[]) => void;
   loadFriendsList: (user: any) => void;
-  isInAboutView: boolean;
-  setIsInAboutView: (value: boolean) => void;
 }
 
 export const useIPodNavigation = (props: NavigationProps) => {
@@ -78,8 +75,6 @@ export const useIPodNavigation = (props: NavigationProps) => {
     setViewingFriendProfile,
     setViewingFriendSongs,
     loadFriendsList,
-    isInAboutView,
-    setIsInAboutView,
   } = props;
 
   useEffect(() => {
@@ -127,10 +122,7 @@ export const useIPodNavigation = (props: NavigationProps) => {
     triggerHapticFeedback();
     
     if (currentScreen === 'menu') {
-      if (isInAboutView) {
-        // No navigation needed in About view, it's just text
-        return;
-      } else if (isInMyFiveView) {
+      if (isInMyFiveView) {
         let songsCount;
         if (viewingFriendSongs.length > 0) {
           songsCount = viewingFriendSongs.length;
@@ -159,7 +151,7 @@ export const useIPodNavigation = (props: NavigationProps) => {
         
         setSelectedFriendsItem(newSelection);
       } else if (isInSettingsView) {
-        const settingsItemsCount = 5; // Updated from 4 to 5 (added About)
+        const settingsItemsCount = 4; // Updated from 6 to 4 (removed Share Profile and Edit My Five)
         const newSelection = isClockwise 
           ? (selectedSettingsItem + 1) % settingsItemsCount
           : (selectedSettingsItem - 1 + settingsItemsCount) % settingsItemsCount;
@@ -183,12 +175,6 @@ export const useIPodNavigation = (props: NavigationProps) => {
 
   const handleMenuClick = () => {
     console.log('Menu button clicked');
-    
-    if (isInAboutView) {
-      console.log('Exiting About view');
-      setIsInAboutView(false);
-      return;
-    }
     
     if (isInMyFiveView) {
       console.log('Exiting My Five view');

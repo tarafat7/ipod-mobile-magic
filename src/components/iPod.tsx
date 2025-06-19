@@ -72,19 +72,6 @@ const IPod: React.FC<IPodProps> = ({
     }
   }, [sharedUserSongs, state.isSharedView]);
 
-  // Add effect to listen for About view events
-  useEffect(() => {
-    const handleOpenAboutView = () => {
-      state.setIsInAboutView(true);
-    };
-
-    window.addEventListener('openAboutView', handleOpenAboutView);
-    
-    return () => {
-      window.removeEventListener('openAboutView', handleOpenAboutView);
-    };
-  }, []);
-
   const handleWheelMove = (e: React.MouseEvent) => {
     const wheelElement = e.currentTarget as HTMLElement;
     const rect = wheelElement.getBoundingClientRect();
@@ -288,7 +275,6 @@ const IPod: React.FC<IPodProps> = ({
             selectedFriendsListItem={state.selectedFriendsListItem}
             onFriendsListItemChange={handleFriendsListItemChange}
             friendsList={friends.friendsList}
-            isInAboutView={state.isInAboutView}
           />
 
           <div className="flex-1 flex items-center justify-center md:items-center" style={{ alignItems: 'center', paddingBottom: '2rem' }}>

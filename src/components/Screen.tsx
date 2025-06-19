@@ -1,3 +1,4 @@
+
 import React from 'react';
 import MenuScreen from './MenuScreen/MenuScreen';
 import MusicScreen from './MusicScreen';
@@ -40,7 +41,6 @@ interface ScreenProps {
   selectedFriendsListItem?: number;
   onFriendsListItemChange?: (index: number) => void;
   friendsList?: any[];
-  isInAboutView?: boolean;
 }
 
 const Screen: React.FC<ScreenProps> = ({ 
@@ -64,8 +64,7 @@ const Screen: React.FC<ScreenProps> = ({
   isInFriendsListView = false,
   selectedFriendsListItem = 0,
   onFriendsListItemChange,
-  friendsList = [],
-  isInAboutView = false
+  friendsList = []
 }) => {
   const renderScreen = () => {
     switch (currentScreen) {
@@ -89,7 +88,6 @@ const Screen: React.FC<ScreenProps> = ({
             selectedFriendsListItem={selectedFriendsListItem}
             onFriendsListItemChange={onFriendsListItemChange}
             friendsList={friendsList}
-            isInAboutView={isInAboutView}
           />
         );
       case 'friends':

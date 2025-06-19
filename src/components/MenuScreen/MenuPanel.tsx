@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings } from 'lucide-react';
+import { supabase } from '../../integrations/supabase/client';
 
 interface MenuPanelProps {
   menuItems: string[];
@@ -8,23 +8,35 @@ interface MenuPanelProps {
   isSignedIn: boolean;
   selectedSettingsItem: number;
   onSettingsClick: () => void;
-  onSettingsAction: (action: string) => Promise<void>;
+  onSettingsAction: (action: string) => void;
   onMenuItemClick: (index: number) => void;
   onSettingsItemClick: (index: number) => void;
-  onSettingsItemHover: (item: string | null) => void;
-  isSharedView: boolean;
-  isInFriendsView: boolean;
-  selectedFriendsItem: number;
-  onFriendsClick: () => void;
-  onFriendsAction: (action: string) => Promise<void>;
-  onFriendsItemClick: (index: number) => void;
-  onFriendsItemHover: (item: string | null) => void;
-  isInFriendsListView: boolean;
-  selectedFriendsListItem: number;
-  onFriendsListItemClick: (index: number) => void;
-  onFriendsListItemHover: (friend: any) => void;
-  friendsList: any[];
+  onSettingsItemHover?: (item: string | null) => void;
+  isSharedView?: boolean;
+  isInFriendsView?: boolean;
+  selectedFriendsItem?: number;
+  onFriendsClick?: () => void;
+  onFriendsAction?: (action: string) => void;
+  onFriendsItemClick?: (index: number) => void;
+  onFriendsItemHover?: (item: string | null) => void;
+  isInFriendsListView?: boolean;
+  selectedFriendsListItem?: number;
+  onFriendsListItemClick?: (index: number) => void;
+  onFriendsListItemHover?: (friend: any) => void;
+  friendsList?: any[];
 }
+
+const settingsMenuItems = [
+  'Edit Account',
+  'Product Feedback',
+  'Logout',
+  'Delete Account'
+];
+
+const friendsMenuItems = [
+  'Add a friend',
+  'My Friends'
+];
 
 const MenuPanel: React.FC<MenuPanelProps> = ({
   menuItems,
@@ -37,144 +49,216 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   onMenuItemClick,
   onSettingsItemClick,
   onSettingsItemHover,
-  isSharedView,
-  isInFriendsView,
-  selectedFriendsItem,
+  isSharedView = false,
+  isInFriendsView = false,
+  selectedFriendsItem = 0,
   onFriendsClick,
   onFriendsAction,
   onFriendsItemClick,
   onFriendsItemHover,
-  isInFriendsListView,
-  selectedFriendsListItem,
+  isInFriendsListView = false,
+  selectedFriendsListItem = 0,
   onFriendsListItemClick,
   onFriendsListItemHover,
-  friendsList
+  friendsList = []
 }) => {
   const [touchedItem, setTouchedItem] = useState<string | null>(null);
+  
+  // Modify menu items for shared view
+  const displayMenuItems = isSharedView && !isSignedIn 
+    ? ['Sign In', ...menuItems.filter(item => item !== 'Sign In')] 
+    : menuItems;
+  
+  let currentMenuItems = displayMenuItems;
+  let currentSelectedIndex = selectedMenuItem;
+  
+  if (isInFriendsListView) {
+    // Show friends list
+    currentMenuItems = friendsList.map(friend => friend.full_name || 'Unknown User');
+    currentSelectedIndex = selectedFriendsListItem;
+  } else if (isInSettingsView) {
+    currentMenuItems = settingsMenuItems;
+    currentSelectedIndex = selectedSettingsItem;
+  } else if (isInFriendsView) {
+    currentMenuItems = friendsMenuItems;
+    currentSelectedIndex = selectedFriendsItem;
+  }
+
+  const handleShareProfile = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const shareUrl = `${window.location.origin}/my-five/${user.id}`;
+      const shareData = {
+        title: 'Check out my Five!',
+        text: 'Here are the 5 songs on repeat for me right now',
+        url: shareUrl
+      };
+
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(shareUrl);
+        alert('Link copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Error sharing profile:', error);
+    }
+  };
 
   const handleProductFeedback = () => {
     window.open('https://app.formbricks.com/s/cmc2iwfd7d33uu2017tjqmhji', '_blank');
   };
 
-  const handleLogout = async () => {
-    await onSettingsAction('Logout');
-  };
-
-  const handleDeleteAccount = async () => {
-    await onSettingsAction('Delete Account');
-  };
-
   const handleItemClick = (item: string, index: number) => {
     // Clear any touched state first
     setTouchedItem(null);
+    if (onSettingsItemHover) {
+      onSettingsItemHover(null);
+    }
+    if (onFriendsItemHover) {
+      onFriendsItemHover(null);
+    }
+    if (onFriendsListItemHover) {
+      onFriendsListItemHover(null);
+    }
     
     if (isInFriendsListView) {
-      onFriendsListItemClick(index);
-      if (onFriendsListItemHover) {
-        onFriendsListItemHover(friendsList[index]);
-      }
-    } else if (isInFriendsView) {
-      onFriendsItemClick(index);
-      if (onFriendsItemHover) {
-        onFriendsItemHover(item);
-      }
-      if (item === 'Add a friend') {
-        onFriendsAction(item);
+      if (onFriendsListItemClick) {
+        onFriendsListItemClick(index);
       }
     } else if (isInSettingsView) {
       onSettingsItemClick(index);
-      
-      // Handle settings actions directly here
-      if (item === 'About') {
-        // Trigger About full screen view
-        const event = new CustomEvent('openAboutView');
-        window.dispatchEvent(event);
-      } else if (item === 'Edit Account') {
-        window.location.href = '/signin?mode=edit';
-      } else if (item === 'Product Feedback') {
+      if (item === 'Product Feedback') {
         handleProductFeedback();
-      } else if (item === 'Logout') {
-        handleLogout();
-      } else if (item === 'Delete Account') {
-        handleDeleteAccount();
+      } else {
+        onSettingsAction(item);
       }
     } else if (isInFriendsView) {
       if (onFriendsItemClick) {
         onFriendsItemClick(index);
       }
-      if (onFriendsItemHover) {
-        onFriendsItemHover(item);
+      if (onFriendsAction) {
+        onFriendsAction(item);
       }
     } else {
       onMenuItemClick(index);
+      if (item === 'Settings' && isSignedIn) {
+        onSettingsClick();
+      } else if (item === 'Friends' && isSignedIn && onFriendsClick) {
+        onFriendsClick();
+      } else if (item === 'Edit My Five') {
+        window.location.href = '/edit-my-five';
+      } else if (item === 'Share Profile') {
+        handleShareProfile();
+      }
     }
   };
 
-  const currentMenuItems = isInSettingsView
-    ? ['Edit Account', 'Product Feedback', 'About', 'Logout', 'Delete Account']
-    : isInFriendsView
-    ? ['Add a friend', 'My Friends']
-    : menuItems;
-  const currentSelectedIndex = isInSettingsView
-    ? selectedSettingsItem
-    : isInFriendsView
-    ? selectedFriendsItem
-    : selectedMenuItem;
+  const handleItemHover = (item: string, index: number) => {
+    if (isInFriendsListView && onFriendsListItemHover) {
+      onFriendsListItemHover(friendsList[index]);
+    } else if (isInSettingsView && onSettingsItemHover) {
+      onSettingsItemHover(item);
+    } else if (isInFriendsView && onFriendsItemHover) {
+      onFriendsItemHover(item);
+    }
+  };
+
+  const handleItemLeave = () => {
+    if (isInFriendsListView && onFriendsListItemHover && !touchedItem) {
+      onFriendsListItemHover(null);
+    } else if (isInSettingsView && onSettingsItemHover && !touchedItem) {
+      onSettingsItemHover(null);
+    } else if (isInFriendsView && onFriendsItemHover && !touchedItem) {
+      onFriendsItemHover(null);
+    }
+  };
+
+  const handleTouchStart = (item: string, index: number) => {
+    if (isInFriendsListView && onFriendsListItemHover) {
+      setTouchedItem(item);
+      onFriendsListItemHover(friendsList[index]);
+    } else if (isInSettingsView && onSettingsItemHover) {
+      setTouchedItem(item);
+      onSettingsItemHover(item);
+    } else if (isInFriendsView && onFriendsItemHover) {
+      setTouchedItem(item);
+      onFriendsItemHover(item);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    // Small delay to allow preview to be seen before clearing
+    setTimeout(() => {
+      setTouchedItem(null);
+      if (isInFriendsListView && onFriendsListItemHover) {
+        onFriendsListItemHover(null);
+      } else if (isInSettingsView && onSettingsItemHover) {
+        onSettingsItemHover(null);
+      } else if (isInFriendsView && onFriendsItemHover) {
+        onFriendsItemHover(null);
+      }
+    }, 100);
+  };
+
+  const getHeaderTitle = () => {
+    if (isInFriendsListView) return 'My Friends';
+    if (isInSettingsView) return 'Settings';
+    if (isInFriendsView) return 'Friends';
+    return 'FivePod';
+  };
 
   return (
-    <div className={`w-1/2 bg-white border-r border-gray-300 transition-all duration-300 relative`}>
-      <div className="p-2">
-        <div className="flex items-center justify-between mb-3 text-xs">
-          <span className="font-bold">{isInSettingsView ? 'Settings' : isInFriendsView ? 'Friends' : 'FivePod'}</span>
+    <div className={`w-1/2 bg-white border-r border-gray-300 transition-transform duration-300 relative ${
+      (isInSettingsView || isInFriendsView || isInFriendsListView) ? 'transform translate-x-0' : 'transform translate-x-0'
+    }`}>
+      {/* Battery indicator - only show in main menu */}
+      {!isInSettingsView && !isInFriendsView && !isInFriendsListView && (
+        <div className="absolute top-2 right-2">
           <div className="w-6 h-3 bg-green-500 rounded-sm"></div>
         </div>
+      )}
+      
+      <div className="p-2">
+        <div className="flex items-center justify-between mb-3 text-xs">
+          <span className="font-bold">{getHeaderTitle()}</span>
+          {/* Battery indicator for Settings, Friends, and Friends List view */}
+          {(isInSettingsView || isInFriendsView || isInFriendsListView) && (
+            <div className="w-6 h-3 bg-green-500 rounded-sm"></div>
+          )}
+        </div>
+        
         <div className="space-y-0">
           {currentMenuItems.map((item, index) => (
             <div
               key={item}
               className={`px-2 py-1 text-sm flex items-center justify-between cursor-pointer ${
                 currentSelectedIndex === index
-                  ? 'bg-blue-500 text-white'
+                  ? 'text-white'
                   : 'text-black hover:bg-gray-100'
               } ${item === 'Delete Account' ? 'text-red-600' : ''}`}
+              style={{
+                backgroundColor: currentSelectedIndex === index ? '#3398d8' : 'transparent'
+              }}
               onClick={() => handleItemClick(item, index)}
-              onMouseEnter={() => {
-                setTouchedItem(item);
-                if (isInSettingsView) {
-                  onSettingsItemHover(item);
-                } else if (isInFriendsView) {
-                  onFriendsItemHover(item);
-                }
-              }}
-              onMouseLeave={() => {
-                setTouchedItem(null);
-                if (isInSettingsView) {
-                  onSettingsItemHover(null);
-                } else if (isInFriendsView) {
-                  onFriendsItemHover(null);
-                }
-              }}
+              onMouseEnter={() => handleItemHover(item, index)}
+              onMouseLeave={handleItemLeave}
+              onTouchStart={() => handleTouchStart(item, index)}
+              onTouchEnd={handleTouchEnd}
             >
               <span>{item}</span>
-              {currentSelectedIndex === index && (
+              {currentSelectedIndex === index && (isInSettingsView || isInFriendsView || isInFriendsListView) && (
+                <span className="text-white">▶</span>
+              )}
+              {currentSelectedIndex === index && !isInSettingsView && !isInFriendsView && !isInFriendsListView && 
+               ((item === 'Settings' && isSignedIn) || (item === 'Friends' && isSignedIn)) && (
                 <span className="text-white">▶</span>
               )}
             </div>
           ))}
-          {!isSignedIn && !isInSettingsView && (
-            <div
-              className={`px-2 py-1 text-sm flex items-center justify-between cursor-pointer ${
-                selectedMenuItem === menuItems.length - 1
-                  ? 'bg-gray-200 text-black'
-                  : 'text-black hover:bg-gray-100'
-              }`}
-              onClick={() => {
-                onMenuItemClick(menuItems.length - 1);
-              }}
-            >
-              <span>Sign In</span>
-            </div>
-          )}
         </div>
       </div>
     </div>
