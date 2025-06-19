@@ -18,7 +18,6 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCe
 
   const handleTouchMove = (e: React.TouchEvent) => {
     e.preventDefault();
-    // Convert touch to mouse event for wheel move handling
     const touch = e.touches[0];
     const mouseEvent = {
       currentTarget: e.currentTarget,
@@ -34,18 +33,20 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCe
     onWheelLeave();
   };
 
-  const handleCenterTouch = (e: React.TouchEvent) => {
+  // Simplified menu button handler
+  const handleMenuButtonClick = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Center button touched on mobile');
-    onCenterClick();
+    console.log('Menu button clicked - calling onMenuClick');
+    onMenuClick();
   };
 
-  const handleMenuTouch = (e: React.TouchEvent) => {
+  // Simplified center button handler
+  const handleCenterButtonClick = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Menu button touched on mobile');
-    onMenuClick();
+    console.log('Center button clicked - calling onCenterClick');
+    onCenterClick();
   };
 
   return (
@@ -60,12 +61,12 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCe
         onTouchEnd={handleTouchEnd}
       >
         
-        {/* MENU Text */}
-        <div className="absolute top-8 left-1/2 transform -translate-x-1/2">
+        {/* MENU Button - Made larger and more responsive */}
+        <div className="absolute top-6 left-1/2 transform -translate-x-1/2 w-16 h-8">
           <button 
-            className="text-gray-700 hover:text-gray-900 transition-colors font-medium text-sm tracking-wider touch-manipulation"
-            onClick={onMenuClick}
-            onTouchEnd={handleMenuTouch}
+            className="w-full h-full text-gray-700 hover:text-gray-900 transition-colors font-medium text-sm tracking-wider touch-manipulation flex items-center justify-center bg-transparent border-none cursor-pointer"
+            onClick={handleMenuButtonClick}
+            onTouchEnd={handleMenuButtonClick}
           >
             MENU
           </button>
@@ -90,8 +91,8 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCe
         {/* Center Button */}
         <button 
           className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-28 h-28 bg-gradient-to-br from-gray-100 to-gray-300 rounded-full shadow-inner border border-gray-400 hover:shadow-lg transition-all duration-200 active:scale-95 touch-manipulation"
-          onClick={onCenterClick}
-          onTouchEnd={handleCenterTouch}
+          onClick={handleCenterButtonClick}
+          onTouchEnd={handleCenterButtonClick}
         >
         </button>
       </div>
