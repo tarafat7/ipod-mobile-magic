@@ -56,6 +56,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
   const [hoveredSettingsItem, setHoveredSettingsItem] = useState<string | null>(null);
   const [hoveredFriendsItem, setHoveredFriendsItem] = useState<string | null>(null);
   const [hoveredFriendsListItem, setHoveredFriendsListItem] = useState<any>(null);
+  const [isInAboutView, setIsInAboutView] = useState(false);
 
   useEffect(() => {
     const loadMenuItems = async () => {
@@ -141,6 +142,19 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
     setHoveredFriendsListItem(friend);
   };
 
+  // Add effect to listen for About view events
+  useEffect(() => {
+    const handleOpenAboutView = () => {
+      setIsInAboutView(true);
+    };
+
+    window.addEventListener('openAboutView', handleOpenAboutView);
+    
+    return () => {
+      window.removeEventListener('openAboutView', handleOpenAboutView);
+    };
+  }, []);
+
   // Update the hovered friend when selectedFriendsListItem changes
   useEffect(() => {
     if (isInFriendsListView && friendsList.length > 0) {
@@ -197,7 +211,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
 
   return (
     <div className="h-full flex">
-      {!isInMyFiveView && (
+      {!isInMyFiveView && !isInAboutView && (
         <MenuPanel
           menuItems={menuItems}
           selectedMenuItem={selectedMenuItem}
@@ -241,6 +255,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
         selectedFriendsListItem={selectedFriendsListItem}
         hoveredFriendsListItem={hoveredFriendsListItem}
         friendsList={friendsList}
+        isInAboutView={isInAboutView}
       />
     </div>
   );

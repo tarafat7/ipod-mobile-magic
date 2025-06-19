@@ -19,6 +19,7 @@ export const useIPodState = () => {
   const [selectedFriendsItem, setSelectedFriendsItem] = useState(0);
   const [isInFriendsListView, setIsInFriendsListView] = useState(false);
   const [selectedFriendsListItem, setSelectedFriendsListItem] = useState(0);
+  const [isInAboutView, setIsInAboutView] = useState(false);
 
   return {
     isPlaying,
@@ -55,5 +56,7 @@ export const useIPodState = () => {
     setIsInFriendsListView,
     selectedFriendsListItem,
     setSelectedFriendsListItem,
+    isInAboutView,
+    setIsInAboutView,
   };
 };

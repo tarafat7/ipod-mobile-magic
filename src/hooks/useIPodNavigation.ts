@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { getMenuItems } from '../data/iPodData';
 import { supabase } from '../integrations/supabase/client';
@@ -37,6 +38,8 @@ interface NavigationProps {
   setViewingFriendProfile: (profile: any) => void;
   setViewingFriendSongs: (songs: any[]) => void;
   loadFriendsList: (user: any) => void;
+  isInAboutView: boolean;
+  setIsInAboutView: (value: boolean) => void;
 }
 
 export const useIPodNavigation = (props: NavigationProps) => {
@@ -75,6 +78,8 @@ export const useIPodNavigation = (props: NavigationProps) => {
     setViewingFriendProfile,
     setViewingFriendSongs,
     loadFriendsList,
+    isInAboutView,
+    setIsInAboutView,
   } = props;
 
   useEffect(() => {
@@ -122,7 +127,10 @@ export const useIPodNavigation = (props: NavigationProps) => {
     triggerHapticFeedback();
     
     if (currentScreen === 'menu') {
-      if (isInMyFiveView) {
+      if (isInAboutView) {
+        // No navigation needed in About view, it's just text
+        return;
+      } else if (isInMyFiveView) {
         let songsCount;
         if (viewingFriendSongs.length > 0) {
           songsCount = viewingFriendSongs.length;
@@ -175,6 +183,12 @@ export const useIPodNavigation = (props: NavigationProps) => {
 
   const handleMenuClick = () => {
     console.log('Menu button clicked');
+    
+    if (isInAboutView) {
+      console.log('Exiting About view');
+      setIsInAboutView(false);
+      return;
+    }
     
     if (isInMyFiveView) {
       console.log('Exiting My Five view');
