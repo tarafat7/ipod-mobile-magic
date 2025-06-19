@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Search } from 'lucide-react';
 import { SpotifyTrack } from '../types/spotify';
 import { searchSpotifyTracks } from '../utils/spotifySearch';
+import { extractSpotifyTrackId, fetchSpotifyTrackInfo, formatDate } from '../utils/spotifyUtils';
 import SelectedTrackDisplay from './SelectedTrackDisplay';
 import SearchResultsDropdown from './SearchResultsDropdown';
 
@@ -24,26 +25,43 @@ const SpotifySearchInput: React.FC<SpotifySearchInputProps> = ({
   const [isSearching, setIsSearching] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState<SpotifyTrack | null>(null);
+  const [isLoadingTrack, setIsLoadingTrack] = useState(false);
   const searchTimeoutRef = useRef<NodeJS.Timeout>();
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Load selected track info when value changes
   useEffect(() => {
-    if (value && !selectedTrack) {
-      // Extract track ID from Spotify URL
-      const trackIdMatch = value.match(/track\/([a-zA-Z0-9]+)/);
-      if (trackIdMatch) {
-        const trackId = trackIdMatch[1];
-        // Find this track in search results if available, or create a placeholder
-        const existingTrack = searchResults.find(track => track.id === trackId);
-        if (existingTrack) {
-          setSelectedTrack(existingTrack);
+    const loadTrackFromUrl = async () => {
+      if (value && !selectedTrack) {
+        setIsLoadingTrack(true);
+        try {
+          const trackId = extractSpotifyTrackId(value);
+          if (trackId) {
+            const trackInfo = await fetchSpotifyTrackInfo(trackId, formatDate(new Date().toISOString()));
+            if (trackInfo) {
+              setSelectedTrack({
+                id: trackId,
+                name: trackInfo.name,
+                artist: trackInfo.artist,
+                album: '', // We don't get album info from the oEmbed API
+                albumArt: trackInfo.albumArt,
+                spotifyUrl: trackInfo.spotifyUrl,
+                duration: 0 // We don't get duration from the oEmbed API
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Error loading track info:', error);
+        } finally {
+          setIsLoadingTrack(false);
         }
+      } else if (!value && selectedTrack) {
+        setSelectedTrack(null);
       }
-    } else if (!value && selectedTrack) {
-      setSelectedTrack(null);
-    }
-  }, [value, selectedTrack, searchResults]);
+    };
+
+    loadTrackFromUrl();
+  }, [value]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -105,6 +123,11 @@ const SpotifySearchInput: React.FC<SpotifySearchInputProps> = ({
           track={selectedTrack} 
           onRemove={handleRemoveSelection} 
         />
+      ) : isLoadingTrack ? (
+        <div className="flex items-center space-x-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+          <span className="text-sm text-gray-500">Loading track...</span>
+        </div>
       ) : (
         <div className="relative">
           <div className="relative">
