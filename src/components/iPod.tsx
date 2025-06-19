@@ -223,6 +223,9 @@ const IPod: React.FC<IPodProps> = ({
           console.log('Entering settings view');
           state.setIsInSettingsView(true);
           state.setSelectedSettingsItem(0);
+        } else if (selectedItem === 'About') {
+          console.log('Entering About view');
+          state.setIsInAboutView(true);
         } else {
           state.setIsPlaying(!state.isPlaying);
         }
@@ -275,6 +278,7 @@ const IPod: React.FC<IPodProps> = ({
             selectedFriendsListItem={state.selectedFriendsListItem}
             onFriendsListItemChange={handleFriendsListItemChange}
             friendsList={friends.friendsList}
+            isInAboutView={state.isInAboutView}
           />
 
           <div className="flex-1 flex items-center justify-center md:items-center" style={{ alignItems: 'center', paddingBottom: '2rem' }}>

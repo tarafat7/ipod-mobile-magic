@@ -1,9 +1,9 @@
-
 import React from 'react';
 import MenuScreen from './MenuScreen/MenuScreen';
 import MusicScreen from './MusicScreen';
 import FriendsScreen from './FriendsScreen';
 import SettingsScreen from './SettingsScreen';
+import AboutScreen from './AboutScreen';
 import { Song } from '../types/iPod';
 import { songs } from '../data/iPodData';
 
@@ -41,6 +41,7 @@ interface ScreenProps {
   selectedFriendsListItem?: number;
   onFriendsListItemChange?: (index: number) => void;
   friendsList?: any[];
+  isInAboutView?: boolean;
 }
 
 const Screen: React.FC<ScreenProps> = ({ 
@@ -64,9 +65,15 @@ const Screen: React.FC<ScreenProps> = ({
   isInFriendsListView = false,
   selectedFriendsListItem = 0,
   onFriendsListItemChange,
-  friendsList = []
+  friendsList = [],
+  isInAboutView = false
 }) => {
   const renderScreen = () => {
+    // Handle About view first
+    if (isInAboutView) {
+      return <AboutScreen />;
+    }
+
     switch (currentScreen) {
       case 'menu':
         return (

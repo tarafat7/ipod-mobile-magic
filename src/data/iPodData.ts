@@ -1,25 +1,24 @@
-
 import { Song } from '../types/iPod';
 import { supabase } from '../integrations/supabase/client';
 
-export const getMenuItems = async () => {
-  // Check if user is signed in with Supabase
+export const getMenuItems = async (): Promise<string[]> => {
   const { data: { session } } = await supabase.auth.getSession();
-  const isSignedIn = !!session;
   
-  if (isSignedIn) {
+  if (session) {
+    // User is signed in
     return [
       'My Five',
-      'Edit My Five',
+      'Edit My Five', 
       'Friends',
       'Share Profile',
-      'Settings'
+      'Settings',
+      'About'
     ];
   } else {
+    // User is not signed in
     return [
       'Sign In',
-      'Friends', 
-      'Settings'
+      'About'
     ];
   }
 };

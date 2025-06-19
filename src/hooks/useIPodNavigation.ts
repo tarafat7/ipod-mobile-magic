@@ -37,6 +37,8 @@ interface NavigationProps {
   setViewingFriendProfile: (profile: any) => void;
   setViewingFriendSongs: (songs: any[]) => void;
   loadFriendsList: (user: any) => void;
+  isInAboutView: boolean;
+  setIsInAboutView: (value: boolean) => void;
 }
 
 export const useIPodNavigation = (props: NavigationProps) => {
@@ -75,6 +77,8 @@ export const useIPodNavigation = (props: NavigationProps) => {
     setViewingFriendProfile,
     setViewingFriendSongs,
     loadFriendsList,
+    isInAboutView,
+    setIsInAboutView,
   } = props;
 
   useEffect(() => {
@@ -189,6 +193,12 @@ export const useIPodNavigation = (props: NavigationProps) => {
         setIsInFriendsView(true);
         loadFriendsList(currentUser);
       }
+      return;
+    }
+    
+    if (props.isInAboutView) {
+      console.log('Exiting About view');
+      props.setIsInAboutView(false);
       return;
     }
     
