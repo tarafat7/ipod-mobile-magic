@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { ArrowLeft, Users, Music } from 'lucide-react';
@@ -46,34 +45,43 @@ const MyFriends: React.FC = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data, error } = await supabase
+      // First get the friend IDs
+      const { data: friendsData, error: friendsError } = await supabase
         .from('friends')
-        .select(`
-          friend_user_id,
-          profiles!friends_friend_user_id_fkey (
-            id,
-            full_name,
-            username
-          )
-        `)
+        .select('friend_user_id')
         .eq('user_id', user.id);
 
-      if (error) {
-        console.error('Error loading friends:', error);
+      if (friendsError) {
+        console.error('Error loading friends:', friendsError);
         return;
       }
 
-      if (data) {
-        const friendsList = data.map(item => ({
-          id: item.friend_user_id,
-          full_name: item.profiles?.full_name || 'Unknown User',
-          username: item.profiles?.username || ''
-        }));
-        setFriends(friendsList);
+      if (friendsData && friendsData.length > 0) {
+        const friendIds = friendsData.map(f => f.friend_user_id);
         
-        // Auto-select first friend if available
-        if (friendsList.length > 0) {
-          handleFriendSelect(friendsList[0]);
+        // Then get the profile information for those friends
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, full_name, username')
+          .in('id', friendIds);
+
+        if (profilesError) {
+          console.error('Error loading friend profiles:', profilesError);
+          return;
+        }
+
+        if (profilesData) {
+          const friendsList = profilesData.map(profile => ({
+            id: profile.id,
+            full_name: profile.full_name || 'Unknown User',
+            username: profile.username || ''
+          }));
+          setFriends(friendsList);
+          
+          // Auto-select first friend if available
+          if (friendsList.length > 0) {
+            handleFriendSelect(friendsList[0]);
+          }
         }
       }
     } catch (error) {
