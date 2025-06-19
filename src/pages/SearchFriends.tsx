@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
-import { Search, UserPlus, ArrowLeft } from 'lucide-react';
+import { Search, UserPlus, ArrowLeft, Check } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 
@@ -16,6 +16,8 @@ const SearchFriends: React.FC = () => {
   const [searchResults, setSearchResults] = useState<UserProfile[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [addedFriends, setAddedFriends] = useState<Set<string>>(new Set());
+  const [addingFriend, setAddingFriend] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -56,12 +58,29 @@ const SearchFriends: React.FC = () => {
   };
 
   const handleAddFriend = async (friendId: string) => {
+    if (!currentUser) return;
+    
+    setAddingFriend(friendId);
     try {
-      // For now, just log the action
-      console.log('Adding friend:', friendId);
-      alert('Friend request functionality will be implemented soon!');
+      const { error } = await supabase
+        .from('friends')
+        .insert({
+          user_id: currentUser.id,
+          friend_user_id: friendId
+        });
+
+      if (error) {
+        console.error('Error adding friend:', error);
+        alert('Error adding friend. They may already be in your friends list.');
+        return;
+      }
+
+      setAddedFriends(prev => new Set([...prev, friendId]));
+      console.log('Friend added successfully!');
     } catch (error) {
       console.error('Error adding friend:', error);
+    } finally {
+      setAddingFriend(null);
     }
   };
 
@@ -84,7 +103,7 @@ const SearchFriends: React.FC = () => {
               Back
             </button>
             <h1 className="text-xl font-bold">Search Friends</h1>
-            <div className="w-12"></div> {/* Spacer for centering */}
+            <div className="w-12"></div>
           </div>
 
           <div className="space-y-4">
@@ -122,14 +141,22 @@ const SearchFriends: React.FC = () => {
                       </h3>
                       <p className="text-sm text-gray-600">@{user.username}</p>
                     </div>
-                    <Button
-                      onClick={() => handleAddFriend(user.id)}
-                      size="sm"
-                      className="flex items-center gap-2"
-                    >
-                      <UserPlus size={16} />
-                      Add Friend
-                    </Button>
+                    {addedFriends.has(user.id) ? (
+                      <div className="flex items-center gap-2 text-green-600">
+                        <Check size={16} />
+                        <span className="text-sm">Added</span>
+                      </div>
+                    ) : (
+                      <Button
+                        onClick={() => handleAddFriend(user.id)}
+                        size="sm"
+                        className="flex items-center gap-2"
+                        disabled={addingFriend === user.id}
+                      >
+                        <UserPlus size={16} />
+                        {addingFriend === user.id ? 'Adding...' : 'Add Friend'}
+                      </Button>
+                    )}
                   </div>
                 ))
               ) : searchQuery && !isLoading ? (

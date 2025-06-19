@@ -31,8 +31,7 @@ const settingsMenuItems = [
 
 const friendsMenuItems = [
   'Add a friend',
-  'My Friends',
-  'Friend Requests'
+  'My Friends'
 ];
 
 const MenuPanel: React.FC<MenuPanelProps> = ({
