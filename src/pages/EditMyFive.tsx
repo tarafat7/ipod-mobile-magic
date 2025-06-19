@@ -200,7 +200,7 @@ const EditMyFive = () => {
             className="flex-1 bg-blue-600 hover:bg-blue-700"
             disabled={isSaving}
           >
-            {isSaving ? 'Saving...' : 'Save My Five'}
+            {isSaving ? 'Saving...' : 'Save'}
           </Button>
           
           <Button 
