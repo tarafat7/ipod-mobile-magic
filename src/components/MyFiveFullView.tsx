@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Music, ExternalLink } from 'lucide-react';
@@ -123,8 +124,15 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
     }
   }, [extractSpotifyTrackId, fetchSpotifyTrackInfo, formatDate, loadedUserId]);
 
-  // Only run the effect when the view type changes or initial load
+  // CRITICAL FIX: Only run the effect when the view type changes or initial load
   useEffect(() => {
+    console.log('MyFiveFullView useEffect triggered:', {
+      isSharedView,
+      hasSharedProfile: !!sharedUserProfile,
+      sharedSongsCount: sharedUserSongs.length,
+      currentSongsCount: songs.length
+    });
+
     if (isSharedView) {
       // For shared views, use the provided shared songs data directly
       console.log('Using shared songs data:', sharedUserSongs);
@@ -135,18 +143,18 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
       // For authenticated users viewing their own songs
       loadMyFiveSongs();
     }
-  }, [isSharedView]); // Removed sharedUserSongs from dependencies to prevent reloading
+  }, [isSharedView]); // CRITICAL: Only depend on isSharedView, not sharedUserSongs
 
-  // Update songs only when sharedUserSongs actually changes (not on every scroll)
+  // CRITICAL FIX: Update songs only when sharedUserSongs actually changes (not on every scroll)
   useEffect(() => {
     if (isSharedView && sharedUserSongs.length > 0 && songs.length !== sharedUserSongs.length) {
-      console.log('Updating shared songs data:', sharedUserSongs);
+      console.log('Updating shared songs data due to length change:', sharedUserSongs);
       setSongs(sharedUserSongs);
     }
   }, [isSharedView, sharedUserSongs.length]); // Only depend on length, not the array itself
 
+  // Listen for song selection events from the center button
   useEffect(() => {
-    // Listen for song selection events from the center button
     const handleSongSelect = (event: CustomEvent) => {
       const { songIndex } = event.detail;
       if (songs[songIndex]) {
