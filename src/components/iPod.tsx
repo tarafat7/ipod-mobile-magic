@@ -1,9 +1,9 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import Screen from './Screen';
 import ClickWheel from './ClickWheel';
 import { getMenuItems, songs } from '../data/iPodData';
 import { supabase } from '../integrations/supabase/client';
+import { extractSpotifyTrackId, fetchSpotifyTrackInfo, formatDate } from '../utils/spotifyUtils';
 
 interface SpotifyTrackInfo {
   name: string;
@@ -45,6 +45,10 @@ const IPod: React.FC<IPodProps> = ({
   const [isInFriendsListView, setIsInFriendsListView] = useState(false);
   const [selectedFriendsListItem, setSelectedFriendsListItem] = useState(0);
   const [friendsList, setFriendsList] = useState<any[]>([]);
+
+  // Add state for viewing friend's songs
+  const [viewingFriendProfile, setViewingFriendProfile] = useState<UserProfile | null>(null);
+  const [viewingFriendSongs, setViewingFriendSongs] = useState<SpotifyTrackInfo[]>([]);
 
   // Check authentication state and route context
   useEffect(() => {
@@ -103,6 +107,62 @@ const IPod: React.FC<IPodProps> = ({
       }
     } catch (error) {
       console.error('Error loading friends:', error);
+    }
+  };
+
+  // Add function to load friend's songs
+  const loadFriendSongs = async (friendId: string, friendName: string) => {
+    try {
+      console.log('Loading songs for friend:', friendId, friendName);
+      
+      // Set the profile first
+      setViewingFriendProfile({ full_name: friendName });
+      
+      // Load friend's songs
+      const { data, error } = await supabase
+        .from('user_five_songs')
+        .select('*')
+        .eq('user_id', friendId)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error loading friend songs:', error);
+        setViewingFriendSongs([]);
+        return;
+      }
+
+      if (data) {
+        const songUrls = [
+          data.song_1,
+          data.song_2,
+          data.song_3,
+          data.song_4,
+          data.song_5
+        ].filter(Boolean);
+
+        if (songUrls.length > 0) {
+          const addedDate = formatDate(data.created_at);
+          const songInfoPromises = songUrls.map(async (url) => {
+            const trackId = extractSpotifyTrackId(url);
+            if (trackId) {
+              return await fetchSpotifyTrackInfo(trackId, addedDate);
+            }
+            return null;
+          });
+
+          const songInfos = await Promise.all(songInfoPromises);
+          const validSongs = songInfos.filter((song): song is SpotifyTrackInfo => song !== null);
+          console.log('Loaded friend songs:', validSongs);
+          setViewingFriendSongs(validSongs);
+        } else {
+          setViewingFriendSongs([]);
+        }
+      } else {
+        setViewingFriendSongs([]);
+      }
+    } catch (error) {
+      console.error('Error loading friend songs:', error);
+      setViewingFriendSongs([]);
     }
   };
 
@@ -213,8 +273,16 @@ const IPod: React.FC<IPodProps> = ({
       
       if (currentScreen === 'menu') {
         if (isInMyFiveView) {
-          // Navigate My Five songs - use shared songs count if in shared view
-          const songsCount = isSharedView ? sharedUserSongs.length : myFiveSongsCount;
+          // Navigate My Five songs - use viewing friend songs if we're viewing a friend, otherwise use shared or personal songs
+          let songsCount;
+          if (viewingFriendSongs.length > 0) {
+            songsCount = viewingFriendSongs.length;
+          } else if (isSharedView) {
+            songsCount = sharedUserSongs.length;
+          } else {
+            songsCount = myFiveSongsCount;
+          }
+          
           const newSelection = isClockwise 
             ? (selectedMyFiveSong + 1) % Math.max(songsCount, 1)
             : (selectedMyFiveSong - 1 + Math.max(songsCount, 1)) % Math.max(songsCount, 1);
@@ -356,19 +424,34 @@ const IPod: React.FC<IPodProps> = ({
       if (isInMyFiveView) {
         // Handle My Five song selection - open Spotify link
         console.log('My Five song selected:', selectedMyFiveSong);
-        if (isSharedView && sharedUserSongs[selectedMyFiveSong]) {
-          // Open the shared song in Spotify
-          window.open(sharedUserSongs[selectedMyFiveSong].spotifyUrl, '_blank');
+        
+        let songToPlay = null;
+        if (viewingFriendSongs.length > 0) {
+          // Playing friend's song
+          songToPlay = viewingFriendSongs[selectedMyFiveSong];
+        } else if (isSharedView && sharedUserSongs[selectedMyFiveSong]) {
+          // Playing shared song
+          songToPlay = sharedUserSongs[selectedMyFiveSong];
+        }
+        
+        if (songToPlay) {
+          window.open(songToPlay.spotifyUrl, '_blank');
         } else {
-          // Trigger the existing song select event for non-shared view
+          // Trigger the existing song select event for personal songs
           const event = new CustomEvent('myFiveSongSelect', { detail: { songIndex: selectedMyFiveSong } });
           window.dispatchEvent(event);
         }
       } else if (isInFriendsListView) {
-        // Handle friend selection - open their My Five page
+        // Handle friend selection - load their songs and enter My Five view
         const selectedFriend = friendsList[selectedFriendsListItem];
         if (selectedFriend) {
-          window.location.href = `/my-five/${selectedFriend.id}`;
+          console.log('Loading friend\'s songs:', selectedFriend);
+          loadFriendSongs(selectedFriend.id, selectedFriend.full_name);
+          // Transition to My Five view to show friend's songs
+          setIsInMyFiveView(true);
+          setSelectedMyFiveSong(0);
+          // Clear shared view state since we're viewing a friend's songs locally
+          setIsSharedView(false);
         }
       } else if (isInFriendsView) {
         // Handle friends item selection
@@ -425,8 +508,10 @@ const IPod: React.FC<IPodProps> = ({
           console.log('Window opened:', newWindow);
         } else if (selectedItem === 'My Five') {
           console.log('Entering My Five view');
-          // Clear any shared view state and enter personal My Five
+          // Clear any shared view state and viewing friend state, enter personal My Five
           setIsSharedView(false);
+          setViewingFriendProfile(null);
+          setViewingFriendSongs([]);
           setIsInMyFiveView(true);
           setSelectedMyFiveSong(0);
         } else if (selectedItem === 'Friends') {
@@ -462,6 +547,9 @@ const IPod: React.FC<IPodProps> = ({
       console.log('Exiting My Five view');
       setIsInMyFiveView(false);
       setSelectedMyFiveSong(0);
+      // Clear viewing friend state when exiting My Five view
+      setViewingFriendProfile(null);
+      setViewingFriendSongs([]);
       // Don't clear shared view state here - let route detection handle it
     } else if (isInSettingsView) {
       console.log('Exiting settings view');
@@ -509,9 +597,9 @@ const IPod: React.FC<IPodProps> = ({
             isInMyFiveView={isInMyFiveView}
             selectedMyFiveSong={selectedMyFiveSong}
             onMyFiveSongChange={handleMyFiveSongChange}
-            isSharedView={isSharedView}
-            sharedUserProfile={sharedUserProfile}
-            sharedUserSongs={sharedUserSongs}
+            isSharedView={isSharedView || viewingFriendSongs.length > 0}
+            sharedUserProfile={viewingFriendProfile || sharedUserProfile}
+            sharedUserSongs={viewingFriendSongs.length > 0 ? viewingFriendSongs : sharedUserSongs}
             isInFriendsView={isInFriendsView}
             selectedFriendsItem={selectedFriendsItem}
             onFriendsItemChange={handleFriendsItemChange}
