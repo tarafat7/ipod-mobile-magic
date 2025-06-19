@@ -1,3 +1,4 @@
+
 import React from 'react';
 import FriendsScreen from '../FriendsScreen';
 import SettingsScreen from '../SettingsScreen';
@@ -6,7 +7,7 @@ import MyFiveFullView from '../MyFiveFullView';
 import AccountPreview from '../AccountPreview';
 import FriendSongsPreview from '../FriendSongsPreview';
 import FriendsListPreview from '../FriendsListPreview';
-import { User, Settings, Users, Music } from 'lucide-react';
+import { User, Settings, Users, Music, Share } from 'lucide-react';
 
 interface SpotifyTrackInfo {
   name: string;
@@ -149,6 +150,28 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
         return <SettingsScreen />;
       case 'My Five':
         return <MyFivePreview />;
+      case 'Edit My Five':
+        return (
+          <div className="h-full flex flex-col items-center justify-center p-4 text-center">
+            <Music size={32} className="text-blue-600 mb-3" />
+            <h3 className="font-bold text-lg mb-1">Edit</h3>
+            <p className="text-sm text-gray-600 text-center leading-tight">
+              Add or change which songs<br />
+              you have on repeat currently
+            </p>
+          </div>
+        );
+      case 'Share Profile':
+        return (
+          <div className="h-full flex flex-col items-center justify-center p-4 text-center">
+            <Share size={32} className="text-green-600 mb-3" />
+            <h3 className="font-bold text-lg mb-1">Share</h3>
+            <p className="text-sm text-gray-600 text-center leading-tight">
+              Share your five<br />
+              with friends
+            </p>
+          </div>
+        );
       case 'Sign In':
         return (
           <div className="h-full flex flex-col items-center justify-center p-4 text-center">
