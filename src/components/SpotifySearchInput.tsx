@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../integrations/supabase/client';
-import { Music, Search, Check } from 'lucide-react';
+import { Music, Search, Check, X } from 'lucide-react';
 
 interface SpotifyTrack {
   id: string;
@@ -113,7 +113,7 @@ const SpotifySearchInput: React.FC<SpotifySearchInputProps> = ({
     setSearchQuery('');
   };
 
-  const handleClearSelection = () => {
+  const handleRemoveSelection = () => {
     setSelectedTrack(null);
     onChange('');
     setSearchQuery('');
@@ -130,7 +130,7 @@ const SpotifySearchInput: React.FC<SpotifySearchInputProps> = ({
       <label className="text-sm font-medium text-gray-700">{label}</label>
       
       {selectedTrack ? (
-        // Show selected track
+        // Show selected track with remove option
         <div className="flex items-center space-x-3 p-3 bg-green-50 border border-green-200 rounded-lg">
           <div className="w-12 h-12 bg-gray-200 rounded flex-shrink-0 overflow-hidden">
             {selectedTrack.albumArt ? (
@@ -157,10 +157,11 @@ const SpotifySearchInput: React.FC<SpotifySearchInputProps> = ({
             <Check size={16} className="text-green-600" />
             <button
               type="button"
-              onClick={handleClearSelection}
-              className="text-sm text-gray-500 hover:text-gray-700"
+              onClick={handleRemoveSelection}
+              className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+              title="Remove song"
             >
-              Change
+              <X size={16} />
             </button>
           </div>
         </div>
