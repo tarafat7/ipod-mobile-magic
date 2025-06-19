@@ -187,8 +187,8 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
         return (
           <div className="h-full flex flex-col items-center justify-center p-4 text-center">
             <div className="w-16 h-16 bg-black rounded-xl flex items-center justify-center mb-3">
-              <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
-                <div className="w-6 h-6 bg-green-600 rounded-md"></div>
+              <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
+                <div className="w-6 h-6 bg-purple-600 rounded-md"></div>
               </div>
             </div>
             <h3 className="font-bold text-lg mb-1">FivePod</h3>
