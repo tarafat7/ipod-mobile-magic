@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Music, ExternalLink } from 'lucide-react';
+import { Music } from 'lucide-react';
 
 interface SpotifyTrackInfo {
   name: string;
@@ -17,11 +17,6 @@ interface SongListProps {
 }
 
 const SongList: React.FC<SongListProps> = ({ songs, selectedSongIndex, onSongClick }) => {
-  // Don't render anything if there are no songs
-  if (!songs || songs.length === 0) {
-    return null;
-  }
-
   const handleSongClick = (spotifyUrl: string) => {
     if (onSongClick) {
       onSongClick(spotifyUrl);
@@ -31,10 +26,10 @@ const SongList: React.FC<SongListProps> = ({ songs, selectedSongIndex, onSongCli
   };
 
   return (
-    <div className="bg-white px-2 relative z-10">
+    <div className="bg-white px-2">
       {songs.map((song, index) => (
         <div 
-          key={`song-${index}-${song.spotifyUrl}`}
+          key={index}
           className={`flex items-center p-1.5 border-b border-gray-200 transition-colors ${
             selectedSongIndex === index 
               ? 'bg-blue-500 text-white' 
@@ -47,17 +42,12 @@ const SongList: React.FC<SongListProps> = ({ songs, selectedSongIndex, onSongCli
                 src={song.albumArt} 
                 alt={`${song.name} album art`}
                 className="w-full h-full object-cover"
-                loading="lazy"
-                onError={(e) => {
-                  // Fallback to music icon if image fails to load
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                }}
               />
-            ) : null}
-            <div className={`w-full h-full flex items-center justify-center ${song.albumArt ? 'hidden' : ''}`}>
-              <Music size={14} className="text-gray-400" />
-            </div>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <Music size={14} className="text-gray-400" />
+              </div>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <h3 className={`font-semibold text-sm truncate ${
@@ -72,7 +62,7 @@ const SongList: React.FC<SongListProps> = ({ songs, selectedSongIndex, onSongCli
             </p>
           </div>
           {selectedSongIndex === index && (
-            <div className="text-white text-sm ml-2 flex-shrink-0">▶</div>
+            <div className="text-white text-sm">▶</div>
           )}
         </div>
       ))}
