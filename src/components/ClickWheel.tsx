@@ -12,50 +12,19 @@ interface ClickWheelProps {
 const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCenterClick, onMenuClick }) => {
   const wheelRef = useRef<HTMLDivElement>(null);
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    e.preventDefault();
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    e.preventDefault();
-    // Convert touch to mouse event for wheel move handling
-    const touch = e.touches[0];
-    const mouseEvent = {
-      currentTarget: e.currentTarget,
-      clientX: touch.clientX,
-      clientY: touch.clientY,
-    } as React.MouseEvent;
-    
-    onWheelMove(mouseEvent);
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    e.preventDefault();
-    onWheelLeave();
-  };
-
-  const handleCenterTouch = (e: React.TouchEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    onCenterClick();
-  };
-
   return (
     <div className="relative w-72 h-72 md:w-64 md:h-64 flex-shrink-0">
       <div 
         ref={wheelRef}
-        className="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-300 rounded-full shadow-lg border border-gray-400 cursor-pointer touch-none"
+        className="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-300 rounded-full shadow-lg border border-gray-400 cursor-pointer"
         onMouseMove={onWheelMove}
         onMouseLeave={onWheelLeave}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
       >
         
-        {/* FIXED: Simplified MENU Button */}
+        {/* MENU Button - simplified */}
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
           <button 
-            className="text-gray-700 hover:text-gray-900 font-medium text-sm tracking-wider p-2"
+            className="text-gray-700 font-medium text-sm p-2"
             onClick={onMenuClick}
           >
             MENU
@@ -63,26 +32,25 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCe
         </div>
         
         {/* Control Buttons */}
-        <button className="absolute right-8 top-1/2 transform -translate-y-1/2 w-6 h-6 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-colors">
+        <button className="absolute right-8 top-1/2 transform -translate-y-1/2 w-6 h-6 flex items-center justify-center text-gray-700">
           <SkipForward size={16} />
         </button>
         
-        <button className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-6 h-6 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-colors">
+        <button className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-6 h-6 flex items-center justify-center text-gray-700">
           <div className="flex space-x-1">
             <div className="w-1 h-1 bg-gray-700 rounded-full"></div>
             <div className="w-1 h-1 bg-gray-700 rounded-full"></div>
           </div>
         </button>
         
-        <button className="absolute left-8 top-1/2 transform -translate-y-1/2 w-6 h-6 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-colors">
+        <button className="absolute left-8 top-1/2 transform -translate-y-1/2 w-6 h-6 flex items-center justify-center text-gray-700">
           <SkipBack size={16} />
         </button>
 
-        {/* Center Button */}
+        {/* Center Button - simplified */}
         <button 
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-28 h-28 bg-gradient-to-br from-gray-100 to-gray-300 rounded-full shadow-inner border border-gray-400 hover:shadow-lg transition-all duration-200 active:scale-95"
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-28 h-28 bg-gradient-to-br from-gray-100 to-gray-300 rounded-full shadow-inner border border-gray-400"
           onClick={onCenterClick}
-          onTouchEnd={handleCenterTouch}
         >
         </button>
       </div>
