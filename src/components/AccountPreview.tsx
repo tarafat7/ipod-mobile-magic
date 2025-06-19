@@ -6,7 +6,7 @@ import { User } from 'lucide-react';
 interface UserProfile {
   full_name: string | null;
   email: string | null;
-  profile_picture_url: string | null;
+  username: string | null;
 }
 
 const AccountPreview: React.FC = () => {
@@ -20,7 +20,7 @@ const AccountPreview: React.FC = () => {
         if (user) {
           const { data: profileData } = await supabase
             .from('profiles')
-            .select('full_name, email, profile_picture_url')
+            .select('full_name, email, username')
             .eq('id', user.id)
             .single();
           
@@ -64,15 +64,7 @@ const AccountPreview: React.FC = () => {
     <div className="h-full flex flex-col items-center justify-center p-4 text-center">
       {/* Profile Picture / Album Art */}
       <div className="w-16 h-16 mb-3 rounded-lg overflow-hidden bg-gray-200 flex items-center justify-center">
-        {profile.profile_picture_url ? (
-          <img 
-            src={profile.profile_picture_url} 
-            alt="Profile" 
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <User size={24} className="text-gray-500" />
-        )}
+        <User size={24} className="text-gray-500" />
       </div>
       
       {/* Full Name / Song Title */}
@@ -80,9 +72,9 @@ const AccountPreview: React.FC = () => {
         {profile.full_name || 'No name set'}
       </h3>
       
-      {/* Email / Date */}
+      {/* Username / Date */}
       <p className="text-sm text-gray-600 text-center leading-tight">
-        {profile.email || 'No email'}
+        @{profile.username || 'No username'}
       </p>
     </div>
   );

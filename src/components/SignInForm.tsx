@@ -4,16 +4,16 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { supabase } from '../integrations/supabase/client';
-import ProfilePictureUpload from './ProfilePictureUpload';
 
 interface FormData {
   fullName: string;
   email: string;
   password: string;
+  username: string;
 }
 
 interface SignInFormProps {
-  onSubmit: (formData: FormData, profilePicture?: File | null) => void;
+  onSubmit: (formData: FormData) => void;
   isLoading: boolean;
   error: string | null;
   onErrorClear: () => void;
@@ -23,10 +23,9 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
   const [formData, setFormData] = useState<FormData>({
     fullName: '',
     email: '',
-    password: ''
+    password: '',
+    username: ''
   });
-  const [profilePicture, setProfilePicture] = useState<File | null>(null);
-  const [currentProfilePictureUrl, setCurrentProfilePictureUrl] = useState<string | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isSignInMode, setIsSignInMode] = useState(false);
 
@@ -55,40 +54,13 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
           setFormData({
             fullName: profile.full_name || '',
             email: profile.email || '',
-            password: '' // Don't pre-fill password
+            password: '', // Don't pre-fill password
+            username: profile.username || ''
           });
-          setCurrentProfilePictureUrl(profile.profile_picture_url);
         }
       }
     } catch (error) {
       console.error('Error loading user data:', error);
-    }
-  };
-
-  const uploadProfilePicture = async (file: File, userId: string): Promise<string | null> => {
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${userId}/profile.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('profile-pictures')
-        .upload(fileName, file, {
-          upsert: true
-        });
-
-      if (uploadError) {
-        console.error('Profile picture upload error:', uploadError);
-        return null;
-      }
-
-      const { data } = supabase.storage
-        .from('profile-pictures')
-        .getPublicUrl(fileName);
-
-      return data.publicUrl;
-    } catch (error) {
-      console.error('Unexpected profile picture upload error:', error);
-      return null;
     }
   };
 
@@ -99,10 +71,6 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
       [name]: value
     }));
     onErrorClear();
-  };
-
-  const handleProfilePictureSelect = (file: File | null) => {
-    setProfilePicture(file);
   };
 
   const handleSignIn = async () => {
@@ -138,23 +106,13 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          let profilePictureUrl = currentProfilePictureUrl;
-          
-          // Upload new profile picture if one was selected
-          if (profilePicture) {
-            const uploadedUrl = await uploadProfilePicture(profilePicture, user.id);
-            if (uploadedUrl) {
-              profilePictureUrl = uploadedUrl;
-            }
-          }
-          
           // Update profile in profiles table
           await supabase
             .from('profiles')
             .update({
               full_name: formData.fullName,
               email: formData.email,
-              profile_picture_url: profilePictureUrl
+              username: formData.username
             })
             .eq('id', user.id);
           
@@ -171,10 +129,10 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
             updateData.password = formData.password;
           }
           
-          // Update user metadata with full name and profile picture URL
+          // Update user metadata with full name and username
           updateData.data = {
             full_name: formData.fullName,
-            profile_picture_url: profilePictureUrl
+            username: formData.username
           };
           
           await supabase.auth.updateUser(updateData);
@@ -186,7 +144,7 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
         console.error('Error updating account:', error);
       }
     } else {
-      onSubmit(formData, profilePicture);
+      onSubmit(formData);
     }
   };
 
@@ -249,11 +207,19 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
                 />
               </div>
               
-              <ProfilePictureUpload
-                onImageSelect={handleProfilePictureSelect}
-                currentImage={currentProfilePictureUrl}
-                disabled={isLoading}
-              />
+              <div>
+                <Label htmlFor="username">Username</Label>
+                <Input
+                  id="username"
+                  name="username"
+                  type="text"
+                  value={formData.username}
+                  onChange={handleInputChange}
+                  required
+                  className="mt-1"
+                  disabled={isLoading}
+                />
+              </div>
             </>
           )}
           
