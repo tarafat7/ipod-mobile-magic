@@ -1,4 +1,3 @@
-
 import React from 'react';
 import FriendsScreen from '../FriendsScreen';
 import SettingsScreen from '../SettingsScreen';
@@ -6,6 +5,7 @@ import MyFivePreview from '../MyFivePreview';
 import MyFiveFullView from '../MyFiveFullView';
 import AccountPreview from '../AccountPreview';
 import FriendSongsPreview from '../FriendSongsPreview';
+import FriendsListPreview from '../FriendsListPreview';
 import { User, Settings, Users, Music } from 'lucide-react';
 
 interface SpotifyTrackInfo {
@@ -69,29 +69,11 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
   }
 
   if (isInFriendsListView) {
-    // Show friend songs when hovering over a friend
-    if (hoveredFriendsListItem) {
-      return (
-        <div className="w-1/2 bg-gray-50 transition-all duration-300">
-          <FriendSongsPreview 
-            selectedFriend={hoveredFriendsListItem}
-            selectedFriendSongs={[]}
-            isLoadingSongs={false}
-          />
-        </div>
-      );
-    }
-    
     return (
       <div className="w-1/2 bg-gray-50 transition-all duration-300">
-        <div className="h-full flex flex-col items-center justify-center p-4 text-center">
-          <Users size={32} className="text-gray-600 mb-3" />
-          <h3 className="font-bold text-lg mb-1">My Friends</h3>
-          <p className="text-sm text-gray-600 text-center leading-tight">
-            Browse your friends<br />
-            and their music
-          </p>
-        </div>
+        <FriendsListPreview 
+          selectedFriend={hoveredFriendsListItem}
+        />
       </div>
     );
   }
