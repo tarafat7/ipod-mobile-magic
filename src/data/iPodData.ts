@@ -2,45 +2,28 @@
 import { Song } from '../types/iPod';
 import { supabase } from '../integrations/supabase/client';
 
-export const songs: Song[] = [
-  {
-    title: "Song 1",
-    artist: "Artist 1",
-    duration: "3:45",
-    albumArt: "/placeholder.svg"
-  },
-  {
-    title: "Song 2", 
-    artist: "Artist 2",
-    duration: "4:20",
-    albumArt: "/placeholder.svg"
-  },
-  {
-    title: "Song 3",
-    artist: "Artist 3", 
-    duration: "2:55",
-    albumArt: "/placeholder.svg"
-  },
-  {
-    title: "Song 4",
-    artist: "Artist 4",
-    duration: "3:12",
-    albumArt: "/placeholder.svg"
-  },
-  {
-    title: "Song 5",
-    artist: "Artist 5",
-    duration: "4:01",
-    albumArt: "/placeholder.svg"
-  }
+export const getMenuItems = async () => {
+  // Check if user is signed in with Supabase
+  const { data: { session } } = await supabase.auth.getSession();
+  const isSignedIn = !!session;
+  
+  return [
+    isSignedIn ? 'My Five' : 'Sign In',
+    'Friends', 
+    'Settings'
+  ];
+};
+
+export const menuItems = [
+  'Sign In',
+  'Friends', 
+  'Settings'
 ];
 
-export const getMenuItems = async (): Promise<string[]> => {
-  const { data: { session } } = await supabase.auth.getSession();
-  
-  if (session) {
-    return ['My Five', 'Edit My Five', 'Friends', 'Settings'];
-  } else {
-    return ['Sign In', 'My Five'];
-  }
-};
+export const songs: Song[] = [
+  { id: 1, title: 'Bohemian Rhapsody', artist: 'Queen', duration: '5:55' },
+  { id: 2, title: 'Hotel California', artist: 'Eagles', duration: '6:30' },
+  { id: 3, title: 'Stairway to Heaven', artist: 'Led Zeppelin', duration: '8:02' },
+  { id: 4, title: 'Sweet Child O Mine', artist: 'Guns N Roses', duration: '5:03' },
+  { id: 5, title: 'Imagine', artist: 'John Lennon', duration: '3:07' }
+];
