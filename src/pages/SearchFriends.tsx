@@ -26,11 +26,38 @@ const SearchFriends: React.FC = () => {
       
       if (!user) {
         window.location.href = '/signin';
+      } else {
+        // Load existing friends when user is authenticated
+        loadExistingFriends();
       }
     };
     
     checkAuth();
   }, []);
+
+  const loadExistingFriends = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('friends')
+        .select('friend_user_id')
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error loading existing friends:', error);
+        return;
+      }
+
+      if (data) {
+        const friendIds = new Set(data.map(friend => friend.friend_user_id));
+        setAddedFriends(friendIds);
+      }
+    } catch (error) {
+      console.error('Error loading existing friends:', error);
+    }
+  };
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;

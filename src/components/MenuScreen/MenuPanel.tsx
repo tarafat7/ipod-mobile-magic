@@ -121,6 +121,11 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
       if (onFriendsAction) {
         onFriendsAction(item);
       }
+      
+      // Handle specific friends actions
+      if (item === 'My Friends') {
+        window.location.href = '/my-friends';
+      }
     } else {
       onMenuItemClick(index);
       if (item === 'Settings' && isSignedIn) {
