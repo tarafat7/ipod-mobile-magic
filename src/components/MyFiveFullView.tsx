@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Music, ExternalLink } from 'lucide-react';
@@ -124,7 +123,7 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
     }
   }, [extractSpotifyTrackId, fetchSpotifyTrackInfo, formatDate, loadedUserId]);
 
-  // Handle initial load and view type changes
+  // Handle initial load - only load personal songs if NOT in shared view
   useEffect(() => {
     console.log('MyFiveFullView effect triggered:', { 
       isSharedView, 
@@ -132,21 +131,27 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
       sharedProfile: sharedUserProfile?.full_name
     });
 
-    if (isSharedView && sharedUserSongs.length > 0) {
-      // For shared views, use the provided shared songs data directly
-      console.log('Using shared songs data:', sharedUserSongs);
+    if (isSharedView) {
+      // For shared views, NEVER load personal songs - only use shared data
+      console.log('Shared view detected - using shared songs only');
       setSongs(sharedUserSongs);
       setIsLoading(false);
-      setLoadedUserId('shared'); // Mark as shared view
-    } else if (!isSharedView) {
-      // For authenticated users viewing their own songs, only load if not already loaded
-      loadMyFiveSongs();
+      setLoadedUserId('shared');
     } else {
-      // Shared view but no songs yet
-      setSongs([]);
+      // Only load personal songs when NOT in shared view
+      console.log('Personal view - loading own songs');
+      loadMyFiveSongs();
+    }
+  }, [isSharedView, sharedUserProfile, loadMyFiveSongs]);
+
+  // Update shared songs when they change
+  useEffect(() => {
+    if (isSharedView) {
+      console.log('Updating shared songs:', sharedUserSongs);
+      setSongs(sharedUserSongs);
       setIsLoading(false);
     }
-  }, [isSharedView, sharedUserProfile]); // Removed sharedUserSongs from dependencies
+  }, [sharedUserSongs, isSharedView]);
 
   // Separate effect to handle shared songs updates without triggering reload
   useEffect(() => {
