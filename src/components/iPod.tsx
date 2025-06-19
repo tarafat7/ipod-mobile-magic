@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Screen from './Screen';
 import ClickWheel from './ClickWheel';
@@ -284,22 +283,6 @@ const IPod: React.FC<IPodProps> = ({
       </div>
     </div>
   );
-};
-
-const handleSettingsItemChange = (index: number) => {
-  state.setSelectedSettingsItem(index);
-};
-
-const handleMyFiveSongChange = (index: number) => {
-  state.setSelectedMyFiveSong(index);
-};
-
-const handleFriendsItemChange = (index: number) => {
-  state.setSelectedFriendsItem(index);
-};
-
-const handleFriendsListItemChange = (index: number) => {
-  state.setSelectedFriendsListItem(index);
 };
 
 export default IPod;
