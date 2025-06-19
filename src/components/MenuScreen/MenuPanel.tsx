@@ -24,12 +24,9 @@ interface MenuPanelProps {
   onFriendsListItemClick?: (index: number) => void;
   onFriendsListItemHover?: (friend: any) => void;
   friendsList?: any[];
-  isInAboutView?: boolean;
-  onAboutClick?: () => void;
 }
 
 const settingsMenuItems = [
-  'About',
   'Edit Account',
   'Product Feedback',
   'Logout',
@@ -63,9 +60,7 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   selectedFriendsListItem = 0,
   onFriendsListItemClick,
   onFriendsListItemHover,
-  friendsList = [],
-  isInAboutView = false,
-  onAboutClick
+  friendsList = []
 }) => {
   const [touchedItem, setTouchedItem] = useState<string | null>(null);
   
@@ -136,11 +131,7 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
       }
     } else if (isInSettingsView) {
       onSettingsItemClick(index);
-      if (item === 'About') {
-        if (onAboutClick) {
-          onAboutClick();
-        }
-      } else if (item === 'Product Feedback') {
+      if (item === 'Product Feedback') {
         handleProductFeedback();
       } else {
         onSettingsAction(item);
