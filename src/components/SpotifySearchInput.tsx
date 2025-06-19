@@ -1,17 +1,10 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { supabase } from '../integrations/supabase/client';
-import { Music, Search, Check, X } from 'lucide-react';
-
-interface SpotifyTrack {
-  id: string;
-  name: string;
-  artist: string;
-  album: string;
-  albumArt: string;
-  spotifyUrl: string;
-  duration: number;
-}
+import { Search } from 'lucide-react';
+import { SpotifyTrack } from '../types/spotify';
+import { searchSpotifyTracks } from '../utils/spotifySearch';
+import SelectedTrackDisplay from './SelectedTrackDisplay';
+import SearchResultsDropdown from './SearchResultsDropdown';
 
 interface SpotifySearchInputProps {
   label: string;
@@ -64,27 +57,11 @@ const SpotifySearchInput: React.FC<SpotifySearchInputProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const searchSpotify = async (query: string) => {
-    if (!query.trim()) {
-      setSearchResults([]);
-      return;
-    }
-
+  const handleSearch = async (query: string) => {
     setIsSearching(true);
     try {
-      const { data, error } = await supabase.functions.invoke('spotify-search', {
-        body: { query },
-      });
-
-      if (error) {
-        console.error('Spotify search error:', error);
-        setSearchResults([]);
-      } else {
-        setSearchResults(data.tracks || []);
-      }
-    } catch (error) {
-      console.error('Error calling spotify-search:', error);
-      setSearchResults([]);
+      const tracks = await searchSpotifyTracks(query);
+      setSearchResults(tracks);
     } finally {
       setIsSearching(false);
     }
@@ -102,7 +79,7 @@ const SpotifySearchInput: React.FC<SpotifySearchInputProps> = ({
 
     // Debounce search
     searchTimeoutRef.current = setTimeout(() => {
-      searchSpotify(query);
+      handleSearch(query);
     }, 300);
   };
 
@@ -119,54 +96,16 @@ const SpotifySearchInput: React.FC<SpotifySearchInputProps> = ({
     setSearchQuery('');
   };
 
-  const formatDuration = (ms: number) => {
-    const minutes = Math.floor(ms / 60000);
-    const seconds = Math.floor((ms % 60000) / 1000);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
-
   return (
     <div className="space-y-2" ref={containerRef}>
       <label className="text-sm font-medium text-gray-700">{label}</label>
       
       {selectedTrack ? (
-        // Show selected track with remove option
-        <div className="flex items-center space-x-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-          <div className="w-12 h-12 bg-gray-200 rounded flex-shrink-0 overflow-hidden">
-            {selectedTrack.albumArt ? (
-              <img 
-                src={selectedTrack.albumArt} 
-                alt={`${selectedTrack.name} album art`}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <Music size={16} className="text-gray-400" />
-              </div>
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900 truncate">
-              {selectedTrack.name}
-            </p>
-            <p className="text-sm text-gray-500 truncate">
-              {selectedTrack.artist}
-            </p>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Check size={16} className="text-green-600" />
-            <button
-              type="button"
-              onClick={handleRemoveSelection}
-              className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
-              title="Remove song"
-            >
-              <X size={16} />
-            </button>
-          </div>
-        </div>
+        <SelectedTrackDisplay 
+          track={selectedTrack} 
+          onRemove={handleRemoveSelection} 
+        />
       ) : (
-        // Show search input
         <div className="relative">
           <div className="relative">
             <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -185,53 +124,13 @@ const SpotifySearchInput: React.FC<SpotifySearchInputProps> = ({
             )}
           </div>
 
-          {/* Search Results Dropdown */}
           {showResults && (searchResults.length > 0 || isSearching) && (
-            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-64 overflow-y-auto">
-              {isSearching ? (
-                <div className="p-3 text-center text-gray-500">
-                  <div className="animate-pulse">Searching...</div>
-                </div>
-              ) : searchResults.length > 0 ? (
-                searchResults.map((track) => (
-                  <button
-                    key={track.id}
-                    type="button"
-                    onClick={() => handleTrackSelect(track)}
-                    className="w-full flex items-center space-x-3 p-3 hover:bg-gray-50 text-left border-b border-gray-100 last:border-b-0"
-                  >
-                    <div className="w-10 h-10 bg-gray-200 rounded flex-shrink-0 overflow-hidden">
-                      {track.albumArt ? (
-                        <img 
-                          src={track.albumArt} 
-                          alt={`${track.name} album art`}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Music size={14} className="text-gray-400" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {track.name}
-                      </p>
-                      <p className="text-xs text-gray-500 truncate">
-                        {track.artist} • {track.album}
-                      </p>
-                    </div>
-                    <div className="text-xs text-gray-400">
-                      {formatDuration(track.duration)}
-                    </div>
-                  </button>
-                ))
-              ) : searchQuery && (
-                <div className="p-3 text-center text-gray-500">
-                  No results found
-                </div>
-              )}
-            </div>
+            <SearchResultsDropdown
+              searchResults={searchResults}
+              isSearching={isSearching}
+              searchQuery={searchQuery}
+              onTrackSelect={handleTrackSelect}
+            />
           )}
         </div>
       )}
