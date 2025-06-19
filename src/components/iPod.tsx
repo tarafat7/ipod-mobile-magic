@@ -208,7 +208,8 @@ const IPod: React.FC<IPodProps> = ({
 
     const loadMyFiveSongs = async () => {
       // Only load user's own songs if not in shared view, not viewing a friend, and user is authenticated
-      if (isSharedView || viewingFriendSongs.length > 0 || !currentUser) return;
+      // Also check if we're currently in the process of viewing a friend
+      if (isSharedView || viewingFriendProfile || !currentUser) return;
       
       try {
         const { data, error } = await supabase
@@ -234,7 +235,7 @@ const IPod: React.FC<IPodProps> = ({
 
     loadMenuItems();
     loadMyFiveSongs();
-  }, [isSharedView, currentUser, viewingFriendSongs.length]);
+  }, [isSharedView, currentUser, viewingFriendProfile]);
 
   const triggerHapticFeedback = () => {
     // Check if vibration API is available (mobile devices)
