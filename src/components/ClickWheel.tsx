@@ -21,15 +21,13 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCe
         onMouseLeave={onWheelLeave}
       >
         
-        {/* MENU Button - simplified */}
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
-          <button 
-            className="text-gray-700 font-medium text-sm p-2"
-            onClick={onMenuClick}
-          >
-            MENU
-          </button>
-        </div>
+        {/* MENU Button - made larger and more clickable */}
+        <button 
+          className="absolute top-4 left-1/2 transform -translate-x-1/2 text-gray-700 font-medium text-sm p-4 hover:bg-gray-200 rounded transition-colors z-10"
+          onClick={onMenuClick}
+        >
+          MENU
+        </button>
         
         {/* Control Buttons */}
         <button className="absolute right-8 top-1/2 transform -translate-y-1/2 w-6 h-6 flex items-center justify-center text-gray-700">
@@ -47,7 +45,7 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCe
           <SkipBack size={16} />
         </button>
 
-        {/* Center Button - simplified */}
+        {/* Center Button */}
         <button 
           className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-28 h-28 bg-gradient-to-br from-gray-100 to-gray-300 rounded-full shadow-inner border border-gray-400"
           onClick={onCenterClick}

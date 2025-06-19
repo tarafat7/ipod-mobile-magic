@@ -75,14 +75,12 @@ export const useIPodNavigation = (
             ? (state.selectedMyFiveSong + 1) % Math.max(songsCount, 1)
             : (state.selectedMyFiveSong - 1 + Math.max(songsCount, 1)) % Math.max(songsCount, 1);
           
-          console.log('My Five navigation:', { currentSelection: state.selectedMyFiveSong, newSelection });
           setters.setSelectedMyFiveSong(newSelection);
         } else if (state.isInFriendsListView) {
           const newSelection = isClockwise 
             ? (state.selectedFriendsListItem + 1) % Math.max(state.friendsList.length, 1)
             : (state.selectedFriendsListItem - 1 + Math.max(state.friendsList.length, 1)) % Math.max(state.friendsList.length, 1);
           
-          console.log('Friends list navigation:', { currentSelection: state.selectedFriendsListItem, newSelection });
           setters.setSelectedFriendsListItem(newSelection);
         } else if (state.isInFriendsView) {
           const friendsItemsCount = 2;
@@ -90,7 +88,6 @@ export const useIPodNavigation = (
             ? (state.selectedFriendsItem + 1) % friendsItemsCount
             : (state.selectedFriendsItem - 1 + friendsItemsCount) % friendsItemsCount;
           
-          console.log('Friends navigation:', { currentSelection: state.selectedFriendsItem, newSelection });
           setters.setSelectedFriendsItem(newSelection);
         } else if (state.isInSettingsView) {
           const settingsItemsCount = 6;
@@ -98,19 +95,17 @@ export const useIPodNavigation = (
             ? (state.selectedSettingsItem + 1) % settingsItemsCount
             : (state.selectedSettingsItem - 1 + settingsItemsCount) % settingsItemsCount;
           
-          console.log('Settings navigation:', { currentSelection: state.selectedSettingsItem, newSelection });
           setters.setSelectedSettingsItem(newSelection);
         } else {
           const newSelection = isClockwise 
             ? (state.selectedMenuItem + 1) % state.menuItems.length
             : (state.selectedMenuItem - 1 + state.menuItems.length) % state.menuItems.length;
           
-          console.log('Menu navigation:', { currentSelection: state.selectedMenuItem, newSelection, selectedItem: state.menuItems[newSelection] });
           setters.setSelectedMenuItem(newSelection);
         }
       } else if (state.currentScreen === 'music') {
         const newSelection = isClockwise 
-          ? (state.selectedSong + 1) % 10 // Assuming 10 songs, adjust as needed
+          ? (state.selectedSong + 1) % 10
           : (state.selectedSong - 1 + 10) % 10;
         
         setters.setSelectedSong(newSelection);
