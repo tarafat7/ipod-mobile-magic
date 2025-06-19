@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { supabase } from '../../integrations/supabase/client';
 
@@ -213,22 +212,22 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   };
 
   return (
-    <div className={`w-1/2 bg-white border-r border-gray-300 transition-all duration-200 ease-out relative ${
+    <div className={`w-1/2 bg-white border-r border-gray-300 transition-all duration-300 ease-out relative ${
       (isInSettingsView || isInFriendsView || isInFriendsListView) ? 'transform translate-x-0' : 'transform translate-x-0'
     }`}>
       {/* Battery indicator - only show in main menu */}
       {!isInSettingsView && !isInFriendsView && !isInFriendsListView && (
-        <div className="absolute top-2 right-2">
+        <div className="absolute top-2 right-2 transition-all duration-200 ease-out">
           <div className="w-6 h-3 bg-green-500 rounded-sm"></div>
         </div>
       )}
       
       <div className="p-2">
-        <div className="flex items-center justify-between mb-3 text-xs transition-all duration-200 ease-out">
+        <div className="flex items-center justify-between mb-3 text-xs transition-all duration-300 ease-out">
           <span className="font-bold">{getHeaderTitle()}</span>
           {/* Battery indicator for Settings, Friends, and Friends List view */}
           {(isInSettingsView || isInFriendsView || isInFriendsListView) && (
-            <div className="w-6 h-3 bg-green-500 rounded-sm"></div>
+            <div className="w-6 h-3 bg-green-500 rounded-sm transition-all duration-200 ease-out"></div>
           )}
         </div>
         
@@ -236,11 +235,11 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
           {currentMenuItems.map((item, index) => (
             <div
               key={item}
-              className={`px-2 py-1 text-sm flex items-center justify-between cursor-pointer transition-all duration-150 ease-out ${
+              className={`px-2 py-1 text-sm flex items-center justify-between cursor-pointer transition-all duration-200 ease-out transform ${
                 currentSelectedIndex === index
-                  ? 'text-white transform scale-[1.02]'
-                  : 'text-black hover:bg-gray-100 hover:transform hover:scale-[1.01]'
-              } ${item === 'Delete Account' ? 'text-red-600' : ''}`}
+                  ? 'text-white scale-[1.02] shadow-sm'
+                  : 'text-black hover:bg-gray-100 hover:transform hover:scale-[1.01] hover:shadow-sm'
+              } ${item === 'Delete Account' ? 'text-red-600 hover:text-red-700' : ''}`}
               style={{
                 backgroundColor: currentSelectedIndex === index ? '#3398d8' : 'transparent'
               }}
@@ -250,13 +249,13 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
               onTouchStart={() => handleTouchStart(item, index)}
               onTouchEnd={handleTouchEnd}
             >
-              <span className="transition-all duration-150 ease-out">{item}</span>
+              <span className="transition-all duration-200 ease-out">{item}</span>
               {currentSelectedIndex === index && (isInSettingsView || isInFriendsView || isInFriendsListView) && (
-                <span className="text-white transition-all duration-150 ease-out">▶</span>
+                <span className="text-white transition-all duration-200 ease-out transform scale-110">▶</span>
               )}
               {currentSelectedIndex === index && !isInSettingsView && !isInFriendsView && !isInFriendsListView && 
                ((item === 'Settings' && isSignedIn) || (item === 'Friends' && isSignedIn)) && (
-                <span className="text-white transition-all duration-150 ease-out">▶</span>
+                <span className="text-white transition-all duration-200 ease-out transform scale-110">▶</span>
               )}
             </div>
           ))}
