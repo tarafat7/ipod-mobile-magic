@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Music, ExternalLink } from 'lucide-react';
@@ -123,27 +124,38 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
     }
   }, [extractSpotifyTrackId, fetchSpotifyTrackInfo, formatDate, loadedUserId]);
 
-  // Only run the effect when the view type changes or initial load
+  // Handle initial load and view type changes
   useEffect(() => {
-    if (isSharedView) {
+    console.log('MyFiveFullView effect triggered:', { 
+      isSharedView, 
+      sharedSongsLength: sharedUserSongs.length,
+      sharedProfile: sharedUserProfile?.full_name
+    });
+
+    if (isSharedView && sharedUserSongs.length > 0) {
       // For shared views, use the provided shared songs data directly
       console.log('Using shared songs data:', sharedUserSongs);
       setSongs(sharedUserSongs);
       setIsLoading(false);
-      setLoadedUserId(''); // Reset loaded user ID for shared views
-    } else {
-      // For authenticated users viewing their own songs
+      setLoadedUserId('shared'); // Mark as shared view
+    } else if (!isSharedView) {
+      // For authenticated users viewing their own songs, only load if not already loaded
       loadMyFiveSongs();
+    } else {
+      // Shared view but no songs yet
+      setSongs([]);
+      setIsLoading(false);
     }
-  }, [isSharedView]); // Removed sharedUserSongs from dependencies to prevent reloading
+  }, [isSharedView, sharedUserProfile]); // Removed sharedUserSongs from dependencies
 
-  // Update songs only when sharedUserSongs actually changes (not on every scroll)
+  // Separate effect to handle shared songs updates without triggering reload
   useEffect(() => {
-    if (isSharedView && sharedUserSongs.length > 0 && songs.length !== sharedUserSongs.length) {
-      console.log('Updating shared songs data:', sharedUserSongs);
+    if (isSharedView && sharedUserSongs.length > 0) {
+      console.log('Updating shared songs without reload:', sharedUserSongs);
       setSongs(sharedUserSongs);
+      setIsLoading(false);
     }
-  }, [isSharedView, sharedUserSongs.length]); // Only depend on length, not the array itself
+  }, [sharedUserSongs]);
 
   useEffect(() => {
     // Listen for song selection events from the center button
@@ -204,7 +216,7 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
       <div className="bg-white px-2">
         {songs.map((song, index) => (
           <div 
-            key={index} 
+            key={`${isSharedView ? 'shared' : 'own'}-${index}-${song.name}`}
             className={`flex items-center p-1.5 border-b border-gray-200 transition-colors ${
               selectedSongIndex === index 
                 ? 'bg-blue-500 text-white' 
