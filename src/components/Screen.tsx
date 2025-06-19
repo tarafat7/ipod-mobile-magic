@@ -41,6 +41,7 @@ interface ScreenProps {
   selectedFriendsListItem?: number;
   onFriendsListItemChange?: (index: number) => void;
   friendsList?: any[];
+  isTransitioning?: boolean;
 }
 
 const Screen: React.FC<ScreenProps> = ({ 
@@ -64,7 +65,8 @@ const Screen: React.FC<ScreenProps> = ({
   isInFriendsListView = false,
   selectedFriendsListItem = 0,
   onFriendsListItemChange,
-  friendsList = []
+  friendsList = [],
+  isTransitioning = false
 }) => {
   const renderScreen = () => {
     switch (currentScreen) {
@@ -114,7 +116,9 @@ const Screen: React.FC<ScreenProps> = ({
   return (
     <div className="bg-gray-900 rounded-xl p-2 mb-3 md:mb-6 shadow-inner flex-1 max-h-[40vh] md:max-h-none md:flex-none md:min-h-[220px]">
       <div className="bg-gray-100 rounded-lg h-full border border-gray-300 overflow-hidden">
-        <div className="h-full transition-all duration-300 ease-out">
+        <div className={`h-full transition-all duration-300 ease-out ${
+          isTransitioning ? 'opacity-50 scale-95' : 'opacity-100 scale-100'
+        }`}>
           {renderScreen()}
         </div>
       </div>
