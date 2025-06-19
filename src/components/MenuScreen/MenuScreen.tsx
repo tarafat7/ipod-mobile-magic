@@ -219,50 +219,54 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
   return (
     <div className="h-full flex">
       {!isInMyFiveView && (
-        <MenuPanel
+        <div className="animate-fade-in">
+          <MenuPanel
+            menuItems={menuItems}
+            selectedMenuItem={selectedMenuItem}
+            isInSettingsView={isInSettingsView}
+            isSignedIn={isSignedIn}
+            selectedSettingsItem={selectedSettingsItem}
+            onSettingsClick={handleSettingsClick}
+            onSettingsAction={handleSettingsAction}
+            onMenuItemClick={handleMenuItemClick}
+            onSettingsItemClick={handleSettingsItemClick}
+            onSettingsItemHover={handleSettingsItemHover}
+            isSharedView={isSharedView}
+            isInFriendsView={isInFriendsView}
+            selectedFriendsItem={selectedFriendsItem}
+            onFriendsClick={handleFriendsClick}
+            onFriendsAction={handleFriendsAction}
+            onFriendsItemClick={handleFriendsItemClick}
+            onFriendsItemHover={handleFriendsItemHover}
+            isInFriendsListView={isInFriendsListView}
+            selectedFriendsListItem={selectedFriendsListItem}
+            onFriendsListItemClick={handleFriendsListItemClick}
+            onFriendsListItemHover={handleFriendsListItemHover}
+            friendsList={friendsList}
+          />
+        </div>
+      )}
+      <div className="animate-fade-in">
+        <ContentPanel
           menuItems={menuItems}
           selectedMenuItem={selectedMenuItem}
           isInSettingsView={isInSettingsView}
           isSignedIn={isSignedIn}
-          selectedSettingsItem={selectedSettingsItem}
-          onSettingsClick={handleSettingsClick}
-          onSettingsAction={handleSettingsAction}
-          onMenuItemClick={handleMenuItemClick}
-          onSettingsItemClick={handleSettingsItemClick}
-          onSettingsItemHover={handleSettingsItemHover}
+          isInMyFiveView={isInMyFiveView}
+          selectedMyFiveSong={selectedMyFiveSong}
+          hoveredSettingsItem={hoveredSettingsItem}
           isSharedView={isSharedView}
+          sharedUserProfile={sharedUserProfile}
+          sharedUserSongs={sharedUserSongs}
           isInFriendsView={isInFriendsView}
           selectedFriendsItem={selectedFriendsItem}
-          onFriendsClick={handleFriendsClick}
-          onFriendsAction={handleFriendsAction}
-          onFriendsItemClick={handleFriendsItemClick}
-          onFriendsItemHover={handleFriendsItemHover}
+          hoveredFriendsItem={hoveredFriendsItem}
           isInFriendsListView={isInFriendsListView}
           selectedFriendsListItem={selectedFriendsListItem}
-          onFriendsListItemClick={handleFriendsListItemClick}
-          onFriendsListItemHover={handleFriendsListItemHover}
+          hoveredFriendsListItem={hoveredFriendsListItem}
           friendsList={friendsList}
         />
-      )}
-      <ContentPanel
-        menuItems={menuItems}
-        selectedMenuItem={selectedMenuItem}
-        isInSettingsView={isInSettingsView}
-        isSignedIn={isSignedIn}
-        isInMyFiveView={isInMyFiveView}
-        selectedMyFiveSong={selectedMyFiveSong}
-        hoveredSettingsItem={hoveredSettingsItem}
-        isSharedView={isSharedView}
-        sharedUserProfile={sharedUserProfile}
-        sharedUserSongs={sharedUserSongs}
-        isInFriendsView={isInFriendsView}
-        selectedFriendsItem={selectedFriendsItem}
-        hoveredFriendsItem={hoveredFriendsItem}
-        isInFriendsListView={isInFriendsListView}
-        selectedFriendsListItem={selectedFriendsListItem}
-        hoveredFriendsListItem={hoveredFriendsListItem}
-        friendsList={friendsList}
-      />
+      </div>
     </div>
   );
 };
