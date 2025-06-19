@@ -94,18 +94,11 @@ export const useIPodState = (sharedUserProfile?: UserProfile | null, sharedUserS
     };
 
     const loadMyFiveSongs = async () => {
-      // CRITICAL FIX: Only load My Five songs when NOT viewing a friend's profile
-      // and NOT in shared view and user is authenticated
+      // FIXED: Only load current user's songs when NOT in any viewing mode
       if (isSharedView || viewingFriendProfile || !currentUser) {
-        console.log('Skipping loadMyFiveSongs - conditions not met:', {
-          isSharedView,
-          hasViewingFriendProfile: !!viewingFriendProfile,
-          hasCurrentUser: !!currentUser
-        });
         return;
       }
       
-      console.log('Loading My Five songs for current user');
       try {
         const { data, error } = await supabase
           .from('user_five_songs')
@@ -121,7 +114,6 @@ export const useIPodState = (sharedUserProfile?: UserProfile | null, sharedUserS
             data.song_4,
             data.song_5
           ].filter(Boolean);
-          console.log('Setting My Five songs count:', songUrls.length);
           setMyFiveSongsCount(songUrls.length);
         }
       } catch (error) {
@@ -130,7 +122,11 @@ export const useIPodState = (sharedUserProfile?: UserProfile | null, sharedUserS
     };
 
     loadMenuItems();
-    loadMyFiveSongs();
+    
+    // FIXED: Only call loadMyFiveSongs when specifically needed
+    if (!isSharedView && !viewingFriendProfile && currentUser) {
+      loadMyFiveSongs();
+    }
   }, [isSharedView, currentUser, viewingFriendProfile]);
 
   return {

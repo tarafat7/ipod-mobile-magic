@@ -37,66 +37,7 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCe
   const handleCenterTouch = (e: React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Center button touched on mobile');
     onCenterClick();
-  };
-
-  const handleMenuTouch = (e: React.TouchEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log('Menu button touched - IMMEDIATE RESPONSE');
-    onMenuClick();
-  };
-
-  const handleMenuTouchStart = (e: React.TouchEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log('Menu button touch started');
-    // Add visual feedback immediately
-    const target = e.currentTarget as HTMLElement;
-    target.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';
-    target.style.transform = 'scale(0.95)';
-  };
-
-  const handleMenuTouchEnd = (e: React.TouchEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log('Menu button touch ended - TRIGGERING MENU');
-    
-    // Reset visual feedback
-    const target = e.currentTarget as HTMLElement;
-    target.style.backgroundColor = '';
-    target.style.transform = '';
-    
-    // Trigger the menu action
-    onMenuClick();
-  };
-
-  const handleMenuClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log('Menu button clicked - IMMEDIATE RESPONSE');
-    onMenuClick();
-  };
-
-  const handleMenuMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log('Menu button mouse down');
-    // Add visual feedback
-    const target = e.currentTarget as HTMLElement;
-    target.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';
-    target.style.transform = 'scale(0.95)';
-  };
-
-  const handleMenuMouseUp = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log('Menu button mouse up');
-    // Reset visual feedback
-    const target = e.currentTarget as HTMLElement;
-    target.style.backgroundColor = '';
-    target.style.transform = '';
   };
 
   return (
@@ -111,23 +52,11 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCe
         onTouchEnd={handleTouchEnd}
       >
         
-        {/* MENU Button - Much more responsive with larger touch area */}
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 -translate-y-2">
+        {/* FIXED: Simplified MENU Button */}
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
           <button 
-            className="text-gray-700 hover:text-gray-900 transition-all duration-100 font-medium text-sm tracking-wider touch-manipulation bg-transparent border-none rounded-lg active:scale-95"
-            style={{ 
-              WebkitTapHighlightColor: 'transparent',
-              touchAction: 'manipulation',
-              padding: '12px 16px',
-              margin: '-8px',
-              minWidth: '60px',
-              minHeight: '40px'
-            }}
-            onClick={handleMenuClick}
-            onMouseDown={handleMenuMouseDown}
-            onMouseUp={handleMenuMouseUp}
-            onTouchStart={handleMenuTouchStart}
-            onTouchEnd={handleMenuTouchEnd}
+            className="text-gray-700 hover:text-gray-900 font-medium text-sm tracking-wider p-2"
+            onClick={onMenuClick}
           >
             MENU
           </button>
@@ -151,13 +80,9 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCe
 
         {/* Center Button */}
         <button 
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-28 h-28 bg-gradient-to-br from-gray-100 to-gray-300 rounded-full shadow-inner border border-gray-400 hover:shadow-lg transition-all duration-200 active:scale-95 touch-manipulation"
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-28 h-28 bg-gradient-to-br from-gray-100 to-gray-300 rounded-full shadow-inner border border-gray-400 hover:shadow-lg transition-all duration-200 active:scale-95"
           onClick={onCenterClick}
           onTouchEnd={handleCenterTouch}
-          style={{ 
-            WebkitTapHighlightColor: 'transparent',
-            touchAction: 'manipulation'
-          }}
         >
         </button>
       </div>
