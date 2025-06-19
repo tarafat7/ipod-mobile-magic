@@ -71,14 +71,20 @@ const SearchFriends: React.FC = () => {
 
       if (error) {
         console.error('Error adding friend:', error);
-        alert('Error adding friend. They may already be in your friends list.');
+        if (error.code === '23505') {
+          // Unique constraint violation - friend already added
+          alert('This user is already in your friends list.');
+        } else {
+          alert('Error adding friend. Please try again.');
+        }
         return;
       }
 
       setAddedFriends(prev => new Set([...prev, friendId]));
-      console.log('Friend added successfully!');
+      console.log('Friend added successfully to database!');
     } catch (error) {
       console.error('Error adding friend:', error);
+      alert('Error adding friend. Please try again.');
     } finally {
       setAddingFriend(null);
     }
@@ -161,7 +167,7 @@ const SearchFriends: React.FC = () => {
                 ))
               ) : searchQuery && !isLoading ? (
                 <div className="text-center py-8 text-gray-500">
-                  No users found matching "{searchQuery}"
+                  Search for "{searchQuery}"
                 </div>
               ) : null}
             </div>
