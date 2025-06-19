@@ -30,7 +30,6 @@ interface MenuScreenProps {
   selectedFriendsListItem?: number;
   onFriendsListItemChange?: (index: number) => void;
   friendsList?: any[];
-  viewingFriendProfile?: {full_name: string} | null;
 }
 
 const MenuScreen: React.FC<MenuScreenProps> = ({ 
@@ -50,8 +49,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
   isInFriendsListView = false,
   selectedFriendsListItem = 0,
   onFriendsListItemChange,
-  friendsList = [],
-  viewingFriendProfile = null
+  friendsList = []
 }) => {
   const [menuItems, setMenuItems] = useState<string[]>([]);
   const [isSignedIn, setIsSignedIn] = useState(false);
@@ -264,7 +262,6 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
         selectedFriendsListItem={selectedFriendsListItem}
         hoveredFriendsListItem={hoveredFriendsListItem}
         friendsList={friendsList}
-        viewingFriendProfile={viewingFriendProfile}
       />
     </div>
   );

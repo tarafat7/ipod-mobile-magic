@@ -1,4 +1,3 @@
-
 import React from 'react';
 import FriendsScreen from '../FriendsScreen';
 import SettingsScreen from '../SettingsScreen';
@@ -35,7 +34,6 @@ interface ContentPanelProps {
   selectedFriendsListItem?: number;
   hoveredFriendsListItem?: any;
   friendsList?: any[];
-  viewingFriendProfile?: {full_name: string} | null;
 }
 
 const ContentPanel: React.FC<ContentPanelProps> = ({
@@ -55,8 +53,7 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
   isInFriendsListView = false,
   selectedFriendsListItem = 0,
   hoveredFriendsListItem = null,
-  friendsList = [],
-  viewingFriendProfile = null
+  friendsList = []
 }) => {
   if (isInMyFiveView) {
     return (
