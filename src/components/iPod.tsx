@@ -103,6 +103,16 @@ const IPod: React.FC<IPodProps> = ({
     state.setLastAngle(null);
   };
 
+  const handleBackClick = () => {
+    console.log('Back button clicked - same as menu');
+    navigation.handleMenuClick();
+  };
+
+  const handleForwardClick = () => {
+    console.log('Forward button clicked - same as center');
+    handleCenterClick();
+  };
+
   const handleEditAccount = () => {
     window.location.href = '/signin?mode=edit';
   };
@@ -273,6 +283,8 @@ const IPod: React.FC<IPodProps> = ({
               onWheelLeave={handleWheelLeave}
               onCenterClick={handleCenterClick}
               onMenuClick={navigation.handleMenuClick}
+              onBackClick={handleBackClick}
+              onForwardClick={handleForwardClick}
             />
           </div>
         </div>

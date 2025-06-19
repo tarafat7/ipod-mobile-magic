@@ -7,9 +7,18 @@ interface ClickWheelProps {
   onWheelLeave: () => void;
   onCenterClick: () => void;
   onMenuClick: () => void;
+  onBackClick?: () => void;
+  onForwardClick?: () => void;
 }
 
-const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCenterClick, onMenuClick }) => {
+const ClickWheel: React.FC<ClickWheelProps> = ({ 
+  onWheelMove, 
+  onWheelLeave, 
+  onCenterClick, 
+  onMenuClick,
+  onBackClick,
+  onForwardClick 
+}) => {
   const wheelRef = useRef<HTMLDivElement>(null);
   const centerClickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastClickTimeRef = useRef<number>(0);
@@ -80,6 +89,44 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCe
     onMenuClick();
   }, [onMenuClick]);
 
+  // Back button handler
+  const handleBackButtonClick = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const now = Date.now();
+    const timeSinceLastClick = now - lastClickTimeRef.current;
+    
+    if (timeSinceLastClick < 200) {
+      return;
+    }
+    
+    lastClickTimeRef.current = now;
+    console.log('Back button clicked');
+    if (onBackClick) {
+      onBackClick();
+    }
+  }, [onBackClick]);
+
+  // Forward button handler
+  const handleForwardButtonClick = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const now = Date.now();
+    const timeSinceLastClick = now - lastClickTimeRef.current;
+    
+    if (timeSinceLastClick < 200) {
+      return;
+    }
+    
+    lastClickTimeRef.current = now;
+    console.log('Forward button clicked');
+    if (onForwardClick) {
+      onForwardClick();
+    }
+  }, [onForwardClick]);
+
   return (
     <div className="relative w-72 h-72 md:w-64 md:h-64 flex-shrink-0">
       <div 
@@ -103,8 +150,12 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCe
           </button>
         </div>
         
-        {/* Control Buttons */}
-        <button className="absolute right-8 top-1/2 transform -translate-y-1/2 w-6 h-6 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-colors">
+        {/* Forward Button */}
+        <button 
+          className="absolute right-8 top-1/2 transform -translate-y-1/2 w-6 h-6 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-colors cursor-pointer"
+          onClick={handleForwardButtonClick}
+          onTouchEnd={handleForwardButtonClick}
+        >
           <SkipForward size={16} />
         </button>
         
@@ -115,7 +166,12 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCe
           </div>
         </button>
         
-        <button className="absolute left-8 top-1/2 transform -translate-y-1/2 w-6 h-6 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-colors">
+        {/* Back Button */}
+        <button 
+          className="absolute left-8 top-1/2 transform -translate-y-1/2 w-6 h-6 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-colors cursor-pointer"
+          onClick={handleBackButtonClick}
+          onTouchEnd={handleBackButtonClick}
+        >
           <SkipBack size={16} />
         </button>
 
