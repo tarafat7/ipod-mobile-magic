@@ -7,11 +7,21 @@ export const getMenuItems = async () => {
   const { data: { session } } = await supabase.auth.getSession();
   const isSignedIn = !!session;
   
-  return [
-    isSignedIn ? 'My Five' : 'Sign In',
-    'Friends', 
-    'Settings'
-  ];
+  if (isSignedIn) {
+    return [
+      'My Five',
+      'Edit My Five',
+      'Friends',
+      'Share Profile',
+      'Settings'
+    ];
+  } else {
+    return [
+      'Sign In',
+      'Friends', 
+      'Settings'
+    ];
+  }
 };
 
 export const menuItems = [

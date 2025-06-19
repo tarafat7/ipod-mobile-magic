@@ -27,9 +27,7 @@ interface MenuPanelProps {
 }
 
 const settingsMenuItems = [
-  'Share Profile',
-  'Edit Account', 
-  'Edit My Five',
+  'Edit Account',
   'Product Feedback',
   'Logout',
   'Delete Account'
@@ -133,11 +131,7 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
       }
     } else if (isInSettingsView) {
       onSettingsItemClick(index);
-      if (item === 'Edit My Five') {
-        window.location.href = '/edit-my-five';
-      } else if (item === 'Share Profile') {
-        handleShareProfile();
-      } else if (item === 'Product Feedback') {
+      if (item === 'Product Feedback') {
         handleProductFeedback();
       } else {
         onSettingsAction(item);
@@ -149,17 +143,16 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
       if (onFriendsAction) {
         onFriendsAction(item);
       }
-      
-      // Handle specific friends actions
-      if (item === 'My Friends') {
-        // This will be handled by the parent component
-      }
     } else {
       onMenuItemClick(index);
       if (item === 'Settings' && isSignedIn) {
         onSettingsClick();
       } else if (item === 'Friends' && isSignedIn && onFriendsClick) {
         onFriendsClick();
+      } else if (item === 'Edit My Five') {
+        window.location.href = '/edit-my-five';
+      } else if (item === 'Share Profile') {
+        handleShareProfile();
       }
     }
   };

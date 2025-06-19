@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { getMenuItems } from '../data/iPodData';
 import { supabase } from '../integrations/supabase/client';
@@ -152,7 +151,7 @@ export const useIPodNavigation = (props: NavigationProps) => {
         
         setSelectedFriendsItem(newSelection);
       } else if (isInSettingsView) {
-        const settingsItemsCount = 6;
+        const settingsItemsCount = 4; // Updated from 6 to 4 (removed Share Profile and Edit My Five)
         const newSelection = isClockwise 
           ? (selectedSettingsItem + 1) % settingsItemsCount
           : (selectedSettingsItem - 1 + settingsItemsCount) % settingsItemsCount;
@@ -167,7 +166,7 @@ export const useIPodNavigation = (props: NavigationProps) => {
       }
     } else if (currentScreen === 'music') {
       const newSelection = isClockwise 
-        ? (selectedSong + 1) % 5  // Assuming 5 songs for simplicity
+        ? (selectedSong + 1) % 5
         : (selectedSong - 1 + 5) % 5;
       
       setSelectedSong(newSelection);

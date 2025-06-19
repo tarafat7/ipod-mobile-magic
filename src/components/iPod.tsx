@@ -87,7 +87,6 @@ const IPod: React.FC<IPodProps> = ({
       if (angleDiff > 180) angleDiff -= 360;
       if (angleDiff < -180) angleDiff += 360;
       
-      // Increased threshold from 15 to 25 for less sensitivity
       const threshold = 25;
       if (Math.abs(angleDiff) < threshold) {
         return;
@@ -160,19 +159,13 @@ const IPod: React.FC<IPodProps> = ({
             break;
         }
       } else if (state.isInSettingsView) {
-        const settingsItems = ['Share Profile', 'Edit Account', 'Edit My Five', 'Product Feedback', 'Logout', 'Delete Account'];
+        const settingsItems = ['Edit Account', 'Product Feedback', 'Logout', 'Delete Account'];
         const selectedSettingsAction = settingsItems[state.selectedSettingsItem];
         console.log('Settings action selected:', selectedSettingsAction);
         
         switch (selectedSettingsAction) {
-          case 'Share Profile':
-            handleShareProfile();
-            break;
           case 'Edit Account':
             handleEditAccount();
-            break;
-          case 'Edit My Five':
-            handleEditMyFive();
             break;
           case 'Product Feedback':
             window.open('https://app.formbricks.com/s/cmc2iwfd7d33uu2017tjqmhji', '_blank');
@@ -208,10 +201,14 @@ const IPod: React.FC<IPodProps> = ({
           friends.setViewingFriendSongs([]);
           state.setIsInMyFiveView(true);
           state.setSelectedMyFiveSong(0);
+        } else if (selectedItem === 'Edit My Five') {
+          handleEditMyFive();
         } else if (selectedItem === 'Friends') {
           console.log('Entering Friends view');
           state.setIsInFriendsView(true);
           state.setSelectedFriendsItem(0);
+        } else if (selectedItem === 'Share Profile') {
+          handleShareProfile();
         } else if (selectedItem === 'Settings') {
           console.log('Entering settings view');
           state.setIsInSettingsView(true);
