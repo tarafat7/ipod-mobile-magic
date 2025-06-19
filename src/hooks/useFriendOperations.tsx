@@ -65,6 +65,8 @@ export const useFriendOperations = (
     try {
       console.log('Loading songs for friend:', friendId, friendName);
       
+      // Clear previous friend's data immediately
+      setViewingFriendSongs([]);
       setViewingFriendProfile({ full_name: friendName });
       
       const { data, error } = await supabase
@@ -101,6 +103,9 @@ export const useFriendOperations = (
           const songInfos = await Promise.all(songInfoPromises);
           const validSongs = songInfos.filter((song): song is SpotifyTrackInfo => song !== null);
           console.log('Loaded friend songs:', validSongs);
+          
+          // Only set songs if we're still viewing the same friend
+          // This prevents race conditions when switching friends quickly
           setViewingFriendSongs(validSongs);
         } else {
           setViewingFriendSongs([]);

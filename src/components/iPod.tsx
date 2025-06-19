@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Screen from './Screen';
 import ClickWheel from './ClickWheel';
@@ -108,6 +107,11 @@ const IPod: React.FC<IPodProps> = ({
         const selectedFriend = state.friendsList[state.selectedFriendsListItem];
         if (selectedFriend) {
           console.log('Loading friend\'s songs:', selectedFriend);
+          
+          // Clear previous friend's data before loading new friend
+          state.setViewingFriendSongs([]);
+          state.setViewingFriendProfile(null);
+          
           loadFriendSongs(selectedFriend.id, selectedFriend.full_name);
           state.setIsInMyFiveView(true);
           state.setSelectedMyFiveSong(0);
