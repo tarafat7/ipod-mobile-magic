@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { supabase } from '../../integrations/supabase/client';
 
@@ -31,6 +30,7 @@ const settingsMenuItems = [
   'Share Profile',
   'Edit Account', 
   'Edit My Five',
+  'Product Feedback',
   'Logout',
   'Delete Account'
 ];
@@ -110,6 +110,10 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
     }
   };
 
+  const handleProductFeedback = () => {
+    window.open('https://app.formbricks.com/s/cmc2iwfd7d33uu2017tjqmhji', '_blank');
+  };
+
   const handleItemClick = (item: string, index: number) => {
     // Clear any touched state first
     setTouchedItem(null);
@@ -133,6 +137,8 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
         window.location.href = '/edit-my-five';
       } else if (item === 'Share Profile') {
         handleShareProfile();
+      } else if (item === 'Product Feedback') {
+        handleProductFeedback();
       } else {
         onSettingsAction(item);
       }

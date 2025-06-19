@@ -307,8 +307,8 @@ const IPod: React.FC<IPodProps> = ({
           console.log('Friends navigation:', { currentSelection: selectedFriendsItem, newSelection });
           setSelectedFriendsItem(newSelection);
         } else if (isInSettingsView) {
-          // Navigate settings items
-          const settingsItemsCount = 5; // Share Profile, Edit Account, Edit My Five, Logout, Delete Account
+          // Navigate settings items - now 6 items instead of 5
+          const settingsItemsCount = 6; // Share Profile, Edit Account, Edit My Five, Product Feedback, Logout, Delete Account
           const newSelection = isClockwise 
             ? (selectedSettingsItem + 1) % settingsItemsCount
             : (selectedSettingsItem - 1 + settingsItemsCount) % settingsItemsCount;
@@ -475,7 +475,7 @@ const IPod: React.FC<IPodProps> = ({
         }
       } else if (isInSettingsView) {
         // Handle settings item selection
-        const settingsItems = ['Share Profile', 'Edit Account', 'Edit My Five', 'Logout', 'Delete Account'];
+        const settingsItems = ['Share Profile', 'Edit Account', 'Edit My Five', 'Product Feedback', 'Logout', 'Delete Account'];
         const selectedSettingsAction = settingsItems[selectedSettingsItem];
         console.log('Settings action selected:', selectedSettingsAction);
         
@@ -488,6 +488,9 @@ const IPod: React.FC<IPodProps> = ({
             break;
           case 'Edit My Five':
             handleEditMyFive();
+            break;
+          case 'Product Feedback':
+            window.open('https://app.formbricks.com/s/cmc2iwfd7d33uu2017tjqmhji', '_blank');
             break;
           case 'Logout':
             handleLogout();
