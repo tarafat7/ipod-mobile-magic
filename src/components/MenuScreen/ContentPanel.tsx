@@ -1,4 +1,3 @@
-
 import React from 'react';
 import FriendsScreen from '../FriendsScreen';
 import SettingsScreen from '../SettingsScreen';
@@ -193,7 +192,7 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
             </div>
             <h3 className="font-bold text-lg mb-1">FivePod</h3>
             <p className="text-sm text-gray-600 text-center leading-tight">
-              Your personal<br />music player
+              Your interpersonal<br />music player
             </p>
           </div>
         );
