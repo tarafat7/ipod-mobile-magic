@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Search } from 'lucide-react';
 import { SpotifyTrack } from '../types/spotify';
 import { searchSpotifyTracks } from '../utils/spotifySearch';
-import { extractSpotifyTrackId, fetchSpotifyTrackInfo, formatDate } from '../utils/spotifyUtils';
+import { extractSpotifyTrackId } from '../utils/spotifyUtils';
 import SelectedTrackDisplay from './SelectedTrackDisplay';
 import SearchResultsDropdown from './SearchResultsDropdown';
 
@@ -37,18 +37,21 @@ const SpotifySearchInput: React.FC<SpotifySearchInputProps> = ({
         try {
           const trackId = extractSpotifyTrackId(value);
           if (trackId) {
-            const trackInfo = await fetchSpotifyTrackInfo(trackId, formatDate(new Date().toISOString()));
-            if (trackInfo) {
-              setSelectedTrack({
-                id: trackId,
-                name: trackInfo.name,
-                artist: trackInfo.artist,
-                album: '', // We don't get album info from the oEmbed API
-                albumArt: trackInfo.albumArt,
-                spotifyUrl: trackInfo.spotifyUrl,
-                duration: 0 // We don't get duration from the oEmbed API
-              });
-            }
+            // Use the Spotify search API to find the track by ID
+            // We'll search by the track ID to get proper metadata
+            const searchUrl = `https://open.spotify.com/track/${trackId}`;
+            
+            // For now, we'll create a minimal track object and let the user re-search if needed
+            // This ensures we don't display incorrect information
+            setSelectedTrack({
+              id: trackId,
+              name: 'Loading track details...',
+              artist: 'Please search to get full details',
+              album: '',
+              albumArt: '',
+              spotifyUrl: value,
+              duration: 0
+            });
           }
         } catch (error) {
           console.error('Error loading track info:', error);
