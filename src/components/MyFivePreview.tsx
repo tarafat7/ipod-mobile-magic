@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Music } from 'lucide-react';
+import { searchSpotifyTracks } from '../utils/spotifySearch';
+import { extractSpotifyTrackId } from '../utils/spotifyUtils';
 
 interface SpotifyTrackInfo {
   name: string;
@@ -19,28 +21,17 @@ const MyFivePreview: React.FC = () => {
     loadMyFiveSongs();
   }, []);
 
-  const extractSpotifyTrackId = (url: string): string | null => {
-    const match = url.match(/track\/([a-zA-Z0-9]+)/);
-    return match ? match[1] : null;
-  };
-
   const fetchSpotifyTrackInfo = async (trackId: string, addedDate: string): Promise<SpotifyTrackInfo | null> => {
     try {
-      // Use Spotify's oEmbed API to get basic track info
-      const response = await fetch(`https://open.spotify.com/oembed?url=https://open.spotify.com/track/${trackId}`);
-      const data = await response.json();
+      const tracks = await searchSpotifyTracks(`track:${trackId}`);
+      const trackInfo = tracks.find(track => track.id === trackId);
       
-      if (data && data.title) {
-        // Parse title which usually comes as "Song Name by Artist Name"
-        const titleParts = data.title.split(' by ');
-        const songName = titleParts[0] || 'Unknown Song';
-        const artistName = titleParts[1] || '';
-        
+      if (trackInfo) {
         return {
-          name: songName,
-          artist: artistName,
-          albumArt: data.thumbnail_url || '',
-          spotifyUrl: `https://open.spotify.com/track/${trackId}`,
+          name: trackInfo.name,
+          artist: trackInfo.artist,
+          albumArt: trackInfo.albumArt,
+          spotifyUrl: trackInfo.spotifyUrl,
           addedDate
         };
       }
@@ -158,7 +149,7 @@ const MyFivePreview: React.FC = () => {
                 {song.name}
               </p>
               <p className="text-xs text-gray-500 truncate">
-                {song.artist || song.addedDate}
+                {song.artist}
               </p>
             </div>
           </div>

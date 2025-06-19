@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../integrations/supabase/client';
+import { searchSpotifyTracks } from '../utils/spotifySearch';
+import { extractSpotifyTrackId, formatDate } from '../utils/spotifyUtils';
 import IPod from '../components/iPod';
 
 interface SpotifyTrackInfo {
@@ -29,6 +31,26 @@ const MyFive: React.FC = () => {
       loadSharedData();
     }
   }, [userId]);
+
+  const fetchSpotifyTrackInfo = async (trackId: string, addedDate: string): Promise<SpotifyTrackInfo | null> => {
+    try {
+      const tracks = await searchSpotifyTracks(`track:${trackId}`);
+      const trackInfo = tracks.find(track => track.id === trackId);
+      
+      if (trackInfo) {
+        return {
+          name: trackInfo.name,
+          artist: trackInfo.artist,
+          albumArt: trackInfo.albumArt,
+          spotifyUrl: trackInfo.spotifyUrl,
+          addedDate
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching Spotify track info:', error);
+    }
+    return null;
+  };
 
   const loadSharedData = async () => {
     console.log('Starting to load shared user data...');
@@ -95,44 +117,6 @@ const MyFive: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const extractSpotifyTrackId = (url: string): string | null => {
-    const match = url.match(/track\/([a-zA-Z0-9]+)/);
-    return match ? match[1] : null;
-  };
-
-  const fetchSpotifyTrackInfo = async (trackId: string, addedDate: string): Promise<SpotifyTrackInfo | null> => {
-    try {
-      const response = await fetch(`https://open.spotify.com/oembed?url=https://open.spotify.com/track/${trackId}`);
-      const data = await response.json();
-      
-      if (data && data.title) {
-        const titleParts = data.title.split(' by ');
-        const songName = titleParts[0] || 'Unknown Song';
-        const artistName = titleParts[1] || '';
-        
-        return {
-          name: songName,
-          artist: artistName,
-          albumArt: data.thumbnail_url || '',
-          spotifyUrl: `https://open.spotify.com/track/${trackId}`,
-          addedDate
-        };
-      }
-    } catch (error) {
-      console.error('Error fetching Spotify track info:', error);
-    }
-    return null;
-  };
-
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
   };
 
   if (isLoading) {
