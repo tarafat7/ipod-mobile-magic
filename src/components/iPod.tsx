@@ -87,7 +87,8 @@ const IPod: React.FC<IPodProps> = ({
       if (angleDiff > 180) angleDiff -= 360;
       if (angleDiff < -180) angleDiff += 360;
       
-      const threshold = 15;
+      // Increased threshold from 15 to 25 for less sensitivity
+      const threshold = 25;
       if (Math.abs(angleDiff) < threshold) {
         return;
       }

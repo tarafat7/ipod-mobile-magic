@@ -1,5 +1,5 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useCallback } from 'react';
 import { SkipForward, SkipBack } from 'lucide-react';
 
 interface ClickWheelProps {
@@ -11,6 +11,8 @@ interface ClickWheelProps {
 
 const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCenterClick, onMenuClick }) => {
   const wheelRef = useRef<HTMLDivElement>(null);
+  const centerClickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastClickTimeRef = useRef<number>(0);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     e.preventDefault();
@@ -33,21 +35,50 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCe
     onWheelLeave();
   };
 
-  // Simplified menu button handler
-  const handleMenuButtonClick = (e: React.MouseEvent | React.TouchEvent) => {
+  // Debounced center button handler to reduce sensitivity
+  const handleCenterButtonClick = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    const now = Date.now();
+    const timeSinceLastClick = now - lastClickTimeRef.current;
+    
+    // Prevent rapid clicks (debounce with 300ms)
+    if (timeSinceLastClick < 300) {
+      return;
+    }
+    
+    lastClickTimeRef.current = now;
+    
+    // Clear any existing timeout
+    if (centerClickTimeoutRef.current) {
+      clearTimeout(centerClickTimeoutRef.current);
+    }
+    
+    // Add a small delay to prevent accidental clicks
+    centerClickTimeoutRef.current = setTimeout(() => {
+      console.log('Center button clicked - calling onCenterClick');
+      onCenterClick();
+    }, 50);
+  }, [onCenterClick]);
+
+  // Simplified menu button handler with debouncing
+  const handleMenuButtonClick = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const now = Date.now();
+    const timeSinceLastClick = now - lastClickTimeRef.current;
+    
+    // Prevent rapid clicks
+    if (timeSinceLastClick < 200) {
+      return;
+    }
+    
+    lastClickTimeRef.current = now;
     console.log('Menu button clicked - calling onMenuClick');
     onMenuClick();
-  };
-
-  // Simplified center button handler
-  const handleCenterButtonClick = (e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log('Center button clicked - calling onCenterClick');
-    onCenterClick();
-  };
+  }, [onMenuClick]);
 
   return (
     <div className="relative w-72 h-72 md:w-64 md:h-64 flex-shrink-0">
