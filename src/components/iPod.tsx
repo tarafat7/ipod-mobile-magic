@@ -533,7 +533,7 @@ const IPod: React.FC<IPodProps> = ({
 
   const handleMenuClick = () => {
     console.log('Menu button clicked');
-    console.log('Current state - Screen:', currentScreen, 'InSettings:', isInSettingsView, 'InMyFive:', isInMyFiveView, 'InFriends:', isInFriendsView, 'InFriendsList:', isInFriendsListView, 'IsShared:', isSharedView);
+    console.log('Current state - Screen:', currentScreen, 'InSettings:', isInSettingsView, 'InMyFive:', isInMyFiveView, 'InFriends:', isInFriendsView, 'InFriendsList:', isInFriendsListView, 'IsShared:', isSharedView, 'ViewingFriend:', !!viewingFriendProfile);
     
     if (isInFriendsListView) {
       console.log('Exiting Friends List view');
@@ -547,10 +547,24 @@ const IPod: React.FC<IPodProps> = ({
       console.log('Exiting My Five view');
       setIsInMyFiveView(false);
       setSelectedMyFiveSong(0);
-      // Clear viewing friend state when exiting My Five view
-      setViewingFriendProfile(null);
-      setViewingFriendSongs([]);
-      // Don't clear shared view state here - let route detection handle it
+      
+      // Check if we were viewing a friend's My Five
+      if (viewingFriendProfile && viewingFriendSongs.length > 0) {
+        console.log('Was viewing friend\'s My Five, going back to friends list');
+        // Clear viewing friend state
+        setViewingFriendProfile(null);
+        setViewingFriendSongs([]);
+        // Go back to friends list view
+        setIsInFriendsListView(true);
+        setIsInFriendsView(true);
+        // Reload friends list to show the preview again
+        loadFriendsList();
+      } else if (isSharedView) {
+        // Don't clear shared view state here - let route detection handle it
+        console.log('Was viewing shared My Five, staying in shared context');
+      } else {
+        console.log('Was viewing own My Five, going back to main menu');
+      }
     } else if (isInSettingsView) {
       console.log('Exiting settings view');
       setIsInSettingsView(false);
