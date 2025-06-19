@@ -92,10 +92,9 @@ const FriendsListPreview: React.FC<FriendsListPreviewProps> = ({
   }
 
   return (
-    <div className="h-full p-4 overflow-y-auto">
+    <div className="h-full p-4 bg-gray-50">
       <div className="mb-4">
         <h3 className="font-bold text-lg mb-1">{selectedFriend.full_name}'s Five</h3>
-        <p className="text-sm text-gray-600">@{selectedFriend.username}</p>
       </div>
       
       {isLoading ? (
@@ -113,30 +112,27 @@ const FriendsListPreview: React.FC<FriendsListPreviewProps> = ({
           {friendSongs.map((song, index) => (
             <div
               key={index}
-              className="flex items-start space-x-3 p-3 bg-white rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+              className="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
               onClick={() => window.open(song.spotifyUrl, '_blank')}
             >
-              <div className="w-12 h-12 bg-gray-200 rounded flex-shrink-0 overflow-hidden">
+              <div className="w-12 h-12 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden">
                 {song.albumArt ? (
                   <img 
                     src={song.albumArt} 
                     alt={`${song.name} album art`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover rounded-lg"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Music size={16} className="text-gray-400" />
+                  <div className="w-full h-full flex items-center justify-center bg-gray-300 rounded-lg">
+                    <Music size={16} className="text-gray-500" />
                   </div>
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm text-gray-900 truncate">
+                <p className="font-medium text-base text-gray-900 truncate">
                   {song.name}
                 </p>
-                <p className="text-xs text-gray-500 truncate">
-                  {song.artist}
-                </p>
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-sm text-gray-500 mt-1">
                   {song.addedDate}
                 </p>
               </div>
