@@ -26,10 +26,10 @@ interface MenuPanelProps {
   friendsList?: any[];
 }
 
+// Removed "Edit My Five" from settings
 const settingsMenuItems = [
   'Share Profile',
   'Edit Account', 
-  'Edit My Five',
   'Product Feedback',
   'Logout',
   'Delete Account'
@@ -133,9 +133,7 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
       }
     } else if (isInSettingsView) {
       onSettingsItemClick(index);
-      if (item === 'Edit My Five') {
-        window.location.href = '/edit-my-five';
-      } else if (item === 'Share Profile') {
+      if (item === 'Share Profile') {
         handleShareProfile();
       } else if (item === 'Product Feedback') {
         handleProductFeedback();
@@ -261,7 +259,7 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
                 <span className="text-white">▶</span>
               )}
               {currentSelectedIndex === index && !isInSettingsView && !isInFriendsView && !isInFriendsListView && 
-               ((item === 'Settings' && isSignedIn) || (item === 'Friends' && isSignedIn)) && (
+               ((item === 'Settings' && isSignedIn) || (item === 'Friends' && isSignedIn) || (item === 'Edit My Five' && isSignedIn)) && (
                 <span className="text-white">▶</span>
               )}
             </div>

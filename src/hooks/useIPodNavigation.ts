@@ -130,7 +130,8 @@ export const useIPodNavigation = (props: NavigationProps) => {
         } else if (isSharedView) {
           songsCount = sharedUserSongs.length;
         } else {
-          songsCount = myFiveSongsCount;
+          // If no songs exist, show the "Add songs" option
+          songsCount = myFiveSongsCount === 0 ? 1 : myFiveSongsCount;
         }
         
         const newSelection = isClockwise 
@@ -152,7 +153,8 @@ export const useIPodNavigation = (props: NavigationProps) => {
         
         setSelectedFriendsItem(newSelection);
       } else if (isInSettingsView) {
-        const settingsItemsCount = 6;
+        // Updated settings items count (removed "Edit My Five")
+        const settingsItemsCount = 5;
         const newSelection = isClockwise 
           ? (selectedSettingsItem + 1) % settingsItemsCount
           : (selectedSettingsItem - 1 + settingsItemsCount) % settingsItemsCount;

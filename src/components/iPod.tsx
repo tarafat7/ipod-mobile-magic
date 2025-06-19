@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Screen from './Screen';
 import ClickWheel from './ClickWheel';
@@ -129,8 +130,13 @@ const IPod: React.FC<IPodProps> = ({
         if (songToPlay) {
           window.open(songToPlay.spotifyUrl, '_blank');
         } else {
-          const event = new CustomEvent('myFiveSongSelect', { detail: { songIndex: state.selectedMyFiveSong } });
-          window.dispatchEvent(event);
+          // Check if this is the "Add songs" option (when no songs exist)
+          if (state.myFiveSongsCount === 0 && state.selectedMyFiveSong === 0) {
+            handleEditMyFive();
+          } else {
+            const event = new CustomEvent('myFiveSongSelect', { detail: { songIndex: state.selectedMyFiveSong } });
+            window.dispatchEvent(event);
+          }
         }
       } else if (state.isInFriendsListView) {
         const selectedFriend = friends.friendsList[state.selectedFriendsListItem];
@@ -160,7 +166,7 @@ const IPod: React.FC<IPodProps> = ({
             break;
         }
       } else if (state.isInSettingsView) {
-        const settingsItems = ['Share Profile', 'Edit Account', 'Edit My Five', 'Product Feedback', 'Logout', 'Delete Account'];
+        const settingsItems = ['Share Profile', 'Edit Account', 'Product Feedback', 'Logout', 'Delete Account'];
         const selectedSettingsAction = settingsItems[state.selectedSettingsItem];
         console.log('Settings action selected:', selectedSettingsAction);
         
@@ -170,9 +176,6 @@ const IPod: React.FC<IPodProps> = ({
             break;
           case 'Edit Account':
             handleEditAccount();
-            break;
-          case 'Edit My Five':
-            handleEditMyFive();
             break;
           case 'Product Feedback':
             window.open('https://app.formbricks.com/s/cmc2iwfd7d33uu2017tjqmhji', '_blank');
@@ -208,6 +211,8 @@ const IPod: React.FC<IPodProps> = ({
           friends.setViewingFriendSongs([]);
           state.setIsInMyFiveView(true);
           state.setSelectedMyFiveSong(0);
+        } else if (selectedItem === 'Edit My Five') {
+          handleEditMyFive();
         } else if (selectedItem === 'Friends') {
           console.log('Entering Friends view');
           state.setIsInFriendsView(true);
