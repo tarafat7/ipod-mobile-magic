@@ -113,6 +113,30 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
     window.open('https://app.formbricks.com/s/cmc2iwfd7d33uu2017tjqmhji', '_blank');
   };
 
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          // Delete user profile first
+          await supabase.from('profiles').delete().eq('id', user.id);
+          // Then sign out
+          await supabase.auth.signOut();
+        }
+      } catch (error) {
+        console.error('Error deleting account:', error);
+      }
+    }
+  };
+
   const handleItemClick = (item: string, index: number) => {
     // Clear any touched state first
     setTouchedItem(null);
@@ -132,12 +156,18 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
       }
     } else if (isInSettingsView) {
       onSettingsItemClick(index);
-      if (item === 'Product Feedback') {
-        handleProductFeedback();
-      } else if (item === 'About') {
+      
+      // Handle settings actions directly here
+      if (item === 'About') {
         // About is just for display, no action needed
-      } else {
-        onSettingsAction(item);
+      } else if (item === 'Edit Account') {
+        window.location.href = '/signin?mode=edit';
+      } else if (item === 'Product Feedback') {
+        handleProductFeedback();
+      } else if (item === 'Logout') {
+        handleLogout();
+      } else if (item === 'Delete Account') {
+        handleDeleteAccount();
       }
     } else if (isInFriendsView) {
       if (onFriendsItemClick) {
