@@ -213,7 +213,7 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   };
 
   return (
-    <div className={`w-1/2 bg-white border-r border-gray-300 transition-transform duration-300 relative ${
+    <div className={`w-1/2 bg-white border-r border-gray-300 transition-all duration-200 ease-out relative ${
       (isInSettingsView || isInFriendsView || isInFriendsListView) ? 'transform translate-x-0' : 'transform translate-x-0'
     }`}>
       {/* Battery indicator - only show in main menu */}
@@ -224,7 +224,7 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
       )}
       
       <div className="p-2">
-        <div className="flex items-center justify-between mb-3 text-xs">
+        <div className="flex items-center justify-between mb-3 text-xs transition-all duration-200 ease-out">
           <span className="font-bold">{getHeaderTitle()}</span>
           {/* Battery indicator for Settings, Friends, and Friends List view */}
           {(isInSettingsView || isInFriendsView || isInFriendsListView) && (
@@ -236,10 +236,10 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
           {currentMenuItems.map((item, index) => (
             <div
               key={item}
-              className={`px-2 py-1 text-sm flex items-center justify-between cursor-pointer ${
+              className={`px-2 py-1 text-sm flex items-center justify-between cursor-pointer transition-all duration-150 ease-out ${
                 currentSelectedIndex === index
-                  ? 'text-white'
-                  : 'text-black hover:bg-gray-100'
+                  ? 'text-white transform scale-[1.02]'
+                  : 'text-black hover:bg-gray-100 hover:transform hover:scale-[1.01]'
               } ${item === 'Delete Account' ? 'text-red-600' : ''}`}
               style={{
                 backgroundColor: currentSelectedIndex === index ? '#3398d8' : 'transparent'
@@ -250,13 +250,13 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
               onTouchStart={() => handleTouchStart(item, index)}
               onTouchEnd={handleTouchEnd}
             >
-              <span>{item}</span>
+              <span className="transition-all duration-150 ease-out">{item}</span>
               {currentSelectedIndex === index && (isInSettingsView || isInFriendsView || isInFriendsListView) && (
-                <span className="text-white">▶</span>
+                <span className="text-white transition-all duration-150 ease-out">▶</span>
               )}
               {currentSelectedIndex === index && !isInSettingsView && !isInFriendsView && !isInFriendsListView && 
                ((item === 'Settings' && isSignedIn) || (item === 'Friends' && isSignedIn)) && (
-                <span className="text-white">▶</span>
+                <span className="text-white transition-all duration-150 ease-out">▶</span>
               )}
             </div>
           ))}
