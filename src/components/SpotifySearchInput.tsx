@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Search } from 'lucide-react';
 import { SpotifyTrack } from '../types/spotify';
 import { searchSpotifyTracks } from '../utils/spotifySearch';
-import { extractSpotifyTrackId, fetchSpotifyTrackInfo, formatDate } from '../utils/spotifyUtils';
+import { extractSpotifyTrackId } from '../utils/spotifyUtils';
 import SelectedTrackDisplay from './SelectedTrackDisplay';
 import SearchResultsDropdown from './SearchResultsDropdown';
 
@@ -37,17 +37,11 @@ const SpotifySearchInput: React.FC<SpotifySearchInputProps> = ({
         try {
           const trackId = extractSpotifyTrackId(value);
           if (trackId) {
-            const trackInfo = await fetchSpotifyTrackInfo(trackId, formatDate(new Date().toISOString()));
+            // Use the Spotify API to get track info instead of oEmbed
+            const tracks = await searchSpotifyTracks(`track:${trackId}`);
+            const trackInfo = tracks.find(track => track.id === trackId);
             if (trackInfo) {
-              setSelectedTrack({
-                id: trackId,
-                name: trackInfo.name,
-                artist: trackInfo.artist,
-                album: '', // We don't get album info from the oEmbed API
-                albumArt: trackInfo.albumArt,
-                spotifyUrl: trackInfo.spotifyUrl,
-                duration: 0 // We don't get duration from the oEmbed API
-              });
+              setSelectedTrack(trackInfo);
             }
           }
         } catch (error) {

@@ -46,21 +46,44 @@ serve(async (req) => {
     const tokenData = await tokenResponse.json();
     const accessToken = tokenData.access_token;
 
-    // Search for tracks
-    const searchResponse = await fetch(
-      `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=10`,
-      {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-        },
+    let searchData;
+
+    // Check if this is a track ID search (starts with "track:")
+    if (query.startsWith('track:')) {
+      const trackId = query.replace('track:', '');
+      // Get specific track by ID
+      const trackResponse = await fetch(
+        `https://api.spotify.com/v1/tracks/${trackId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (!trackResponse.ok) {
+        throw new Error('Failed to get Spotify track');
       }
-    );
 
-    if (!searchResponse.ok) {
-      throw new Error('Failed to search Spotify tracks');
+      const trackData = await trackResponse.json();
+      searchData = { tracks: { items: [trackData] } };
+    } else {
+      // Search for tracks
+      const searchResponse = await fetch(
+        `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=10`,
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (!searchResponse.ok) {
+        throw new Error('Failed to search Spotify tracks');
+      }
+
+      searchData = await searchResponse.json();
     }
-
-    const searchData = await searchResponse.json();
     
     // Format the results
     const tracks = searchData.tracks.items.map((track: any) => ({
