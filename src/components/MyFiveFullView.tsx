@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Music, ExternalLink } from 'lucide-react';
@@ -16,13 +15,15 @@ interface MyFiveFullViewProps {
   isSharedView?: boolean;
   sharedUserProfile?: {full_name: string} | null;
   sharedUserSongs?: SpotifyTrackInfo[];
+  viewingFriendProfile?: {full_name: string} | null;
 }
 
 const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({ 
   selectedSongIndex,
   isSharedView = false,
   sharedUserProfile = null,
-  sharedUserSongs = []
+  sharedUserSongs = [],
+  viewingFriendProfile = null
 }) => {
   const [songs, setSongs] = useState<SpotifyTrackInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -67,6 +68,13 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
   }, []);
 
   const loadMyFiveSongs = useCallback(async () => {
+    // CRITICAL FIX: Never load user's own songs when viewing a friend's profile
+    if (viewingFriendProfile) {
+      console.log('Skipping loadMyFiveSongs - viewing friend profile:', viewingFriendProfile);
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -115,14 +123,41 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
         const songInfos = await Promise.all(songInfoPromises);
         const validSongs = songInfos.filter((song): song is SpotifyTrackInfo => song !== null);
         setSongs(validSongs);
-        setLoadedUserId(user.id); // Remember that we loaded for this user
+        setLoadedUserId(user.id);
       }
     } catch (error) {
       console.error('Error loading user songs:', error);
     } finally {
       setIsLoading(false);
     }
-  }, [extractSpotifyTrackId, fetchSpotifyTrackInfo, formatDate, loadedUserId]);
+  }, [extractSpotifyTrackId, fetchSpotifyTrackInfo, formatDate, loadedUserId, viewingFriendProfile]);
+
+  // Main effect - handles different view states
+  useEffect(() => {
+    console.log('MyFiveFullView main effect:', {
+      isSharedView,
+      hasSharedProfile: !!sharedUserProfile,
+      hasViewingFriendProfile: !!viewingFriendProfile,
+      sharedSongsCount: sharedUserSongs.length
+    });
+
+    if (viewingFriendProfile) {
+      // When viewing a friend's profile, use the friend's songs directly
+      console.log('Using friend songs data:', sharedUserSongs);
+      setSongs(sharedUserSongs);
+      setIsLoading(false);
+      setLoadedUserId(''); // Reset for friend view
+    } else if (isSharedView && sharedUserProfile) {
+      // For public shared views (URL sharing)
+      console.log('Using shared user songs data:', sharedUserSongs);
+      setSongs(sharedUserSongs);
+      setIsLoading(false);
+      setLoadedUserId('');
+    } else {
+      // For authenticated users viewing their own songs
+      loadMyFiveSongs();
+    }
+  }, [isSharedView, viewingFriendProfile, sharedUserSongs.length]); // Critical dependencies only
 
   // CRITICAL FIX: Only run the effect when the view type changes or initial load
   useEffect(() => {
@@ -174,7 +209,8 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
   };
 
   if (isLoading) {
-    const displayName = isSharedView && sharedUserProfile ? sharedUserProfile.full_name : 'your';
+    const displayName = (viewingFriendProfile || sharedUserProfile) ? 
+      (viewingFriendProfile?.full_name || sharedUserProfile?.full_name) : 'your';
     return (
       <div className="h-full flex flex-col items-center justify-center p-4 text-center">
         <Music size={32} className="text-blue-600 mb-3 animate-pulse" />
@@ -184,19 +220,21 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
   }
 
   if (songs.length === 0) {
-    const displayName = isSharedView && sharedUserProfile ? sharedUserProfile.full_name : 'My';
+    const displayName = (viewingFriendProfile || sharedUserProfile) ? 
+      (viewingFriendProfile?.full_name || sharedUserProfile?.full_name) : 'My';
     return (
       <div className="h-full flex flex-col items-center justify-center p-4 text-center">
         <Music size={32} className="text-blue-600 mb-3" />
         <h3 className="font-bold text-lg mb-1">{displayName} Five</h3>
         <p className="text-sm text-gray-600 leading-tight">
-          {isSharedView ? 'No songs shared yet' : 'Add the 5 songs that are on repeat for you right now'}
+          {(viewingFriendProfile || (isSharedView && sharedUserProfile)) ? 'No songs shared yet' : 'Add the 5 songs that are on repeat for you right now'}
         </p>
       </div>
     );
   }
 
-  const displayName = isSharedView && sharedUserProfile ? `${sharedUserProfile.full_name}'s` : 'My';
+  const displayName = (viewingFriendProfile || sharedUserProfile) ? 
+    `${(viewingFriendProfile?.full_name || sharedUserProfile?.full_name)}'s` : 'My';
 
   return (
     <div className="h-full bg-white">

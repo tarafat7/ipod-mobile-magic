@@ -1,4 +1,5 @@
 
+
 import React, { useRef } from 'react';
 import { SkipForward, SkipBack } from 'lucide-react';
 
@@ -44,7 +45,14 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCe
   const handleMenuTouch = (e: React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Menu button touched on mobile');
+    console.log('Menu button touched on mobile - immediate response');
+    onMenuClick();
+  };
+
+  const handleMenuClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Menu button clicked - immediate response');
     onMenuClick();
   };
 
@@ -60,12 +68,16 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCe
         onTouchEnd={handleTouchEnd}
       >
         
-        {/* MENU Text */}
+        {/* MENU Text - Much more responsive */}
         <div className="absolute top-8 left-1/2 transform -translate-x-1/2">
           <button 
-            className="text-gray-700 hover:text-gray-900 transition-colors font-medium text-sm tracking-wider touch-manipulation"
-            onClick={onMenuClick}
-            onTouchEnd={handleMenuTouch}
+            className="text-gray-700 hover:text-gray-900 transition-colors font-medium text-sm tracking-wider touch-manipulation bg-transparent border-none p-2 -m-2 active:scale-95 active:bg-gray-200 rounded"
+            onClick={handleMenuClick}
+            onTouchStart={handleMenuTouch}
+            style={{ 
+              WebkitTapHighlightColor: 'transparent',
+              touchAction: 'manipulation'
+            }}
           >
             MENU
           </button>
@@ -92,6 +104,10 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCe
           className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-28 h-28 bg-gradient-to-br from-gray-100 to-gray-300 rounded-full shadow-inner border border-gray-400 hover:shadow-lg transition-all duration-200 active:scale-95 touch-manipulation"
           onClick={onCenterClick}
           onTouchEnd={handleCenterTouch}
+          style={{ 
+            WebkitTapHighlightColor: 'transparent',
+            touchAction: 'manipulation'
+          }}
         >
         </button>
       </div>
@@ -100,3 +116,4 @@ const ClickWheel: React.FC<ClickWheelProps> = ({ onWheelMove, onWheelLeave, onCe
 };
 
 export default ClickWheel;
+
