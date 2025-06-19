@@ -18,6 +18,8 @@ const FriendsListPreview: React.FC<FriendsListPreviewProps> = ({
   useEffect(() => {
     if (selectedFriend) {
       loadFriendSongs();
+    } else {
+      setFriendSongs([]);
     }
   }, [selectedFriend]);
 
@@ -107,14 +109,14 @@ const FriendsListPreview: React.FC<FriendsListPreviewProps> = ({
           <p className="text-sm">{selectedFriend.full_name} hasn't added their five songs yet</p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {friendSongs.map((song, index) => (
             <div
               key={index}
-              className="flex items-center space-x-3 p-2 bg-white rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+              className="flex items-start space-x-3 p-3 bg-white rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
               onClick={() => window.open(song.spotifyUrl, '_blank')}
             >
-              <div className="w-8 h-8 bg-gray-200 rounded flex-shrink-0 overflow-hidden">
+              <div className="w-12 h-12 bg-gray-200 rounded flex-shrink-0 overflow-hidden">
                 {song.albumArt ? (
                   <img 
                     src={song.albumArt} 
@@ -123,7 +125,7 @@ const FriendsListPreview: React.FC<FriendsListPreviewProps> = ({
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <Music size={12} className="text-gray-400" />
+                    <Music size={16} className="text-gray-400" />
                   </div>
                 )}
               </div>
@@ -133,6 +135,9 @@ const FriendsListPreview: React.FC<FriendsListPreviewProps> = ({
                 </p>
                 <p className="text-xs text-gray-500 truncate">
                   {song.artist}
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  {song.addedDate}
                 </p>
               </div>
             </div>
