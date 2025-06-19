@@ -37,6 +37,7 @@ const IPod: React.FC<IPodProps> = ({
     ...state,
     currentUser,
     ...friends,
+    sharedUserSongs,
   });
 
   // Handle route-based shared view detection
@@ -111,7 +112,7 @@ const IPod: React.FC<IPodProps> = ({
     window.location.href = '/edit-my-five';
   };
 
-  const handleCenterClick = () => {
+  const handleCenterClick = async () => {
     console.log('Center button clicked!');
     
     if (state.currentScreen === 'menu') {
@@ -283,6 +284,22 @@ const IPod: React.FC<IPodProps> = ({
       </div>
     </div>
   );
+};
+
+const handleSettingsItemChange = (index: number) => {
+  state.setSelectedSettingsItem(index);
+};
+
+const handleMyFiveSongChange = (index: number) => {
+  state.setSelectedMyFiveSong(index);
+};
+
+const handleFriendsItemChange = (index: number) => {
+  state.setSelectedFriendsItem(index);
+};
+
+const handleFriendsListItemChange = (index: number) => {
+  state.setSelectedFriendsListItem(index);
 };
 
 export default IPod;
