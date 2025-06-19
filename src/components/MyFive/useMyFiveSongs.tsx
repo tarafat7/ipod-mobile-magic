@@ -42,9 +42,12 @@ export const useMyFiveSongs = ({
       
       if (data && data.title) {
         const titleParts = data.title.split(' by ');
+        const songName = titleParts[0] || 'Unknown Song';
+        const artistName = titleParts[1] || '';
+        
         return {
-          name: titleParts[0] || 'Unknown Song',
-          artist: titleParts[1] || '',
+          name: songName,
+          artist: artistName,
           albumArt: data.thumbnail_url || '',
           spotifyUrl: `https://open.spotify.com/track/${trackId}`,
           addedDate
@@ -65,64 +68,61 @@ export const useMyFiveSongs = ({
     });
   }, []);
 
-  useEffect(() => {
-    setIsLoading(true);
-    
-    // If viewing shared or friend content, use provided songs
+  const loadUserSongs = useCallback(async () => {
+    // Don't load user's own songs when viewing others
     if (viewingFriendProfile || (isSharedView && sharedUserProfile)) {
-      setSongs([...sharedUserSongs]);
-      setIsLoading(false);
       return;
     }
 
-    // Only load user's own songs if not viewing others
-    const loadUserSongs = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          setSongs([]);
-          return;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('user_five_songs')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (error || !data) return;
+
+      const songUrls = [
+        data.song_1,
+        data.song_2,
+        data.song_3,
+        data.song_4,
+        data.song_5
+      ].filter(Boolean);
+
+      const addedDate = formatDate(data.created_at);
+      const songInfoPromises = songUrls.map(async (url) => {
+        const trackId = extractSpotifyTrackId(url);
+        if (trackId) {
+          return await fetchSpotifyTrackInfo(trackId, addedDate);
         }
+        return null;
+      });
 
-        const { data, error } = await supabase
-          .from('user_five_songs')
-          .select('*')
-          .eq('user_id', user.id)
-          .maybeSingle();
+      const songInfos = await Promise.all(songInfoPromises);
+      const validSongs = songInfos.filter((song): song is SpotifyTrackInfo => song !== null);
+      setSongs(validSongs);
+    } catch (error) {
+      console.error('Error loading user songs:', error);
+    }
+  }, [viewingFriendProfile, isSharedView, sharedUserProfile, extractSpotifyTrackId, fetchSpotifyTrackInfo, formatDate]);
 
-        if (error || !data) {
-          setSongs([]);
-          return;
-        }
-
-        const songUrls = [
-          data.song_1,
-          data.song_2,
-          data.song_3,
-          data.song_4,
-          data.song_5
-        ].filter(Boolean);
-
-        const addedDate = formatDate(data.created_at);
-        const songInfoPromises = songUrls.map(async (url) => {
-          const trackId = extractSpotifyTrackId(url);
-          if (trackId) {
-            return await fetchSpotifyTrackInfo(trackId, addedDate);
-          }
-          return null;
-        });
-
-        const songInfos = await Promise.all(songInfoPromises);
-        const validSongs = songInfos.filter((song): song is SpotifyTrackInfo => song !== null);
-        setSongs(validSongs);
-      } catch (error) {
-        console.error('Error loading user songs:', error);
-        setSongs([]);
-      }
-    };
-
-    loadUserSongs().finally(() => setIsLoading(false));
-  }, [viewingFriendProfile, isSharedView, sharedUserProfile, sharedUserSongs, extractSpotifyTrackId, fetchSpotifyTrackInfo, formatDate]);
+  useEffect(() => {
+    setIsLoading(true);
+    
+    if (viewingFriendProfile || (isSharedView && sharedUserProfile)) {
+      // Use provided shared songs
+      setSongs([...sharedUserSongs]);
+      setIsLoading(false);
+    } else {
+      // Load user's own songs
+      loadUserSongs().finally(() => setIsLoading(false));
+    }
+  }, [viewingFriendProfile, isSharedView, sharedUserProfile, sharedUserSongs, loadUserSongs]);
 
   return { songs, isLoading };
 };

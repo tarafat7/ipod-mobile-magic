@@ -38,7 +38,7 @@ export const useIPodState = (sharedUserProfile?: UserProfile | null, sharedUserS
   const [viewingFriendProfile, setViewingFriendProfile] = useState<UserProfile | null>(null);
   const [viewingFriendSongs, setViewingFriendSongs] = useState<SpotifyTrackInfo[]>([]);
 
-  // Check authentication state
+  // Check authentication state and route context
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -54,21 +54,38 @@ export const useIPodState = (sharedUserProfile?: UserProfile | null, sharedUserS
     return () => subscription.unsubscribe();
   }, []);
 
-  // Handle shared view detection
+  // Handle route-based shared view detection
   useEffect(() => {
     const currentPath = window.location.pathname;
     const isMyFiveRoute = currentPath.includes('/my-five/');
+    const isFriendsRoute = currentPath.includes('/friends/');
+    
+    console.log('Route check:', { currentPath, isMyFiveRoute, isFriendsRoute, hasProfile: !!sharedUserProfile, songsCount: sharedUserSongs?.length });
     
     if (isMyFiveRoute && sharedUserProfile) {
+      console.log('Setting up shared view');
       setIsSharedView(true);
       setCurrentScreen('menu');
       setIsInMyFiveView(true);
       setSelectedMenuItem(0);
       setMyFiveSongsCount(sharedUserSongs?.length || 0);
+    } else if (isFriendsRoute) {
+      console.log('Setting up friends view');
+      setIsSharedView(false);
+      setIsInFriendsView(true);
+      setSelectedFriendsItem(0);
     } else {
       setIsSharedView(false);
     }
-  }, [sharedUserProfile, sharedUserSongs]);
+  }, [sharedUserProfile, sharedUserSongs, window.location.pathname]);
+
+  // Update songs count when shared songs change
+  useEffect(() => {
+    if (isSharedView && sharedUserSongs && sharedUserSongs.length > 0) {
+      console.log('Updating shared songs count:', sharedUserSongs.length);
+      setMyFiveSongsCount(sharedUserSongs.length);
+    }
+  }, [sharedUserSongs, isSharedView]);
 
   useEffect(() => {
     const loadMenuItems = async () => {
@@ -76,9 +93,9 @@ export const useIPodState = (sharedUserProfile?: UserProfile | null, sharedUserS
       setMenuItems(items);
     };
 
-    const loadUserSongs = async () => {
-      // Only load user songs if NOT viewing shared content
-      if (isSharedView || !currentUser) {
+    const loadMyFiveSongs = async () => {
+      // FIXED: Only load current user's songs when NOT in any viewing mode
+      if (isSharedView || viewingFriendProfile || !currentUser) {
         return;
       }
       
@@ -100,16 +117,17 @@ export const useIPodState = (sharedUserProfile?: UserProfile | null, sharedUserS
           setMyFiveSongsCount(songUrls.length);
         }
       } catch (error) {
-        console.error('Error loading user songs:', error);
+        console.error('Error loading my five songs count:', error);
       }
     };
 
     loadMenuItems();
     
-    if (!isSharedView && currentUser) {
-      loadUserSongs();
+    // FIXED: Only call loadMyFiveSongs when specifically needed
+    if (!isSharedView && !viewingFriendProfile && currentUser) {
+      loadMyFiveSongs();
     }
-  }, [isSharedView, currentUser]);
+  }, [isSharedView, currentUser, viewingFriendProfile]);
 
   return {
     isPlaying,
