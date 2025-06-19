@@ -1,3 +1,4 @@
+
 import React from 'react';
 import FriendsScreen from '../FriendsScreen';
 import SettingsScreen from '../SettingsScreen';
@@ -57,7 +58,7 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
 }) => {
   if (isInMyFiveView) {
     return (
-      <div className="w-full bg-gray-50">
+      <div className="w-full bg-gray-50 transition-all duration-300 ease-out">
         <MyFiveFullView 
           selectedSongIndex={selectedMyFiveSong}
           isSharedView={isSharedView}
@@ -70,7 +71,7 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
 
   if (isInFriendsListView) {
     return (
-      <div className="w-1/2 bg-gray-50">
+      <div className="w-1/2 bg-gray-50 transition-all duration-200 ease-out">
         <FriendsListPreview 
           selectedFriend={hoveredFriendsListItem}
         />
@@ -80,7 +81,7 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
 
   if (isInFriendsView) {
     return (
-      <div className="w-1/2 bg-gray-50">
+      <div className="w-1/2 bg-gray-50 transition-all duration-200 ease-out">
         <div className="h-full flex flex-col items-center justify-center p-4 text-center">
           <Users size={32} className="text-gray-600 mb-3" />
           <h3 className="font-bold text-lg mb-1">Friends</h3>
@@ -97,14 +98,14 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
     // Show account preview when hovering over "Edit Account"
     if (hoveredSettingsItem === 'Edit Account') {
       return (
-        <div className="w-1/2 bg-gray-50">
+        <div className="w-1/2 bg-gray-50 transition-all duration-200 ease-out">
           <AccountPreview />
         </div>
       );
     }
     
     return (
-      <div className="w-1/2 bg-gray-50">
+      <div className="w-1/2 bg-gray-50 transition-all duration-200 ease-out">
         <div className="h-full flex flex-col items-center justify-center p-4 text-center">
           <Settings size={32} className="text-gray-600 mb-3" />
           <h3 className="font-bold text-lg mb-1">Settings</h3>
@@ -178,7 +179,7 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
   };
 
   return (
-    <div className="w-1/2 bg-gray-50">
+    <div className="w-1/2 bg-gray-50 transition-all duration-200 ease-out">
       {renderContent()}
     </div>
   );
