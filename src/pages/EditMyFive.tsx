@@ -1,9 +1,18 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { supabase } from '../integrations/supabase/client';
+import { extractSpotifyTrackId, fetchSpotifyTrackInfo } from '../utils/spotifyUtils';
+import { Music, ExternalLink } from 'lucide-react';
+
+interface SpotifyTrackInfo {
+  name: string;
+  artist: string;
+  albumArt: string;
+  spotifyUrl: string;
+  addedDate: string;
+}
 
 const EditMyFive = () => {
   const [songs, setSongs] = useState({
@@ -13,13 +22,20 @@ const EditMyFive = () => {
     song_4: '',
     song_5: ''
   });
+  const [songPreviews, setSongPreviews] = useState<{ [key: string]: SpotifyTrackInfo | null }>({});
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoadingPreviews, setIsLoadingPreviews] = useState(false);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
     loadUserSongs();
   }, []);
+
+  // Load song previews when URLs change
+  useEffect(() => {
+    loadSongPreviews();
+  }, [songs]);
 
   const loadUserSongs = async () => {
     setIsLoading(true);
@@ -55,6 +71,33 @@ const EditMyFive = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const loadSongPreviews = async () => {
+    setIsLoadingPreviews(true);
+    const previews: { [key: string]: SpotifyTrackInfo | null } = {};
+    
+    for (const [key, url] of Object.entries(songs)) {
+      if (url) {
+        const trackId = extractSpotifyTrackId(url);
+        if (trackId) {
+          try {
+            const trackInfo = await fetchSpotifyTrackInfo(trackId, new Date().toISOString());
+            previews[key] = trackInfo;
+          } catch (error) {
+            console.error(`Error loading preview for ${key}:`, error);
+            previews[key] = null;
+          }
+        } else {
+          previews[key] = null;
+        }
+      } else {
+        previews[key] = null;
+      }
+    }
+    
+    setSongPreviews(previews);
+    setIsLoadingPreviews(false);
   };
 
   const handleInputChange = (songKey: string, value: string) => {
@@ -123,6 +166,72 @@ const EditMyFive = () => {
     window.location.href = '/';
   };
 
+  const renderSongInput = (num: number) => {
+    const songKey = `song_${num}`;
+    const songUrl = songs[songKey as keyof typeof songs];
+    const preview = songPreviews[songKey];
+    
+    return (
+      <div key={num} className="space-y-2">
+        <Label htmlFor={songKey} className="text-sm font-medium text-gray-700">
+          Song {num}
+        </Label>
+        
+        {/* Show preview if available */}
+        {preview && (
+          <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border">
+            <div className="w-12 h-12 bg-gray-200 rounded flex-shrink-0 overflow-hidden">
+              {preview.albumArt ? (
+                <img 
+                  src={preview.albumArt} 
+                  alt={`${preview.name} album art`}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Music size={16} className="text-gray-400" />
+                </div>
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900 truncate">
+                {preview.name}
+              </p>
+              <p className="text-sm text-gray-500 truncate">
+                {preview.artist}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => window.open(preview.spotifyUrl, '_blank')}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <ExternalLink size={16} />
+            </button>
+          </div>
+        )}
+        
+        {/* URL Input */}
+        <div className="relative">
+          <input
+            id={songKey}
+            type="url"
+            placeholder="https://open.spotify.com/track/..."
+            value={songUrl}
+            onChange={(e) => handleInputChange(songKey, e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            disabled={isSaving}
+          />
+          {isLoadingPreviews && songUrl && (
+            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black flex items-center justify-center">
@@ -151,23 +260,8 @@ const EditMyFive = () => {
           </div>
         )}
 
-        <div className="space-y-4">
-          {[1, 2, 3, 4, 5].map((num) => (
-            <div key={num}>
-              <Label htmlFor={`song_${num}`} className="text-sm font-medium text-gray-700">
-                Song {num}
-              </Label>
-              <Input
-                id={`song_${num}`}
-                type="url"
-                placeholder="https://open.spotify.com/track/..."
-                value={songs[`song_${num}` as keyof typeof songs]}
-                onChange={(e) => handleInputChange(`song_${num}`, e.target.value)}
-                className="mt-1"
-                disabled={isSaving}
-              />
-            </div>
-          ))}
+        <div className="space-y-6">
+          {[1, 2, 3, 4, 5].map(renderSongInput)}
         </div>
 
         <div className="flex space-x-3 mt-8">
