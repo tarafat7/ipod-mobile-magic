@@ -156,8 +156,8 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
             <Music size={32} className="text-blue-600 mb-3" />
             <h3 className="font-bold text-lg mb-1">Edit</h3>
             <p className="text-sm text-gray-600 text-center leading-tight">
-              Add or change which songs<br />
-              you have on repeat currently
+              Add or change what you<br />
+              have on repeat currently
             </p>
           </div>
         );
