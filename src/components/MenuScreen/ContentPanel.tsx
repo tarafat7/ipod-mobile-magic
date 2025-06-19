@@ -1,4 +1,3 @@
-
 import React from 'react';
 import FriendsScreen from '../FriendsScreen';
 import SettingsScreen from '../SettingsScreen';
@@ -7,7 +6,7 @@ import MyFiveFullView from '../MyFiveFullView';
 import AccountPreview from '../AccountPreview';
 import FriendSongsPreview from '../FriendSongsPreview';
 import FriendsListPreview from '../FriendsListPreview';
-import { User, Settings, Users, Music, Share } from 'lucide-react';
+import { User, Settings, Users, Music, Share, Info } from 'lucide-react';
 
 interface SpotifyTrackInfo {
   name: string;
@@ -100,6 +99,32 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
       return (
         <div className="w-1/2 bg-gray-50">
           <AccountPreview />
+        </div>
+      );
+    }
+    
+    // Show about content when hovering over "About"
+    if (hoveredSettingsItem === 'About') {
+      return (
+        <div className="w-1/2 bg-gray-50">
+          <div className="h-full flex flex-col items-center justify-center p-6 text-center">
+            <Info size={32} className="text-blue-600 mb-4" />
+            <h3 className="font-bold text-lg mb-4">About FivePod</h3>
+            <div className="text-xs text-gray-700 leading-relaxed max-w-xs">
+              <p className="mb-3">
+                FivePod is a small experiment in sharing music the way we used to. It's meant to feel quiet and low-pressure, like handing someone your iPod and saying "just listen."
+              </p>
+              <p className="mb-3">
+                There are no profiles to perfect and nothing to perform. Just five songs that say what you might not feel like putting into words.
+              </p>
+              <p className="mb-3">
+                I built it to feel a little like the early 2000s, a way to check in with people without needing to say much at all.
+              </p>
+              <p className="italic">
+                I hope you enjoy it.
+              </p>
+            </div>
+          </div>
         </div>
       );
     }

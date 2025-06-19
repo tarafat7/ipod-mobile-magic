@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { supabase } from '../../integrations/supabase/client';
 
@@ -28,6 +29,7 @@ interface MenuPanelProps {
 
 const settingsMenuItems = [
   'Edit Account',
+  'About',
   'Product Feedback',
   'Logout',
   'Delete Account'
@@ -133,6 +135,8 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
       onSettingsItemClick(index);
       if (item === 'Product Feedback') {
         handleProductFeedback();
+      } else if (item === 'About') {
+        // About is handled by the content panel, no action needed
       } else {
         onSettingsAction(item);
       }
