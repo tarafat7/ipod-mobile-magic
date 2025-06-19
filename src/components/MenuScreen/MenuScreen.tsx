@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { getMenuItems } from '../../data/iPodData';
 import { supabase } from '../../integrations/supabase/client';
@@ -141,6 +140,14 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
   const handleFriendsListItemHover = (friend: any) => {
     setHoveredFriendsListItem(friend);
   };
+
+  // Update the hovered friend when selectedFriendsListItem changes
+  useEffect(() => {
+    if (isInFriendsListView && friendsList.length > 0) {
+      const selectedFriend = friendsList[selectedFriendsListItem];
+      setHoveredFriendsListItem(selectedFriend);
+    }
+  }, [selectedFriendsListItem, isInFriendsListView, friendsList]);
 
   const handleShareProfile = async () => {
     try {
