@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { supabase } from '../../integrations/supabase/client';
 
@@ -19,6 +20,11 @@ interface MenuPanelProps {
   onFriendsAction?: (action: string) => void;
   onFriendsItemClick?: (index: number) => void;
   onFriendsItemHover?: (item: string | null) => void;
+  isInFriendsListView?: boolean;
+  selectedFriendsListItem?: number;
+  onFriendsListItemClick?: (index: number) => void;
+  onFriendsListItemHover?: (friend: any) => void;
+  friendsList?: any[];
 }
 
 const settingsMenuItems = [
@@ -51,7 +57,12 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   onFriendsClick,
   onFriendsAction,
   onFriendsItemClick,
-  onFriendsItemHover
+  onFriendsItemHover,
+  isInFriendsListView = false,
+  selectedFriendsListItem = 0,
+  onFriendsListItemClick,
+  onFriendsListItemHover,
+  friendsList = []
 }) => {
   const [touchedItem, setTouchedItem] = useState<string | null>(null);
   
@@ -63,7 +74,11 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   let currentMenuItems = displayMenuItems;
   let currentSelectedIndex = selectedMenuItem;
   
-  if (isInSettingsView) {
+  if (isInFriendsListView) {
+    // Show friends list
+    currentMenuItems = friendsList.map(friend => friend.full_name || 'Unknown User');
+    currentSelectedIndex = selectedFriendsListItem;
+  } else if (isInSettingsView) {
     currentMenuItems = settingsMenuItems;
     currentSelectedIndex = selectedSettingsItem;
   } else if (isInFriendsView) {
@@ -104,8 +119,15 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
     if (onFriendsItemHover) {
       onFriendsItemHover(null);
     }
+    if (onFriendsListItemHover) {
+      onFriendsListItemHover(null);
+    }
     
-    if (isInSettingsView) {
+    if (isInFriendsListView) {
+      if (onFriendsListItemClick) {
+        onFriendsListItemClick(index);
+      }
+    } else if (isInSettingsView) {
       onSettingsItemClick(index);
       if (item === 'Edit My Five') {
         window.location.href = '/edit-my-five';
@@ -124,7 +146,7 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
       
       // Handle specific friends actions
       if (item === 'My Friends') {
-        window.location.href = '/my-friends';
+        // This will be handled by the parent component
       }
     } else {
       onMenuItemClick(index);
@@ -136,8 +158,10 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
     }
   };
 
-  const handleItemHover = (item: string) => {
-    if (isInSettingsView && onSettingsItemHover) {
+  const handleItemHover = (item: string, index: number) => {
+    if (isInFriendsListView && onFriendsListItemHover) {
+      onFriendsListItemHover(friendsList[index]);
+    } else if (isInSettingsView && onSettingsItemHover) {
       onSettingsItemHover(item);
     } else if (isInFriendsView && onFriendsItemHover) {
       onFriendsItemHover(item);
@@ -145,15 +169,20 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   };
 
   const handleItemLeave = () => {
-    if (isInSettingsView && onSettingsItemHover && !touchedItem) {
+    if (isInFriendsListView && onFriendsListItemHover && !touchedItem) {
+      onFriendsListItemHover(null);
+    } else if (isInSettingsView && onSettingsItemHover && !touchedItem) {
       onSettingsItemHover(null);
     } else if (isInFriendsView && onFriendsItemHover && !touchedItem) {
       onFriendsItemHover(null);
     }
   };
 
-  const handleTouchStart = (item: string) => {
-    if (isInSettingsView && onSettingsItemHover) {
+  const handleTouchStart = (item: string, index: number) => {
+    if (isInFriendsListView && onFriendsListItemHover) {
+      setTouchedItem(item);
+      onFriendsListItemHover(friendsList[index]);
+    } else if (isInSettingsView && onSettingsItemHover) {
       setTouchedItem(item);
       onSettingsItemHover(item);
     } else if (isInFriendsView && onFriendsItemHover) {
@@ -166,7 +195,9 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
     // Small delay to allow preview to be seen before clearing
     setTimeout(() => {
       setTouchedItem(null);
-      if (isInSettingsView && onSettingsItemHover) {
+      if (isInFriendsListView && onFriendsListItemHover) {
+        onFriendsListItemHover(null);
+      } else if (isInSettingsView && onSettingsItemHover) {
         onSettingsItemHover(null);
       } else if (isInFriendsView && onFriendsItemHover) {
         onFriendsItemHover(null);
@@ -175,6 +206,7 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   };
 
   const getHeaderTitle = () => {
+    if (isInFriendsListView) return 'My Friends';
     if (isInSettingsView) return 'Settings';
     if (isInFriendsView) return 'Friends';
     return 'FivePod';
@@ -182,10 +214,10 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
 
   return (
     <div className={`w-1/2 bg-white border-r border-gray-300 transition-transform duration-300 relative ${
-      (isInSettingsView || isInFriendsView) ? 'transform translate-x-0' : 'transform translate-x-0'
+      (isInSettingsView || isInFriendsView || isInFriendsListView) ? 'transform translate-x-0' : 'transform translate-x-0'
     }`}>
       {/* Battery indicator - only show in main menu */}
-      {!isInSettingsView && !isInFriendsView && (
+      {!isInSettingsView && !isInFriendsView && !isInFriendsListView && (
         <div className="absolute top-2 right-2">
           <div className="w-6 h-3 bg-green-500 rounded-sm"></div>
         </div>
@@ -194,8 +226,8 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
       <div className="p-2">
         <div className="flex items-center justify-between mb-3 text-xs">
           <span className="font-bold">{getHeaderTitle()}</span>
-          {/* Battery indicator for Settings and Friends view */}
-          {(isInSettingsView || isInFriendsView) && (
+          {/* Battery indicator for Settings, Friends, and Friends List view */}
+          {(isInSettingsView || isInFriendsView || isInFriendsListView) && (
             <div className="w-6 h-3 bg-green-500 rounded-sm"></div>
           )}
         </div>
@@ -213,16 +245,16 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
                 backgroundColor: currentSelectedIndex === index ? '#3398d8' : 'transparent'
               }}
               onClick={() => handleItemClick(item, index)}
-              onMouseEnter={() => handleItemHover(item)}
+              onMouseEnter={() => handleItemHover(item, index)}
               onMouseLeave={handleItemLeave}
-              onTouchStart={() => handleTouchStart(item)}
+              onTouchStart={() => handleTouchStart(item, index)}
               onTouchEnd={handleTouchEnd}
             >
               <span>{item}</span>
-              {currentSelectedIndex === index && (isInSettingsView || isInFriendsView) && (
+              {currentSelectedIndex === index && (isInSettingsView || isInFriendsView || isInFriendsListView) && (
                 <span className="text-white">▶</span>
               )}
-              {currentSelectedIndex === index && !isInSettingsView && !isInFriendsView && 
+              {currentSelectedIndex === index && !isInSettingsView && !isInFriendsView && !isInFriendsListView && 
                ((item === 'Settings' && isSignedIn) || (item === 'Friends' && isSignedIn)) && (
                 <span className="text-white">▶</span>
               )}

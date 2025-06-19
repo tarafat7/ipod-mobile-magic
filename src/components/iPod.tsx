@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import Screen from './Screen';
 import ClickWheel from './ClickWheel';
@@ -41,6 +42,9 @@ const IPod: React.FC<IPodProps> = ({
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isInFriendsView, setIsInFriendsView] = useState(false);
   const [selectedFriendsItem, setSelectedFriendsItem] = useState(0);
+  const [isInFriendsListView, setIsInFriendsListView] = useState(false);
+  const [selectedFriendsListItem, setSelectedFriendsListItem] = useState(0);
+  const [friendsList, setFriendsList] = useState<any[]>([]);
 
   // Check authentication state and route context
   useEffect(() => {
@@ -57,6 +61,50 @@ const IPod: React.FC<IPodProps> = ({
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Load friends list when needed
+  const loadFriendsList = async () => {
+    if (!currentUser) return;
+    
+    try {
+      // First get the friend IDs
+      const { data: friendsData, error: friendsError } = await supabase
+        .from('friends')
+        .select('friend_user_id')
+        .eq('user_id', currentUser.id);
+
+      if (friendsError) {
+        console.error('Error loading friends:', friendsError);
+        return;
+      }
+
+      if (friendsData && friendsData.length > 0) {
+        const friendIds = friendsData.map(f => f.friend_user_id);
+        
+        // Then get the profile information for those friends
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, full_name, username')
+          .in('id', friendIds);
+
+        if (profilesError) {
+          console.error('Error loading friend profiles:', profilesError);
+          return;
+        }
+
+        if (profilesData) {
+          const friendsList = profilesData.map(profile => ({
+            id: profile.id,
+            full_name: profile.full_name || 'Unknown User',
+            username: profile.username || ''
+          }));
+          setFriendsList(friendsList);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading friends:', error);
+    }
+  };
 
   // Handle route-based shared view detection
   useEffect(() => {
@@ -173,6 +221,14 @@ const IPod: React.FC<IPodProps> = ({
           
           console.log('My Five navigation:', { currentSelection: selectedMyFiveSong, newSelection });
           setSelectedMyFiveSong(newSelection);
+        } else if (isInFriendsListView) {
+          // Navigate friends list
+          const newSelection = isClockwise 
+            ? (selectedFriendsListItem + 1) % Math.max(friendsList.length, 1)
+            : (selectedFriendsListItem - 1 + Math.max(friendsList.length, 1)) % Math.max(friendsList.length, 1);
+          
+          console.log('Friends list navigation:', { currentSelection: selectedFriendsListItem, newSelection });
+          setSelectedFriendsListItem(newSelection);
         } else if (isInFriendsView) {
           // Navigate friends items - only 2 items now
           const friendsItemsCount = 2; // Add a friend, My Friends
@@ -285,14 +341,16 @@ const IPod: React.FC<IPodProps> = ({
   const handleCenterClick = () => {
     console.log('Center button clicked!');
     console.log('Current screen:', currentScreen);
-    console.log('Selecte menu item:', selectedMenuItem);
+    console.log('Selected menu item:', selectedMenuItem);
     console.log('Selected menu item name:', menuItems[selectedMenuItem]);
     console.log('Is in settings view:', isInSettingsView);
     console.log('Is in My Five view:', isInMyFiveView);
     console.log('Is in Friends view:', isInFriendsView);
+    console.log('Is in Friends List view:', isInFriendsListView);
     console.log('Is shared view:', isSharedView);
     console.log('Selected settings item:', selectedSettingsItem);
     console.log('Selected friends item:', selectedFriendsItem);
+    console.log('Selected friends list item:', selectedFriendsListItem);
     
     if (currentScreen === 'menu') {
       if (isInMyFiveView) {
@@ -306,6 +364,12 @@ const IPod: React.FC<IPodProps> = ({
           const event = new CustomEvent('myFiveSongSelect', { detail: { songIndex: selectedMyFiveSong } });
           window.dispatchEvent(event);
         }
+      } else if (isInFriendsListView) {
+        // Handle friend selection - open their My Five page
+        const selectedFriend = friendsList[selectedFriendsListItem];
+        if (selectedFriend) {
+          window.location.href = `/my-five/${selectedFriend.id}`;
+        }
       } else if (isInFriendsView) {
         // Handle friends item selection
         const friendsItems = ['Add a friend', 'My Friends'];
@@ -317,7 +381,10 @@ const IPod: React.FC<IPodProps> = ({
             window.location.href = '/search-friends';
             break;
           case 'My Friends':
-            window.location.href = '/my-friends';
+            // Enter friends list view instead of navigating away
+            setIsInFriendsListView(true);
+            setSelectedFriendsListItem(0);
+            loadFriendsList();
             break;
           default:
             console.log('Friends action not implemented:', selectedFriendsAction);
@@ -381,9 +448,13 @@ const IPod: React.FC<IPodProps> = ({
 
   const handleMenuClick = () => {
     console.log('Menu button clicked');
-    console.log('Current state - Screen:', currentScreen, 'InSettings:', isInSettingsView, 'InMyFive:', isInMyFiveView, 'InFriends:', isInFriendsView, 'IsShared:', isSharedView);
+    console.log('Current state - Screen:', currentScreen, 'InSettings:', isInSettingsView, 'InMyFive:', isInMyFiveView, 'InFriends:', isInFriendsView, 'InFriendsList:', isInFriendsListView, 'IsShared:', isSharedView);
     
-    if (isInFriendsView) {
+    if (isInFriendsListView) {
+      console.log('Exiting Friends List view');
+      setIsInFriendsListView(false);
+      setSelectedFriendsListItem(0);
+    } else if (isInFriendsView) {
       console.log('Exiting Friends view');
       setIsInFriendsView(false);
       setSelectedFriendsItem(0);
@@ -415,6 +486,10 @@ const IPod: React.FC<IPodProps> = ({
     setSelectedFriendsItem(index);
   };
 
+  const handleFriendsListItemChange = (index: number) => {
+    setSelectedFriendsListItem(index);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center md:p-4 overflow-hidden">
       <div className="relative w-full h-screen md:w-auto md:h-auto">
@@ -440,6 +515,10 @@ const IPod: React.FC<IPodProps> = ({
             isInFriendsView={isInFriendsView}
             selectedFriendsItem={selectedFriendsItem}
             onFriendsItemChange={handleFriendsItemChange}
+            isInFriendsListView={isInFriendsListView}
+            selectedFriendsListItem={selectedFriendsListItem}
+            onFriendsListItemChange={handleFriendsListItemChange}
+            friendsList={friendsList}
           />
 
           {/* Click Wheel - Centered in remaining space, moved up slightly on mobile */}

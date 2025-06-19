@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { getMenuItems } from '../../data/iPodData';
 import { supabase } from '../../integrations/supabase/client';
@@ -26,6 +27,10 @@ interface MenuScreenProps {
   isInFriendsView?: boolean;
   selectedFriendsItem?: number;
   onFriendsItemChange?: (index: number) => void;
+  isInFriendsListView?: boolean;
+  selectedFriendsListItem?: number;
+  onFriendsListItemChange?: (index: number) => void;
+  friendsList?: any[];
 }
 
 const MenuScreen: React.FC<MenuScreenProps> = ({ 
@@ -41,12 +46,17 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
   sharedUserSongs = [],
   isInFriendsView = false,
   selectedFriendsItem = 0,
-  onFriendsItemChange
+  onFriendsItemChange,
+  isInFriendsListView = false,
+  selectedFriendsListItem = 0,
+  onFriendsListItemChange,
+  friendsList = []
 }) => {
   const [menuItems, setMenuItems] = useState<string[]>([]);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [hoveredSettingsItem, setHoveredSettingsItem] = useState<string | null>(null);
   const [hoveredFriendsItem, setHoveredFriendsItem] = useState<string | null>(null);
+  const [hoveredFriendsListItem, setHoveredFriendsListItem] = useState<any>(null);
 
   useEffect(() => {
     const loadMenuItems = async () => {
@@ -114,12 +124,22 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
     }
   };
 
+  const handleFriendsListItemClick = (index: number) => {
+    if (onFriendsListItemChange) {
+      onFriendsListItemChange(index);
+    }
+  };
+
   const handleSettingsItemHover = (item: string | null) => {
     setHoveredSettingsItem(item);
   };
 
   const handleFriendsItemHover = (item: string | null) => {
     setHoveredFriendsItem(item);
+  };
+
+  const handleFriendsListItemHover = (friend: any) => {
+    setHoveredFriendsListItem(friend);
   };
 
   const handleShareProfile = async () => {
@@ -210,6 +230,11 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
           onFriendsAction={handleFriendsAction}
           onFriendsItemClick={handleFriendsItemClick}
           onFriendsItemHover={handleFriendsItemHover}
+          isInFriendsListView={isInFriendsListView}
+          selectedFriendsListItem={selectedFriendsListItem}
+          onFriendsListItemClick={handleFriendsListItemClick}
+          onFriendsListItemHover={handleFriendsListItemHover}
+          friendsList={friendsList}
         />
       )}
       <ContentPanel
@@ -226,6 +251,10 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
         isInFriendsView={isInFriendsView}
         selectedFriendsItem={selectedFriendsItem}
         hoveredFriendsItem={hoveredFriendsItem}
+        isInFriendsListView={isInFriendsListView}
+        selectedFriendsListItem={selectedFriendsListItem}
+        hoveredFriendsListItem={hoveredFriendsListItem}
+        friendsList={friendsList}
       />
     </div>
   );

@@ -37,6 +37,10 @@ interface ScreenProps {
   isInFriendsView?: boolean;
   selectedFriendsItem?: number;
   onFriendsItemChange?: (index: number) => void;
+  isInFriendsListView?: boolean;
+  selectedFriendsListItem?: number;
+  onFriendsListItemChange?: (index: number) => void;
+  friendsList?: any[];
 }
 
 const Screen: React.FC<ScreenProps> = ({ 
@@ -56,7 +60,11 @@ const Screen: React.FC<ScreenProps> = ({
   sharedUserSongs = [],
   isInFriendsView = false,
   selectedFriendsItem = 0,
-  onFriendsItemChange
+  onFriendsItemChange,
+  isInFriendsListView = false,
+  selectedFriendsListItem = 0,
+  onFriendsListItemChange,
+  friendsList = []
 }) => {
   const renderScreen = () => {
     switch (currentScreen) {
@@ -76,6 +84,10 @@ const Screen: React.FC<ScreenProps> = ({
             isInFriendsView={isInFriendsView}
             selectedFriendsItem={selectedFriendsItem}
             onFriendsItemChange={onFriendsItemChange}
+            isInFriendsListView={isInFriendsListView}
+            selectedFriendsListItem={selectedFriendsListItem}
+            onFriendsListItemChange={onFriendsListItemChange}
+            friendsList={friendsList}
           />
         );
       case 'friends':
