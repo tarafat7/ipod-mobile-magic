@@ -137,17 +137,33 @@ const IPod: React.FC<IPodProps> = ({
       } else if (state.isInMyFiveView) {
         console.log('My Five song selected:', state.selectedMyFiveSong);
         
+        // Check if Edit My Five button is selected (index -1 or 0 when it's the first item)
+        const hasEditButton = !state.isSharedView && friends.viewingFriendSongs.length === 0 && currentUser;
+        
+        if (hasEditButton && state.selectedMyFiveSong === 0 && state.myFiveSongsCount === 0) {
+          // Edit My Five selected when no songs exist
+          handleEditMyFive();
+          return;
+        } else if (hasEditButton && state.selectedMyFiveSong === 0) {
+          // Edit My Five selected when songs exist
+          handleEditMyFive();
+          return;
+        }
+        
+        // Adjust song index if Edit button exists
+        const songIndex = hasEditButton ? state.selectedMyFiveSong - 1 : state.selectedMyFiveSong;
+        
         let songToPlay = null;
         if (friends.viewingFriendSongs.length > 0) {
-          songToPlay = friends.viewingFriendSongs[state.selectedMyFiveSong];
-        } else if (state.isSharedView && sharedUserSongs[state.selectedMyFiveSong]) {
-          songToPlay = sharedUserSongs[state.selectedMyFiveSong];
+          songToPlay = friends.viewingFriendSongs[songIndex];
+        } else if (state.isSharedView && sharedUserSongs[songIndex]) {
+          songToPlay = sharedUserSongs[songIndex];
         }
         
         if (songToPlay) {
           window.open(songToPlay.spotifyUrl, '_blank');
-        } else {
-          const event = new CustomEvent('myFiveSongSelect', { detail: { songIndex: state.selectedMyFiveSong } });
+        } else if (songIndex >= 0) {
+          const event = new CustomEvent('myFiveSongSelect', { detail: { songIndex } });
           window.dispatchEvent(event);
         }
       } else if (state.isInFriendsListView) {
@@ -231,15 +247,6 @@ const IPod: React.FC<IPodProps> = ({
             friends.setViewingFriendSongs([]);
             state.setIsInMyFiveView(true);
             state.setSelectedMyFiveSong(0);
-          }
-        } else if (selectedItem === 'Edit My Five') {
-          // Check if user is signed in
-          if (!currentUser) {
-            console.log('User not signed in, showing auth options for Edit My Five');
-            state.setIsInMyFiveAuthView(true);
-            state.setSelectedMyFiveAuthOption(0);
-          } else {
-            handleEditMyFive();
           }
         } else if (selectedItem === 'Friends') {
           console.log('Entering Friends view');

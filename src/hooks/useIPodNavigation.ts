@@ -170,9 +170,14 @@ export const useIPodNavigation = (props: NavigationProps) => {
           songsCount = myFiveSongsCount;
         }
         
+        // Include Edit My Five button in navigation for signed-in users viewing their own songs
+        const hasEditButton = !isSharedView && viewingFriendSongs.length === 0 && currentUser;
+        const totalItems = hasEditButton ? songsCount + 1 : songsCount;
+        const maxItems = Math.max(totalItems, 1);
+        
         const newSelection = isClockwise 
-          ? (selectedMyFiveSong + 1) % Math.max(songsCount, 1)
-          : (selectedMyFiveSong - 1 + Math.max(songsCount, 1)) % Math.max(songsCount, 1);
+          ? (selectedMyFiveSong + 1) % maxItems
+          : (selectedMyFiveSong - 1 + maxItems) % maxItems;
         
         setSelectedMyFiveSong(newSelection);
       } else if (isInFriendsListView) {

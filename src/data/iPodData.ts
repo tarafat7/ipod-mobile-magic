@@ -1,28 +1,27 @@
 
-import { Song } from '../types/iPod';
-import { supabase } from '../integrations/supabase/client';
+export const songs = [
+  { id: 1, title: "Blinding Lights", artist: "The Weeknd", duration: "3:20" },
+  { id: 2, title: "Watermelon Sugar", artist: "Harry Styles", duration: "2:54" },
+  { id: 3, title: "Levitating", artist: "Dua Lipa", duration: "3:23" },
+  { id: 4, title: "Good 4 U", artist: "Olivia Rodrigo", duration: "2:58" },
+  { id: 5, title: "Stay", artist: "The Kid LAROI & Justin Bieber", duration: "2:21" }
+];
 
 export const getMenuItems = async (): Promise<string[]> => {
-  // Remove 'Sign In' from menu items since it's now accessible through My Five and Edit My Five
-  return [
-    'My Five',
-    'Edit My Five', 
-    'Friends',
-    'Share Profile',
-    'Settings',
-    'About'
-  ];
+  const { supabase } = await import('../integrations/supabase/client');
+  
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (session) {
+      // Signed in menu - removed 'Edit My Five'
+      return ['My Five', 'Friends', 'Share Profile', 'Settings', 'About'];
+    } else {
+      // Not signed in menu
+      return ['Sign In', 'My Five', 'About'];
+    }
+  } catch (error) {
+    console.error('Error checking auth session:', error);
+    return ['Sign In', 'My Five', 'About'];
+  }
 };
-
-export const menuItems = [
-  'Friends', 
-  'Settings'
-];
-
-export const songs: Song[] = [
-  { id: 1, title: 'Bohemian Rhapsody', artist: 'Queen', duration: '5:55' },
-  { id: 2, title: 'Hotel California', artist: 'Eagles', duration: '6:30' },
-  { id: 3, title: 'Stairway to Heaven', artist: 'Led Zeppelin', duration: '8:02' },
-  { id: 4, title: 'Sweet Child O Mine', artist: 'Guns N Roses', duration: '5:03' },
-  { id: 5, title: 'Imagine', artist: 'John Lennon', duration: '3:07' }
-];
