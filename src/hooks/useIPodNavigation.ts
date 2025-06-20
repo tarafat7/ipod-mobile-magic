@@ -128,6 +128,21 @@ export const useIPodNavigation = (props: NavigationProps) => {
   const handleWheelNavigation = (isClockwise: boolean) => {
     triggerHapticFeedback();
     
+    // Handle Privacy Policy scrolling
+    if (props.isInPrivacyPolicyView) {
+      const scrollContainer = document.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollContainer) {
+        const scrollAmount = 50;
+        const currentScrollTop = scrollContainer.scrollTop;
+        const newScrollTop = isClockwise 
+          ? currentScrollTop + scrollAmount 
+          : Math.max(0, currentScrollTop - scrollAmount);
+        
+        scrollContainer.scrollTop = newScrollTop;
+      }
+      return;
+    }
+    
     if (currentScreen === 'menu') {
       if (isInMyFiveView) {
         let songsCount;
