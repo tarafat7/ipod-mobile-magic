@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
 import { supabase } from '../integrations/supabase/client';
+import AuthHeader from './Auth/AuthHeader';
+import AuthForm from './Auth/AuthForm';
 
 interface FormData {
   fullName: string;
@@ -29,7 +30,6 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
   const [isSignInMode, setIsSignInMode] = useState(false);
 
   useEffect(() => {
-    // Check if we're in edit mode or signin mode
     const urlParams = new URLSearchParams(window.location.search);
     const mode = urlParams.get('mode');
     
@@ -55,7 +55,7 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
           setFormData({
             fullName: profile.full_name || '',
             email: profile.email || '',
-            password: '', // Don't pre-fill password
+            password: '',
             username: profile.username || ''
           });
         }
@@ -63,15 +63,6 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
     } catch (error) {
       console.error('Error loading user data:', error);
     }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    onErrorClear();
   };
 
   const handleSignIn = async () => {
@@ -83,69 +74,57 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
 
       if (error) {
         console.error('Sign in error:', error);
-        // Handle error - you might want to pass this to the parent component
         return;
       }
 
-      // Redirect to main page on successful sign in
       window.location.href = '/';
     } catch (error) {
       console.error('Unexpected sign in error:', error);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleFormSubmit = async (data: FormData) => {
     if (isSignInMode) {
       await handleSignIn();
       return;
     }
     
     if (isEditMode) {
-      // Handle account update
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          // Update profile in profiles table
           await supabase
             .from('profiles')
             .update({
-              full_name: formData.fullName,
-              email: formData.email,
-              username: formData.username
+              full_name: data.fullName,
+              email: data.email,
+              username: data.username
             })
             .eq('id', user.id);
           
-          // Update auth user metadata and email
           const updateData: any = {};
           
-          // Update email if changed
-          if (formData.email !== user.email) {
-            updateData.email = formData.email;
+          if (data.email !== user.email) {
+            updateData.email = data.email;
           }
           
-          // Update password if provided
-          if (formData.password) {
-            updateData.password = formData.password;
+          if (data.password) {
+            updateData.password = data.password;
           }
           
-          // Update user metadata with full name and username
           updateData.data = {
-            full_name: formData.fullName,
-            username: formData.username
+            full_name: data.fullName,
+            username: data.username
           };
           
           await supabase.auth.updateUser(updateData);
-          
-          // Redirect back to main page
           window.location.href = '/';
         }
       } catch (error) {
         console.error('Error updating account:', error);
       }
     } else {
-      onSubmit(formData);
+      onSubmit(data);
     }
   };
 
@@ -158,32 +137,10 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
     onErrorClear();
   };
 
-  const getTitle = () => {
-    if (isEditMode) return 'Edit your account';
-    if (isSignInMode) return 'Welcome back';
-    return 'Create your account to get started';
-  };
-
-  const getButtonText = () => {
-    if (isLoading) {
-      if (isEditMode) return 'Updating...';
-      if (isSignInMode) return 'Signing In...';
-      return 'Creating Account...';
-    }
-    if (isEditMode) return 'Update Account';
-    if (isSignInMode) return 'Sign In';
-    return 'Create Account';
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black flex items-center justify-center p-4">
       <div className="bg-white rounded-xl p-8 max-w-md w-full shadow-2xl">
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">FivePod</h1>
-          <p className="text-gray-600">
-            {getTitle()}
-          </p>
-        </div>
+        <AuthHeader isEditMode={isEditMode} isSignInMode={isSignInMode} />
         
         {error && (
           <div className="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-md text-sm">
@@ -191,104 +148,43 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
           </div>
         )}
         
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {!isSignInMode && (
-            <>
-              <div>
-                <Label htmlFor="fullName">Full Name</Label>
-                <Input
-                  id="fullName"
-                  name="fullName"
-                  type="text"
-                  value={formData.fullName}
-                  onChange={handleInputChange}
-                  required
-                  className="mt-1"
-                  disabled={isLoading}
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  name="username"
-                  type="text"
-                  value={formData.username}
-                  onChange={handleInputChange}
-                  required
-                  className="mt-1"
-                  disabled={isLoading}
-                />
-              </div>
-            </>
-          )}
-          
-          <div>
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              required
-              className="mt-1"
-              disabled={isLoading}
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="password">
-              Password {isEditMode && '(leave blank to keep current)'}
-            </Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              required={!isEditMode}
-              className="mt-1"
-              disabled={isLoading}
-            />
-          </div>
-          
-          <div className="flex space-x-3">
+        <AuthForm
+          onSubmit={handleFormSubmit}
+          isLoading={isLoading}
+          error={error}
+          onErrorClear={onErrorClear}
+          isEditMode={isEditMode}
+          isSignInMode={isSignInMode}
+          formData={formData}
+          onFormDataChange={setFormData}
+        />
+        
+        <div className="flex space-x-3 mt-4">
+          {isEditMode && (
             <Button 
-              type="submit" 
-              className="flex-1 bg-blue-600 hover:bg-blue-700 mt-6"
+              type="button" 
+              variant="outline"
+              onClick={handleCancel}
+              className="flex-1"
               disabled={isLoading}
             >
-              {getButtonText()}
+              Cancel
             </Button>
-            
-            {isEditMode && (
-              <Button 
-                type="button" 
-                variant="outline"
-                onClick={handleCancel}
-                className="flex-1 mt-6"
-                disabled={isLoading}
-              >
-                Cancel
-              </Button>
-            )}
-          </div>
-
-          {!isEditMode && (
-            <div className="text-center mt-4">
-              <button
-                type="button"
-                onClick={toggleMode}
-                className="text-blue-600 hover:text-blue-700 text-sm underline"
-                disabled={isLoading}
-              >
-                {isSignInMode ? 'or create account' : 'or sign in'}
-              </button>
-            </div>
           )}
-        </form>
+        </div>
+
+        {!isEditMode && (
+          <div className="text-center mt-4">
+            <button
+              type="button"
+              onClick={toggleMode}
+              className="text-blue-600 hover:text-blue-700 text-sm underline"
+              disabled={isLoading}
+            >
+              {isSignInMode ? 'or create account' : 'or sign in'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

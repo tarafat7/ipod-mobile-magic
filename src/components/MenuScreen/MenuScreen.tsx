@@ -3,6 +3,9 @@ import { getMenuItems } from '../../data/iPodData';
 import { supabase } from '../../integrations/supabase/client';
 import MenuPanel from './MenuPanel';
 import ContentPanel from './ContentPanel';
+import { useDailyDropState } from '../../hooks/useDailyDropState';
+import { useSettingsState } from '../../hooks/useSettingsState';
+import { useMyFiveState } from '../../hooks/useMyFiveState';
 
 interface SpotifyTrackInfo {
   name: string;
@@ -59,27 +62,23 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
 }) => {
   const [menuItems, setMenuItems] = useState<string[]>([]);
   const [isSignedIn, setIsSignedIn] = useState(false);
-  const [hoveredSettingsItem, setHoveredSettingsItem] = useState<string | null>(null);
+  
+  const settingsState = useSettingsState();
   const [hoveredFriendsItem, setHoveredFriendsItem] = useState<string | null>(null);
   const [hoveredFriendsListItem, setHoveredFriendsListItem] = useState<any>(null);
   const [hoveredDailyDropItem, setHoveredDailyDropItem] = useState<string | null>(null);
-
-  // Remove the automatic showDailyDropMenu - only use the explicit isInDailyDropView state
-  // const showDailyDropMenu = menuItems[selectedMenuItem] === 'The Daily Drop' && !isInSettingsView && !isInFriendsView && !isInMyFiveView;
 
   useEffect(() => {
     const loadMenuItems = async () => {
       const items = await getMenuItems();
       setMenuItems(items);
       
-      // Check auth status
       const { data: { session } } = await supabase.auth.getSession();
       setIsSignedIn(!!session);
     };
 
     loadMenuItems();
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setIsSignedIn(!!session);
       loadMenuItems();
@@ -88,10 +87,8 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
     return () => subscription.unsubscribe();
   }, []);
 
-  // Add effect to load shared profile data when in shared view
   useEffect(() => {
     if (isSharedView && !sharedUserProfile) {
-      // Extract user ID from URL
       const currentPath = window.location.pathname;
       const userIdMatch = currentPath.match(/\/my-five\/([^\/]+)/);
       
@@ -105,7 +102,6 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
   const loadSharedProfile = async (userId: string) => {
     try {
       // This will be handled by the parent component or through a different mechanism
-      // For now, we'll rely on the shared props being passed down
     } catch (error) {
       console.error('Error loading shared profile:', error);
     }
@@ -121,8 +117,6 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
 
   const handleDailyDropClick = () => {
     console.log('Daily Drop clicked - this should not be called from MenuScreen');
-    // This function should not be responsible for changing the Daily Drop view state
-    // That's handled by the iPod component's center click handler
   };
 
   const handleMenuItemClick = (index: number) => {
@@ -151,10 +145,6 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
     }
   };
 
-  const handleSettingsItemHover = (item: string | null) => {
-    setHoveredSettingsItem(item);
-  };
-
   const handleFriendsItemHover = (item: string | null) => {
     setHoveredFriendsItem(item);
   };
@@ -167,7 +157,6 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
     setHoveredDailyDropItem(item);
   };
 
-  // Update the hovered friend when selectedFriendsListItem changes
   useEffect(() => {
     if (isInFriendsListView && friendsList.length > 0) {
       const selectedFriend = friendsList[selectedFriendsListItem];
@@ -190,7 +179,6 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
       if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
         await navigator.share(shareData);
       } else {
-        // Fallback: copy to clipboard
         await navigator.clipboard.writeText(shareUrl);
         alert('Link copied to clipboard!');
       }
@@ -255,7 +243,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
           onSettingsAction={handleSettingsAction}
           onMenuItemClick={handleMenuItemClick}
           onSettingsItemClick={handleSettingsItemClick}
-          onSettingsItemHover={handleSettingsItemHover}
+          onSettingsItemHover={settingsState.handleSettingsItemHover}
           isSharedView={isSharedView}
           isInFriendsView={isInFriendsView}
           selectedFriendsItem={selectedFriendsItem}
@@ -282,7 +270,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
         isSignedIn={isSignedIn}
         isInMyFiveView={isInMyFiveView}
         selectedMyFiveSong={selectedMyFiveSong}
-        hoveredSettingsItem={hoveredSettingsItem}
+        hoveredSettingsItem={settingsState.hoveredSettingsItem}
         isSharedView={isSharedView}
         sharedUserProfile={sharedUserProfile}
         sharedUserSongs={sharedUserSongs}
