@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { supabase } from '../../integrations/supabase/client';
 
@@ -43,6 +42,7 @@ interface CenterClickHandlerProps {
   onLoadFriendsList: (user: any) => void;
   onPrivacyPolicyViewEnter: () => void;
   onSettingsViewExit: () => void;
+  onDailyDropViewExit: () => void;
 }
 
 export const useCenterClickHandler = (props: CenterClickHandlerProps) => {

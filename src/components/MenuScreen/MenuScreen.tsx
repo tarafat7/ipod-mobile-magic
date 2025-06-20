@@ -117,7 +117,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
   };
 
   const handleDailyDropClick = () => {
-    console.log('Daily Drop clicked - this should not be called from MenuScreen');
+    console.log('Daily Drop clicked');
   };
 
   const handleMenuItemClick = (index: number) => {
@@ -225,6 +225,22 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
     switch (action) {
       case 'Add a friend':
         window.location.href = '/search-friends';
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleDailyDropAction = async (action: string) => {
+    switch (action) {
+      case "Today's Prompt":
+        console.log('Today\'s Prompt action');
+        break;
+      case 'Add a Song':
+        console.log('Add a Song action');
+        break;
+      case 'View Today\'s Playlist':
+        console.log('View Today\'s Playlist action');
         break;
       default:
         break;
