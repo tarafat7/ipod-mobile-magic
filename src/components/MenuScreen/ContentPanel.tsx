@@ -72,8 +72,8 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
           </div>
           <h3 className="font-bold text-lg mb-1">The Daily Drop</h3>
           <p className="text-sm text-gray-600 text-center leading-tight">
-            Discover new music<br />
-            every day
+            A global playlist built<br />
+            daily around a prompt
           </p>
         </div>
       </div>
@@ -155,8 +155,8 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
             </div>
             <h3 className="font-bold text-lg mb-1">The Daily Drop</h3>
             <p className="text-sm text-gray-600 text-center leading-tight">
-              Discover new music<br />
-              every day
+              A global playlist built<br />
+              daily around a prompt
             </p>
           </div>
         );
