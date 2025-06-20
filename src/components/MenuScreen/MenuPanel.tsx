@@ -25,6 +25,11 @@ interface MenuPanelProps {
   onFriendsListItemClick?: (index: number) => void;
   onFriendsListItemHover?: (friend: any) => void;
   friendsList?: any[];
+  isInDailyDropView?: boolean;
+  selectedDailyDropItem?: number;
+  onDailyDropClick?: () => void;
+  onDailyDropItemClick?: (index: number) => void;
+  onDailyDropItemHover?: (item: string | null) => void;
 }
 
 const settingsMenuItems = [
@@ -38,6 +43,12 @@ const settingsMenuItems = [
 const friendsMenuItems = [
   'Add a friend',
   'My Friends'
+];
+
+const dailyDropMenuItems = [
+  "Today's Prompt",
+  'Add My Track',
+  'View Playlist'
 ];
 
 const MenuPanel: React.FC<MenuPanelProps> = ({
@@ -62,7 +73,12 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   selectedFriendsListItem = 0,
   onFriendsListItemClick,
   onFriendsListItemHover,
-  friendsList = []
+  friendsList = [],
+  isInDailyDropView = false,
+  selectedDailyDropItem = 0,
+  onDailyDropClick,
+  onDailyDropItemClick,
+  onDailyDropItemHover
 }) => {
   const [touchedItem, setTouchedItem] = useState<string | null>(null);
   
@@ -78,6 +94,9 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
     // Show friends list
     currentMenuItems = friendsList.map(friend => friend.full_name || 'Unknown User');
     currentSelectedIndex = selectedFriendsListItem;
+  } else if (isInDailyDropView) {
+    currentMenuItems = dailyDropMenuItems;
+    currentSelectedIndex = selectedDailyDropItem;
   } else if (isInSettingsView) {
     currentMenuItems = settingsMenuItems;
     currentSelectedIndex = selectedSettingsItem;
@@ -183,10 +202,17 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
     if (onFriendsListItemHover) {
       onFriendsListItemHover(null);
     }
+    if (onDailyDropItemHover) {
+      onDailyDropItemHover(null);
+    }
     
     if (isInFriendsListView) {
       if (onFriendsListItemClick) {
         onFriendsListItemClick(index);
+      }
+    } else if (isInDailyDropView) {
+      if (onDailyDropItemClick) {
+        onDailyDropItemClick(index);
       }
     } else if (isInSettingsView) {
       onSettingsItemClick(index);
@@ -208,6 +234,10 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
       onMenuItemClick(index);
       if (item === 'Settings' && isSignedIn) {
         onSettingsClick();
+      } else if (item === 'The Daily Drop') {
+        if (onDailyDropClick) {
+          onDailyDropClick();
+        }
       } else if (item === 'Friends' && isSignedIn && onFriendsClick) {
         onFriendsClick();
       } else if (item === 'Edit My Five') {
@@ -221,6 +251,8 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   const handleItemHover = (item: string, index: number) => {
     if (isInFriendsListView && onFriendsListItemHover) {
       onFriendsListItemHover(friendsList[index]);
+    } else if (isInDailyDropView && onDailyDropItemHover) {
+      onDailyDropItemHover(item);
     } else if (isInSettingsView && onSettingsItemHover) {
       onSettingsItemHover(item);
     } else if (isInFriendsView && onFriendsItemHover) {
@@ -231,6 +263,8 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   const handleItemLeave = () => {
     if (isInFriendsListView && onFriendsListItemHover && !touchedItem) {
       onFriendsListItemHover(null);
+    } else if (isInDailyDropView && onDailyDropItemHover && !touchedItem) {
+      onDailyDropItemHover(null);
     } else if (isInSettingsView && onSettingsItemHover && !touchedItem) {
       onSettingsItemHover(null);
     } else if (isInFriendsView && onFriendsItemHover && !touchedItem) {
@@ -242,6 +276,9 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
     if (isInFriendsListView && onFriendsListItemHover) {
       setTouchedItem(item);
       onFriendsListItemHover(friendsList[index]);
+    } else if (isInDailyDropView && onDailyDropItemHover) {
+      setTouchedItem(item);
+      onDailyDropItemHover(item);
     } else if (isInSettingsView && onSettingsItemHover) {
       setTouchedItem(item);
       onSettingsItemHover(item);
@@ -257,6 +294,8 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
       setTouchedItem(null);
       if (isInFriendsListView && onFriendsListItemHover) {
         onFriendsListItemHover(null);
+      } else if (isInDailyDropView && onDailyDropItemHover) {
+        onDailyDropItemHover(null);
       } else if (isInSettingsView && onSettingsItemHover) {
         onSettingsItemHover(null);
       } else if (isInFriendsView && onFriendsItemHover) {
@@ -267,6 +306,7 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
 
   const getHeaderTitle = () => {
     if (isInFriendsListView) return 'My Friends';
+    if (isInDailyDropView) return 'The Daily Drop';
     if (isInSettingsView) return 'Settings';
     if (isInFriendsView) return 'Friends';
     return 'FivePod';
@@ -274,10 +314,10 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
 
   return (
     <div className={`w-1/2 bg-white border-r border-gray-300 transition-transform duration-300 relative ${
-      (isInSettingsView || isInFriendsView || isInFriendsListView) ? 'transform translate-x-0' : 'transform translate-x-0'
+      (isInSettingsView || isInFriendsView || isInFriendsListView || isInDailyDropView) ? 'transform translate-x-0' : 'transform translate-x-0'
     }`}>
       {/* Battery indicator - only show in main menu */}
-      {!isInSettingsView && !isInFriendsView && !isInFriendsListView && (
+      {!isInSettingsView && !isInFriendsView && !isInFriendsListView && !isInDailyDropView && (
         <div className="absolute top-2 right-2">
           <div className="w-6 h-3 bg-green-500 rounded-sm"></div>
         </div>
@@ -286,8 +326,8 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
       <div className="p-2">
         <div className="flex items-center justify-between mb-3 text-xs">
           <span className="font-bold">{getHeaderTitle()}</span>
-          {/* Battery indicator for Settings, Friends, and Friends List view */}
-          {(isInSettingsView || isInFriendsView || isInFriendsListView) && (
+          {/* Battery indicator for Settings, Friends, Friends List, and Daily Drop view */}
+          {(isInSettingsView || isInFriendsView || isInFriendsListView || isInDailyDropView) && (
             <div className="w-6 h-3 bg-green-500 rounded-sm"></div>
           )}
         </div>
@@ -311,11 +351,11 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
               onTouchEnd={handleTouchEnd}
             >
               <span>{item}</span>
-              {currentSelectedIndex === index && (isInSettingsView || isInFriendsView || isInFriendsListView) && (
+              {currentSelectedIndex === index && (isInSettingsView || isInFriendsView || isInFriendsListView || isInDailyDropView) && (
                 <span className="text-white">▶</span>
               )}
-              {currentSelectedIndex === index && !isInSettingsView && !isInFriendsView && !isInFriendsListView && 
-               ((item === 'Settings' && isSignedIn) || (item === 'Friends' && isSignedIn)) && (
+              {currentSelectedIndex === index && !isInSettingsView && !isInFriendsView && !isInFriendsListView && !isInDailyDropView && 
+               ((item === 'Settings' && isSignedIn) || (item === 'Friends' && isSignedIn) || item === 'The Daily Drop') && (
                 <span className="text-white">▶</span>
               )}
             </div>

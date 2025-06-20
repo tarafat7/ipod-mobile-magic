@@ -15,9 +15,9 @@ export const getMenuItems = async (): Promise<string[]> => {
     
     // Always show the same menu items regardless of auth status
     // Individual features will handle authentication requirements when accessed
-    return ['My Five', 'Friends', 'Share Profile', 'Settings', 'About'];
+    return ['The Daily Drop', 'My Five', 'Friends', 'Share Profile', 'Settings', 'About'];
   } catch (error) {
     console.error('Error checking auth session:', error);
-    return ['My Five', 'Friends', 'Share Profile', 'Settings', 'About'];
+    return ['The Daily Drop', 'My Five', 'Friends', 'Share Profile', 'Settings', 'About'];
   }
 };

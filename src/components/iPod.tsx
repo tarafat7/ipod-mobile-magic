@@ -44,8 +44,9 @@ const IPod: React.FC<IPodProps> = ({
     const currentPath = window.location.pathname;
     const isMyFiveRoute = currentPath.includes('/my-five/');
     const isFriendsRoute = currentPath.includes('/friends/');
+    const isDailyDropRoute = currentPath.includes('/daily-drop/');
     
-    console.log('Route check:', { currentPath, isMyFiveRoute, isFriendsRoute, hasProfile: !!sharedUserProfile, songsCount: sharedUserSongs.length });
+    console.log('Route check:', { currentPath, isMyFiveRoute, isFriendsRoute, isDailyDropRoute, hasProfile: !!sharedUserProfile, songsCount: sharedUserSongs.length });
     
     if (isMyFiveRoute && sharedUserProfile) {
       console.log('Setting up shared view');
@@ -59,6 +60,11 @@ const IPod: React.FC<IPodProps> = ({
       state.setIsSharedView(false);
       state.setIsInFriendsView(true);
       state.setSelectedFriendsItem(0);
+    } else if (isDailyDropRoute) {
+      console.log('Setting up daily drop view');
+      state.setIsSharedView(false);
+      state.setIsInDailyDropView(true);
+      state.setSelectedDailyDropItem(0);
     } else {
       state.setIsSharedView(false);
     }
@@ -166,6 +172,28 @@ const IPod: React.FC<IPodProps> = ({
           const event = new CustomEvent('myFiveSongSelect', { detail: { songIndex } });
           window.dispatchEvent(event);
         }
+      } else if (state.isInDailyDropView) {
+        const dailyDropItems = ["Today's Prompt", 'Add My Track', 'View Playlist'];
+        const selectedDailyDropAction = dailyDropItems[state.selectedDailyDropItem];
+        console.log('Daily Drop action selected:', selectedDailyDropAction);
+        
+        switch (selectedDailyDropAction) {
+          case "Today's Prompt":
+            console.log('Today\'s Prompt selected');
+            // TODO: Implement Today's Prompt functionality
+            break;
+          case 'Add My Track':
+            console.log('Add My Track selected');
+            // TODO: Implement Add My Track functionality
+            break;
+          case 'View Playlist':
+            console.log('View Playlist selected');
+            // TODO: Implement View Playlist functionality
+            break;
+          default:
+            console.log('Daily Drop action not implemented:', selectedDailyDropAction);
+            break;
+        }
       } else if (state.isInFriendsListView) {
         const selectedFriend = friends.friendsList[state.selectedFriendsListItem];
         if (selectedFriend) {
@@ -229,7 +257,11 @@ const IPod: React.FC<IPodProps> = ({
         }
       } else {
         const selectedItem = state.menuItems[state.selectedMenuItem];
-        if (selectedItem === 'Sign In') {
+        if (selectedItem === 'The Daily Drop') {
+          console.log('Entering Daily Drop view');
+          state.setIsInDailyDropView(true);
+          state.setSelectedDailyDropItem(0);
+        } else if (selectedItem === 'Sign In') {
           console.log('Attempting to open sign-in page...');
           const newWindow = window.open('/signin?mode=signin', '_blank');
           console.log('Window opened:', newWindow);
@@ -286,6 +318,10 @@ const IPod: React.FC<IPodProps> = ({
     state.setSelectedFriendsListItem(index);
   };
 
+  const handleDailyDropItemChange = (index: number) => {
+    state.setSelectedDailyDropItem(index);
+  };
+
   const handleMyFiveAuthSignIn = () => {
     window.open('/signin?mode=signin', '_blank');
   };
@@ -327,6 +363,9 @@ const IPod: React.FC<IPodProps> = ({
             selectedMyFiveAuthOption={state.selectedMyFiveAuthOption}
             onMyFiveAuthSignIn={handleMyFiveAuthSignIn}
             onMyFiveAuthSignUp={handleMyFiveAuthSignUp}
+            isInDailyDropView={state.isInDailyDropView}
+            selectedDailyDropItem={state.selectedDailyDropItem}
+            onDailyDropItemChange={handleDailyDropItemChange}
           />
 
           <div className="flex-1 flex items-center justify-center md:items-center" style={{ alignItems: 'center', paddingBottom: '2rem' }}>
