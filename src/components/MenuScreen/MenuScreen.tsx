@@ -37,6 +37,7 @@ interface MenuScreenProps {
   isInDailyDropView?: boolean;
   selectedDailyDropItem?: number;
   onDailyDropItemChange?: (index: number) => void;
+  onDailyDropEnter?: () => void;
 }
 
 const MenuScreen: React.FC<MenuScreenProps> = ({ 
@@ -59,7 +60,8 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
   friendsList = [],
   isInDailyDropView = false,
   selectedDailyDropItem = 0,
-  onDailyDropItemChange
+  onDailyDropItemChange,
+  onDailyDropEnter
 }) => {
   const [menuItems, setMenuItems] = useState<string[]>([]);
   const [isSignedIn, setIsSignedIn] = useState(false);
@@ -124,8 +126,10 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
   };
 
   const handleDailyDropClick = () => {
-    console.log('Daily Drop clicked - this should trigger state change in iPod');
-    // This is just a placeholder - the actual state change happens in iPod.tsx
+    console.log('Daily Drop clicked - triggering state change');
+    if (onDailyDropEnter) {
+      onDailyDropEnter();
+    }
   };
 
   const handleMenuItemClick = (index: number) => {

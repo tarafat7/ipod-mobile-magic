@@ -1,3 +1,4 @@
+
 import React from 'react';
 import MenuScreen from './MenuScreen/MenuScreen';
 import MusicScreen from './MusicScreen';
@@ -53,6 +54,7 @@ interface ScreenProps {
   isInDailyDropView?: boolean;
   selectedDailyDropItem?: number;
   onDailyDropItemChange?: (index: number) => void;
+  onDailyDropEnter?: () => void;
 }
 
 const Screen: React.FC<ScreenProps> = ({ 
@@ -85,7 +87,8 @@ const Screen: React.FC<ScreenProps> = ({
   onMyFiveAuthSignUp,
   isInDailyDropView = false,
   selectedDailyDropItem = 0,
-  onDailyDropItemChange
+  onDailyDropItemChange,
+  onDailyDropEnter
 }) => {
   const renderScreen = () => {
     // Handle Daily Drop view first
@@ -138,6 +141,7 @@ const Screen: React.FC<ScreenProps> = ({
             isInDailyDropView={isInDailyDropView}
             selectedDailyDropItem={selectedDailyDropItem}
             onDailyDropItemChange={onDailyDropItemChange}
+            onDailyDropEnter={onDailyDropEnter}
           />
         );
       case 'friends':

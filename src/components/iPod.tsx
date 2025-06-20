@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Screen from './Screen';
 import ClickWheel from './ClickWheel';
@@ -145,6 +144,12 @@ const IPod: React.FC<IPodProps> = ({
     window.open('/signin', '_blank');
   };
 
+  const handleDailyDropEnter = () => {
+    console.log('Daily Drop enter triggered');
+    state.setIsInDailyDropView(true);
+    state.setSelectedDailyDropItem(0);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center md:p-4 overflow-hidden">
       <div className="relative w-full h-screen md:w-auto md:h-auto">
@@ -181,6 +186,7 @@ const IPod: React.FC<IPodProps> = ({
             isInDailyDropView={state.isInDailyDropView}
             selectedDailyDropItem={state.selectedDailyDropItem}
             onDailyDropItemChange={handleDailyDropItemChange}
+            onDailyDropEnter={handleDailyDropEnter}
           />
 
           <div className="flex-1 flex items-center justify-center md:items-center" style={{ alignItems: 'center', paddingBottom: '2rem' }}>
