@@ -50,6 +50,9 @@ interface ScreenProps {
   selectedMyFiveAuthOption?: number;
   onMyFiveAuthSignIn?: () => void;
   onMyFiveAuthSignUp?: () => void;
+  isInDailyDropView?: boolean;
+  selectedDailyDropItem?: number;
+  onDailyDropItemChange?: (index: number) => void;
 }
 
 const Screen: React.FC<ScreenProps> = ({ 
@@ -79,7 +82,10 @@ const Screen: React.FC<ScreenProps> = ({
   isInMyFiveAuthView = false,
   selectedMyFiveAuthOption = 0,
   onMyFiveAuthSignIn,
-  onMyFiveAuthSignUp
+  onMyFiveAuthSignUp,
+  isInDailyDropView = false,
+  selectedDailyDropItem = 0,
+  onDailyDropItemChange
 }) => {
   const renderScreen = () => {
     // Handle About view first
@@ -124,6 +130,9 @@ const Screen: React.FC<ScreenProps> = ({
             selectedFriendsListItem={selectedFriendsListItem}
             onFriendsListItemChange={onFriendsListItemChange}
             friendsList={friendsList}
+            isInDailyDropView={isInDailyDropView}
+            selectedDailyDropItem={selectedDailyDropItem}
+            onDailyDropItemChange={onDailyDropItemChange}
           />
         );
       case 'friends':

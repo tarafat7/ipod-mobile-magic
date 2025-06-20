@@ -3,8 +3,8 @@ import { Song } from '../types/iPod';
 import { supabase } from '../integrations/supabase/client';
 
 export const getMenuItems = async (): Promise<string[]> => {
-  // Remove 'Sign In' from menu items since it's now accessible through My Five and Edit My Five
   return [
+    'The Daily Drop',
     'My Five',
     'Edit My Five', 
     'Friends',

@@ -30,6 +30,9 @@ interface MenuScreenProps {
   selectedFriendsListItem?: number;
   onFriendsListItemChange?: (index: number) => void;
   friendsList?: any[];
+  isInDailyDropView?: boolean;
+  selectedDailyDropItem?: number;
+  onDailyDropItemChange?: (index: number) => void;
 }
 
 const MenuScreen: React.FC<MenuScreenProps> = ({ 
@@ -49,13 +52,17 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
   isInFriendsListView = false,
   selectedFriendsListItem = 0,
   onFriendsListItemChange,
-  friendsList = []
+  friendsList = [],
+  isInDailyDropView = false,
+  selectedDailyDropItem = 0,
+  onDailyDropItemChange
 }) => {
   const [menuItems, setMenuItems] = useState<string[]>([]);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [hoveredSettingsItem, setHoveredSettingsItem] = useState<string | null>(null);
   const [hoveredFriendsItem, setHoveredFriendsItem] = useState<string | null>(null);
   const [hoveredFriendsListItem, setHoveredFriendsListItem] = useState<any>(null);
+  const [hoveredDailyDropItem, setHoveredDailyDropItem] = useState<string | null>(null);
 
   useEffect(() => {
     const loadMenuItems = async () => {
@@ -109,6 +116,10 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
     console.log('Friends clicked');
   };
 
+  const handleDailyDropClick = () => {
+    console.log('Daily Drop clicked');
+  };
+
   const handleMenuItemClick = (index: number) => {
     console.log('Menu item clicked:', index);
   };
@@ -129,6 +140,12 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
     }
   };
 
+  const handleDailyDropItemClick = (index: number) => {
+    if (onDailyDropItemChange) {
+      onDailyDropItemChange(index);
+    }
+  };
+
   const handleSettingsItemHover = (item: string | null) => {
     setHoveredSettingsItem(item);
   };
@@ -139,6 +156,10 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
 
   const handleFriendsListItemHover = (friend: any) => {
     setHoveredFriendsListItem(friend);
+  };
+
+  const handleDailyDropItemHover = (item: string | null) => {
+    setHoveredDailyDropItem(item);
   };
 
   // Update the hovered friend when selectedFriendsListItem changes
@@ -216,6 +237,25 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
     }
   };
 
+  const handleDailyDropAction = async (action: string) => {
+    switch (action) {
+      case 'Today\'s Prompt':
+        console.log('Today\'s Prompt clicked');
+        // TODO: Implement prompt functionality
+        break;
+      case 'Add a Song':
+        console.log('Add a Song clicked');
+        // TODO: Implement add song functionality
+        break;
+      case 'View Playlist':
+        console.log('View Playlist clicked');
+        // TODO: Implement view playlist functionality
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
     <div className="h-full flex">
       {!isInMyFiveView && (
@@ -242,6 +282,12 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
           onFriendsListItemClick={handleFriendsListItemClick}
           onFriendsListItemHover={handleFriendsListItemHover}
           friendsList={friendsList}
+          isInDailyDropView={isInDailyDropView}
+          selectedDailyDropItem={selectedDailyDropItem}
+          onDailyDropClick={handleDailyDropClick}
+          onDailyDropAction={handleDailyDropAction}
+          onDailyDropItemClick={handleDailyDropItemClick}
+          onDailyDropItemHover={handleDailyDropItemHover}
         />
       )}
       <ContentPanel
@@ -262,6 +308,9 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
         selectedFriendsListItem={selectedFriendsListItem}
         hoveredFriendsListItem={hoveredFriendsListItem}
         friendsList={friendsList}
+        isInDailyDropView={isInDailyDropView}
+        selectedDailyDropItem={selectedDailyDropItem}
+        hoveredDailyDropItem={hoveredDailyDropItem}
       />
     </div>
   );

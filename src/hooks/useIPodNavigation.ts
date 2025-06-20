@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { getMenuItems } from '../data/iPodData';
 import { supabase } from '../integrations/supabase/client';
@@ -25,6 +26,10 @@ interface NavigationProps {
   setIsInSettingsView: (value: boolean) => void;
   selectedSettingsItem: number;
   setSelectedSettingsItem: (value: number) => void;
+  isInDailyDropView: boolean;
+  setIsInDailyDropView: (value: boolean) => void;
+  selectedDailyDropItem: number;
+  setSelectedDailyDropItem: (value: number) => void;
   selectedMenuItem: number;
   setSelectedMenuItem: (value: number) => void;
   selectedSong: number;
@@ -188,6 +193,13 @@ export const useIPodNavigation = (props: NavigationProps) => {
           : (selectedFriendsItem - 1 + friendsItemsCount) % friendsItemsCount;
         
         setSelectedFriendsItem(newSelection);
+      } else if (isInDailyDropView) {
+        const dailyDropItemsCount = 3;
+        const newSelection = isClockwise 
+          ? (selectedDailyDropItem + 1) % dailyDropItemsCount
+          : (selectedDailyDropItem - 1 + dailyDropItemsCount) % dailyDropItemsCount;
+        
+        setSelectedDailyDropItem(newSelection);
       } else if (isInSettingsView) {
         const settingsItemsCount = 5; // Updated from 4 to 5 (added Privacy Policy)
         const newSelection = isClockwise 
@@ -257,6 +269,10 @@ export const useIPodNavigation = (props: NavigationProps) => {
       console.log('Exiting Friends view');
       setIsInFriendsView(false);
       setSelectedFriendsItem(0);
+    } else if (isInDailyDropView) {
+      console.log('Exiting Daily Drop view');
+      setIsInDailyDropView(false);
+      setSelectedDailyDropItem(0);
     } else if (isInSettingsView) {
       console.log('Exiting settings view');
       setIsInSettingsView(false);

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import FriendsScreen from '../FriendsScreen';
 import SettingsScreen from '../SettingsScreen';
@@ -6,7 +7,7 @@ import MyFiveFullView from '../MyFiveFullView';
 import AccountPreview from '../AccountPreview';
 import FriendSongsPreview from '../FriendSongsPreview';
 import FriendsListPreview from '../FriendsListPreview';
-import { User, Settings, Users, Music, Share } from 'lucide-react';
+import { User, Settings, Users, Music, Share, Calendar } from 'lucide-react';
 
 interface SpotifyTrackInfo {
   name: string;
@@ -34,6 +35,9 @@ interface ContentPanelProps {
   selectedFriendsListItem?: number;
   hoveredFriendsListItem?: any;
   friendsList?: any[];
+  isInDailyDropView?: boolean;
+  selectedDailyDropItem?: number;
+  hoveredDailyDropItem?: string | null;
 }
 
 const ContentPanel: React.FC<ContentPanelProps> = ({
@@ -53,7 +57,10 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
   isInFriendsListView = false,
   selectedFriendsListItem = 0,
   hoveredFriendsListItem = null,
-  friendsList = []
+  friendsList = [],
+  isInDailyDropView = false,
+  selectedDailyDropItem = 0,
+  hoveredDailyDropItem = null
 }) => {
   if (isInMyFiveView) {
     return (
@@ -74,6 +81,21 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
         <FriendsListPreview 
           selectedFriend={hoveredFriendsListItem}
         />
+      </div>
+    );
+  }
+
+  if (isInDailyDropView) {
+    return (
+      <div className="w-1/2 bg-gray-50">
+        <div className="h-full flex flex-col items-center justify-center p-4 text-center">
+          <Calendar size={32} className="text-purple-600 mb-3" />
+          <h3 className="font-bold text-lg mb-1">The Daily Drop</h3>
+          <p className="text-sm text-gray-600 text-center leading-tight">
+            A global playlist built<br />
+            daily around a prompt
+          </p>
+        </div>
       </div>
     );
   }
@@ -120,6 +142,17 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
   
   const renderContent = () => {
     switch (selectedItem) {
+      case 'The Daily Drop':
+        return (
+          <div className="h-full flex flex-col items-center justify-center p-4 text-center">
+            <Calendar size={32} className="text-purple-600 mb-3" />
+            <h3 className="font-bold text-lg mb-1">The Daily Drop</h3>
+            <p className="text-sm text-gray-600 text-center leading-tight">
+              A global playlist built<br />
+              daily around a prompt
+            </p>
+          </div>
+        );
       case 'Friends':
         if (isSignedIn) {
           return (

@@ -177,6 +177,28 @@ const IPod: React.FC<IPodProps> = ({
             console.log('Friends action not implemented:', selectedFriendsAction);
             break;
         }
+      } else if (state.isInDailyDropView) {
+        const dailyDropItems = ['Today\'s Prompt', 'Add a Song', 'View Playlist'];
+        const selectedDailyDropAction = dailyDropItems[state.selectedDailyDropItem];
+        console.log('Daily Drop action selected:', selectedDailyDropAction);
+        
+        switch (selectedDailyDropAction) {
+          case 'Today\'s Prompt':
+            console.log('Today\'s Prompt clicked');
+            // TODO: Implement prompt functionality
+            break;
+          case 'Add a Song':
+            console.log('Add a Song clicked');
+            // TODO: Implement add song functionality
+            break;
+          case 'View Playlist':
+            console.log('View Playlist clicked');
+            // TODO: Implement view playlist functionality
+            break;
+          default:
+            console.log('Daily Drop action not implemented:', selectedDailyDropAction);
+            break;
+        }
       } else if (state.isInSettingsView) {
         const settingsItems = ['Edit Account', 'Privacy Policy', 'Product Feedback', 'Logout', 'Delete Account'];
         const selectedSettingsAction = settingsItems[state.selectedSettingsItem];
@@ -279,6 +301,10 @@ const IPod: React.FC<IPodProps> = ({
     state.setSelectedFriendsListItem(index);
   };
 
+  const handleDailyDropItemChange = (index: number) => {
+    state.setSelectedDailyDropItem(index);
+  };
+
   const handleMyFiveAuthSignIn = () => {
     window.open('/signin?mode=signin', '_blank');
   };
@@ -320,6 +346,9 @@ const IPod: React.FC<IPodProps> = ({
             selectedMyFiveAuthOption={state.selectedMyFiveAuthOption}
             onMyFiveAuthSignIn={handleMyFiveAuthSignIn}
             onMyFiveAuthSignUp={handleMyFiveAuthSignUp}
+            isInDailyDropView={state.isInDailyDropView}
+            selectedDailyDropItem={state.selectedDailyDropItem}
+            onDailyDropItemChange={handleDailyDropItemChange}
           />
 
           <div className="flex-1 flex items-center justify-center md:items-center" style={{ alignItems: 'center', paddingBottom: '2rem' }}>
