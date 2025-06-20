@@ -6,6 +6,7 @@ import FriendsScreen from './FriendsScreen';
 import SettingsScreen from './SettingsScreen';
 import AboutScreen from './AboutScreen';
 import PrivacyPolicyScreen from './PrivacyPolicyScreen';
+import MyFiveAuthScreen from './MyFiveAuthScreen';
 import { Song } from '../types/iPod';
 import { songs } from '../data/iPodData';
 
@@ -45,6 +46,10 @@ interface ScreenProps {
   friendsList?: any[];
   isInAboutView?: boolean;
   isInPrivacyPolicyView?: boolean;
+  isInMyFiveAuthView?: boolean;
+  selectedMyFiveAuthOption?: number;
+  onMyFiveAuthSignIn?: () => void;
+  onMyFiveAuthSignUp?: () => void;
 }
 
 const Screen: React.FC<ScreenProps> = ({ 
@@ -70,7 +75,11 @@ const Screen: React.FC<ScreenProps> = ({
   onFriendsListItemChange,
   friendsList = [],
   isInAboutView = false,
-  isInPrivacyPolicyView = false
+  isInPrivacyPolicyView = false,
+  isInMyFiveAuthView = false,
+  selectedMyFiveAuthOption = 0,
+  onMyFiveAuthSignIn,
+  onMyFiveAuthSignUp
 }) => {
   const renderScreen = () => {
     // Handle About view first
@@ -81,6 +90,17 @@ const Screen: React.FC<ScreenProps> = ({
     // Handle Privacy Policy view
     if (isInPrivacyPolicyView) {
       return <PrivacyPolicyScreen />;
+    }
+
+    // Handle My Five Auth view
+    if (isInMyFiveAuthView) {
+      return (
+        <MyFiveAuthScreen
+          selectedOption={selectedMyFiveAuthOption}
+          onSignInClick={onMyFiveAuthSignIn || (() => {})}
+          onSignUpClick={onMyFiveAuthSignUp || (() => {})}
+        />
+      );
     }
 
     switch (currentScreen) {

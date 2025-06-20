@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { getMenuItems } from '../data/iPodData';
 import { supabase } from '../integrations/supabase/client';
@@ -42,6 +41,10 @@ interface NavigationProps {
   setIsInAboutView: (value: boolean) => void;
   isInPrivacyPolicyView: boolean;
   setIsInPrivacyPolicyView: (value: boolean) => void;
+  isInMyFiveAuthView: boolean;
+  setIsInMyFiveAuthView: (value: boolean) => void;
+  selectedMyFiveAuthOption: number;
+  setSelectedMyFiveAuthOption: (value: number) => void;
 }
 
 export const useIPodNavigation = (props: NavigationProps) => {
@@ -82,6 +85,12 @@ export const useIPodNavigation = (props: NavigationProps) => {
     loadFriendsList,
     isInAboutView,
     setIsInAboutView,
+    isInPrivacyPolicyView,
+    setIsInPrivacyPolicyView,
+    isInMyFiveAuthView,
+    setIsInMyFiveAuthView,
+    selectedMyFiveAuthOption,
+    setSelectedMyFiveAuthOption,
   } = props;
 
   useEffect(() => {
@@ -144,7 +153,14 @@ export const useIPodNavigation = (props: NavigationProps) => {
     }
     
     if (currentScreen === 'menu') {
-      if (isInMyFiveView) {
+      if (isInMyFiveAuthView) {
+        const authOptionsCount = 2; // Sign In, Sign Up
+        const newSelection = isClockwise 
+          ? (selectedMyFiveAuthOption + 1) % authOptionsCount
+          : (selectedMyFiveAuthOption - 1 + authOptionsCount) % authOptionsCount;
+        
+        setSelectedMyFiveAuthOption(newSelection);
+      } else if (isInMyFiveView) {
         let songsCount;
         if (viewingFriendSongs.length > 0) {
           songsCount = viewingFriendSongs.length;
@@ -197,6 +213,13 @@ export const useIPodNavigation = (props: NavigationProps) => {
 
   const handleMenuClick = () => {
     console.log('Menu button clicked');
+    
+    if (isInMyFiveAuthView) {
+      console.log('Exiting My Five Auth view');
+      setIsInMyFiveAuthView(false);
+      setSelectedMyFiveAuthOption(0);
+      return;
+    }
     
     if (isInMyFiveView) {
       console.log('Exiting My Five view');

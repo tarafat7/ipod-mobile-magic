@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Screen from './Screen';
 import ClickWheel from './ClickWheel';
@@ -126,7 +125,16 @@ const IPod: React.FC<IPodProps> = ({
     console.log('Center button clicked!');
     
     if (state.currentScreen === 'menu') {
-      if (state.isInMyFiveView) {
+      if (state.isInMyFiveAuthView) {
+        console.log('My Five Auth option selected:', state.selectedMyFiveAuthOption);
+        if (state.selectedMyFiveAuthOption === 0) {
+          // Sign In
+          window.open('/signin', '_blank');
+        } else {
+          // Sign Up
+          window.open('/signin', '_blank');
+        }
+      } else if (state.isInMyFiveView) {
         console.log('My Five song selected:', state.selectedMyFiveSong);
         
         let songToPlay = null;
@@ -211,11 +219,19 @@ const IPod: React.FC<IPodProps> = ({
           console.log('Window opened:', newWindow);
         } else if (selectedItem === 'My Five') {
           console.log('Entering My Five view');
-          state.setIsSharedView(false);
-          friends.setViewingFriendProfile(null);
-          friends.setViewingFriendSongs([]);
-          state.setIsInMyFiveView(true);
-          state.setSelectedMyFiveSong(0);
+          
+          // Check if user is signed in
+          if (!currentUser) {
+            console.log('User not signed in, showing auth options');
+            state.setIsInMyFiveAuthView(true);
+            state.setSelectedMyFiveAuthOption(0);
+          } else {
+            state.setIsSharedView(false);
+            friends.setViewingFriendProfile(null);
+            friends.setViewingFriendSongs([]);
+            state.setIsInMyFiveView(true);
+            state.setSelectedMyFiveSong(0);
+          }
         } else if (selectedItem === 'Edit My Five') {
           handleEditMyFive();
         } else if (selectedItem === 'Friends') {
@@ -256,6 +272,14 @@ const IPod: React.FC<IPodProps> = ({
     state.setSelectedFriendsListItem(index);
   };
 
+  const handleMyFiveAuthSignIn = () => {
+    window.open('/signin', '_blank');
+  };
+
+  const handleMyFiveAuthSignUp = () => {
+    window.open('/signin', '_blank');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center md:p-4 overflow-hidden">
       <div className="relative w-full h-screen md:w-auto md:h-auto">
@@ -285,6 +309,10 @@ const IPod: React.FC<IPodProps> = ({
             friendsList={friends.friendsList}
             isInAboutView={state.isInAboutView}
             isInPrivacyPolicyView={state.isInPrivacyPolicyView}
+            isInMyFiveAuthView={state.isInMyFiveAuthView}
+            selectedMyFiveAuthOption={state.selectedMyFiveAuthOption}
+            onMyFiveAuthSignIn={handleMyFiveAuthSignIn}
+            onMyFiveAuthSignUp={handleMyFiveAuthSignUp}
           />
 
           <div className="flex-1 flex items-center justify-center md:items-center" style={{ alignItems: 'center', paddingBottom: '2rem' }}>

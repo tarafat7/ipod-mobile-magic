@@ -21,6 +21,8 @@ export const useIPodState = () => {
   const [selectedFriendsListItem, setSelectedFriendsListItem] = useState(0);
   const [isInAboutView, setIsInAboutView] = useState(false);
   const [isInPrivacyPolicyView, setIsInPrivacyPolicyView] = useState(false);
+  const [isInMyFiveAuthView, setIsInMyFiveAuthView] = useState(false);
+  const [selectedMyFiveAuthOption, setSelectedMyFiveAuthOption] = useState(0);
 
   return {
     isPlaying,
@@ -61,5 +63,9 @@ export const useIPodState = () => {
     setIsInAboutView,
     isInPrivacyPolicyView,
     setIsInPrivacyPolicyView,
+    isInMyFiveAuthView,
+    setIsInMyFiveAuthView,
+    selectedMyFiveAuthOption,
+    setSelectedMyFiveAuthOption,
   };
 };
