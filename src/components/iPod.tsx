@@ -6,7 +6,6 @@ import { useIPodState } from '../hooks/useIPodState';
 import { useIPodAuth } from '../hooks/useIPodAuth';
 import { useIPodFriends } from '../hooks/useIPodFriends';
 import { useIPodNavigation } from '../hooks/useIPodNavigation';
-import { useDailyDropState } from '../hooks/useDailyDropState';
 
 interface SpotifyTrackInfo {
   name: string;
@@ -32,17 +31,12 @@ const IPod: React.FC<IPodProps> = ({
   const state = useIPodState();
   const { currentUser, handleLogout, handleDeleteAccount, handleShareProfile } = useIPodAuth();
   const friends = useIPodFriends();
-  const dailyDropState = useDailyDropState();
   
   const navigation = useIPodNavigation({
     ...state,
     currentUser,
     ...friends,
     sharedUserSongs,
-    isInDailyDropView: dailyDropState.isInDailyDropView,
-    setIsInDailyDropView: dailyDropState.setIsInDailyDropView,
-    selectedDailyDropItem: dailyDropState.selectedDailyDropItem,
-    setSelectedDailyDropItem: dailyDropState.setSelectedDailyDropItem,
   });
 
   // Handle route-based shared view detection
@@ -50,9 +44,8 @@ const IPod: React.FC<IPodProps> = ({
     const currentPath = window.location.pathname;
     const isMyFiveRoute = currentPath.includes('/my-five/');
     const isFriendsRoute = currentPath.includes('/friends/');
-    const isDailyDropRoute = currentPath.includes('/daily-drop/');
     
-    console.log('Route check:', { currentPath, isMyFiveRoute, isFriendsRoute, isDailyDropRoute, hasProfile: !!sharedUserProfile, songsCount: sharedUserSongs.length });
+    console.log('Route check:', { currentPath, isMyFiveRoute, isFriendsRoute, hasProfile: !!sharedUserProfile, songsCount: sharedUserSongs.length });
     
     if (isMyFiveRoute && sharedUserProfile) {
       console.log('Setting up shared view');
@@ -66,11 +59,6 @@ const IPod: React.FC<IPodProps> = ({
       state.setIsSharedView(false);
       state.setIsInFriendsView(true);
       state.setSelectedFriendsItem(0);
-    } else if (isDailyDropRoute) {
-      console.log('Setting up daily drop view');
-      state.setIsSharedView(false);
-      state.setIsInDailyDropView(true);
-      state.setSelectedDailyDropItem(0);
     } else {
       state.setIsSharedView(false);
     }
@@ -140,60 +128,27 @@ const IPod: React.FC<IPodProps> = ({
       if (state.isInMyFiveAuthView) {
         console.log('My Five Auth option selected:', state.selectedMyFiveAuthOption);
         if (state.selectedMyFiveAuthOption === 0) {
+          // Sign In - add signin mode parameter
           window.open('/signin?mode=signin', '_blank');
         } else {
+          // Sign Up
           window.open('/signin', '_blank');
         }
       } else if (state.isInMyFiveView) {
         console.log('My Five song selected:', state.selectedMyFiveSong);
         
-        // Check if Edit My Five button is selected (index -1 or 0 when it's the first item)
-        const hasEditButton = !state.isSharedView && friends.viewingFriendSongs.length === 0 && currentUser;
-        
-        if (hasEditButton && state.selectedMyFiveSong === 0 && state.myFiveSongsCount === 0) {
-          // Edit My Five selected when no songs exist
-          handleEditMyFive();
-          return;
-        } else if (hasEditButton && state.selectedMyFiveSong === 0) {
-          // Edit My Five selected when songs exist
-          handleEditMyFive();
-          return;
-        }
-        
-        // Adjust song index if Edit button exists
-        const songIndex = hasEditButton ? state.selectedMyFiveSong - 1 : state.selectedMyFiveSong;
-        
         let songToPlay = null;
         if (friends.viewingFriendSongs.length > 0) {
-          songToPlay = friends.viewingFriendSongs[songIndex];
-        } else if (state.isSharedView && sharedUserSongs[songIndex]) {
-          songToPlay = sharedUserSongs[songIndex];
+          songToPlay = friends.viewingFriendSongs[state.selectedMyFiveSong];
+        } else if (state.isSharedView && sharedUserSongs[state.selectedMyFiveSong]) {
+          songToPlay = sharedUserSongs[state.selectedMyFiveSong];
         }
         
         if (songToPlay) {
           window.open(songToPlay.spotifyUrl, '_blank');
-        } else if (songIndex >= 0) {
-          const event = new CustomEvent('myFiveSongSelect', { detail: { songIndex } });
+        } else {
+          const event = new CustomEvent('myFiveSongSelect', { detail: { songIndex: state.selectedMyFiveSong } });
           window.dispatchEvent(event);
-        }
-      } else if (dailyDropState.isInDailyDropView) {
-        const dailyDropItems = ["Today's Prompt", 'Add a Song', 'View Today\'s Playlist'];
-        const selectedDailyDropAction = dailyDropItems[dailyDropState.selectedDailyDropItem];
-        console.log('Daily Drop action selected:', selectedDailyDropAction);
-        
-        switch (selectedDailyDropAction) {
-          case "Today's Prompt":
-            console.log('Today\'s Prompt selected');
-            break;
-          case 'Add a Song':
-            console.log('Add a Song selected');
-            break;
-          case 'View Today\'s Playlist':
-            console.log('View Today\'s Playlist selected');
-            break;
-          default:
-            console.log('Daily Drop action not implemented:', selectedDailyDropAction);
-            break;
         }
       } else if (state.isInFriendsListView) {
         const selectedFriend = friends.friendsList[state.selectedFriendsListItem];
@@ -258,10 +213,7 @@ const IPod: React.FC<IPodProps> = ({
         }
       } else {
         const selectedItem = state.menuItems[state.selectedMenuItem];
-        if (selectedItem === 'The Daily Drop') {
-          console.log('Entering Daily Drop view');
-          dailyDropState.enterDailyDropView();
-        } else if (selectedItem === 'Sign In') {
+        if (selectedItem === 'Sign In') {
           console.log('Attempting to open sign-in page...');
           const newWindow = window.open('/signin?mode=signin', '_blank');
           console.log('Window opened:', newWindow);
@@ -279,6 +231,15 @@ const IPod: React.FC<IPodProps> = ({
             friends.setViewingFriendSongs([]);
             state.setIsInMyFiveView(true);
             state.setSelectedMyFiveSong(0);
+          }
+        } else if (selectedItem === 'Edit My Five') {
+          // Check if user is signed in
+          if (!currentUser) {
+            console.log('User not signed in, showing auth options for Edit My Five');
+            state.setIsInMyFiveAuthView(true);
+            state.setSelectedMyFiveAuthOption(0);
+          } else {
+            handleEditMyFive();
           }
         } else if (selectedItem === 'Friends') {
           console.log('Entering Friends view');
@@ -316,10 +277,6 @@ const IPod: React.FC<IPodProps> = ({
 
   const handleFriendsListItemChange = (index: number) => {
     state.setSelectedFriendsListItem(index);
-  };
-
-  const handleDailyDropItemChange = (index: number) => {
-    dailyDropState.handleDailyDropItemChange(index);
   };
 
   const handleMyFiveAuthSignIn = () => {
@@ -363,9 +320,6 @@ const IPod: React.FC<IPodProps> = ({
             selectedMyFiveAuthOption={state.selectedMyFiveAuthOption}
             onMyFiveAuthSignIn={handleMyFiveAuthSignIn}
             onMyFiveAuthSignUp={handleMyFiveAuthSignUp}
-            isInDailyDropView={dailyDropState.isInDailyDropView}
-            selectedDailyDropItem={dailyDropState.selectedDailyDropItem}
-            onDailyDropItemChange={handleDailyDropItemChange}
           />
 
           <div className="flex-1 flex items-center justify-center md:items-center" style={{ alignItems: 'center', paddingBottom: '2rem' }}>

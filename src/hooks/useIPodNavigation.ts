@@ -45,10 +45,6 @@ interface NavigationProps {
   setIsInMyFiveAuthView: (value: boolean) => void;
   selectedMyFiveAuthOption: number;
   setSelectedMyFiveAuthOption: (value: number) => void;
-  isInDailyDropView: boolean;
-  setIsInDailyDropView: (value: boolean) => void;
-  selectedDailyDropItem: number;
-  setSelectedDailyDropItem: (value: number) => void;
 }
 
 export const useIPodNavigation = (props: NavigationProps) => {
@@ -95,10 +91,6 @@ export const useIPodNavigation = (props: NavigationProps) => {
     setIsInMyFiveAuthView,
     selectedMyFiveAuthOption,
     setSelectedMyFiveAuthOption,
-    isInDailyDropView,
-    setIsInDailyDropView,
-    selectedDailyDropItem,
-    setSelectedDailyDropItem,
   } = props;
 
   useEffect(() => {
@@ -162,19 +154,12 @@ export const useIPodNavigation = (props: NavigationProps) => {
     
     if (currentScreen === 'menu') {
       if (isInMyFiveAuthView) {
-        const authOptionsCount = 2;
+        const authOptionsCount = 2; // Sign In, Sign Up
         const newSelection = isClockwise 
           ? (selectedMyFiveAuthOption + 1) % authOptionsCount
           : (selectedMyFiveAuthOption - 1 + authOptionsCount) % authOptionsCount;
         
         setSelectedMyFiveAuthOption(newSelection);
-      } else if (isInDailyDropView) {
-        const dailyDropItemsCount = 3;
-        const newSelection = isClockwise 
-          ? (selectedDailyDropItem + 1) % dailyDropItemsCount
-          : (selectedDailyDropItem - 1 + dailyDropItemsCount) % dailyDropItemsCount;
-        
-        setSelectedDailyDropItem(newSelection);
       } else if (isInMyFiveView) {
         let songsCount;
         if (viewingFriendSongs.length > 0) {
@@ -185,14 +170,9 @@ export const useIPodNavigation = (props: NavigationProps) => {
           songsCount = myFiveSongsCount;
         }
         
-        // Include Edit My Five button in navigation for signed-in users viewing their own songs
-        const hasEditButton = !isSharedView && viewingFriendSongs.length === 0 && currentUser;
-        const totalItems = hasEditButton ? songsCount + 1 : songsCount;
-        const maxItems = Math.max(totalItems, 1);
-        
         const newSelection = isClockwise 
-          ? (selectedMyFiveSong + 1) % maxItems
-          : (selectedMyFiveSong - 1 + maxItems) % maxItems;
+          ? (selectedMyFiveSong + 1) % Math.max(songsCount, 1)
+          : (selectedMyFiveSong - 1 + Math.max(songsCount, 1)) % Math.max(songsCount, 1);
         
         setSelectedMyFiveSong(newSelection);
       } else if (isInFriendsListView) {
@@ -238,13 +218,6 @@ export const useIPodNavigation = (props: NavigationProps) => {
       console.log('Exiting My Five Auth view');
       setIsInMyFiveAuthView(false);
       setSelectedMyFiveAuthOption(0);
-      return;
-    }
-    
-    if (isInDailyDropView) {
-      console.log('Exiting Daily Drop view');
-      setIsInDailyDropView(false);
-      setSelectedDailyDropItem(0);
       return;
     }
     

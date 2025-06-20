@@ -7,7 +7,6 @@ import SettingsScreen from './SettingsScreen';
 import AboutScreen from './AboutScreen';
 import PrivacyPolicyScreen from './PrivacyPolicyScreen';
 import MyFiveAuthScreen from './MyFiveAuthScreen';
-import DailyDropScreen from './DailyDropScreen';
 import { Song } from '../types/iPod';
 import { songs } from '../data/iPodData';
 
@@ -51,9 +50,6 @@ interface ScreenProps {
   selectedMyFiveAuthOption?: number;
   onMyFiveAuthSignIn?: () => void;
   onMyFiveAuthSignUp?: () => void;
-  isInDailyDropView?: boolean;
-  selectedDailyDropItem?: number;
-  onDailyDropItemChange?: (index: number) => void;
 }
 
 const Screen: React.FC<ScreenProps> = ({ 
@@ -83,18 +79,10 @@ const Screen: React.FC<ScreenProps> = ({
   isInMyFiveAuthView = false,
   selectedMyFiveAuthOption = 0,
   onMyFiveAuthSignIn,
-  onMyFiveAuthSignUp,
-  isInDailyDropView = false,
-  selectedDailyDropItem = 0,
-  onDailyDropItemChange
+  onMyFiveAuthSignUp
 }) => {
   const renderScreen = () => {
-    // Handle Daily Drop view first
-    if (isInDailyDropView) {
-      return <DailyDropScreen />;
-    }
-
-    // Handle About view
+    // Handle About view first
     if (isInAboutView) {
       return <AboutScreen />;
     }
