@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -30,13 +29,15 @@ const SignInForm = ({ onSubmit, isLoading, error, onErrorClear }: SignInFormProp
   const [isSignInMode, setIsSignInMode] = useState(false);
 
   useEffect(() => {
-    // Check if we're in edit mode
+    // Check if we're in edit mode or signin mode
     const urlParams = new URLSearchParams(window.location.search);
     const mode = urlParams.get('mode');
     
     if (mode === 'edit') {
       setIsEditMode(true);
       loadUserData();
+    } else if (mode === 'signin') {
+      setIsSignInMode(true);
     }
   }, []);
 

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Screen from './Screen';
 import ClickWheel from './ClickWheel';
@@ -129,8 +128,8 @@ const IPod: React.FC<IPodProps> = ({
       if (state.isInMyFiveAuthView) {
         console.log('My Five Auth option selected:', state.selectedMyFiveAuthOption);
         if (state.selectedMyFiveAuthOption === 0) {
-          // Sign In
-          window.open('/signin', '_blank');
+          // Sign In - add signin mode parameter
+          window.open('/signin?mode=signin', '_blank');
         } else {
           // Sign Up
           window.open('/signin', '_blank');
@@ -216,7 +215,7 @@ const IPod: React.FC<IPodProps> = ({
         const selectedItem = state.menuItems[state.selectedMenuItem];
         if (selectedItem === 'Sign In') {
           console.log('Attempting to open sign-in page...');
-          const newWindow = window.open('/signin', '_blank');
+          const newWindow = window.open('/signin?mode=signin', '_blank');
           console.log('Window opened:', newWindow);
         } else if (selectedItem === 'My Five') {
           console.log('Entering My Five view');
@@ -281,7 +280,7 @@ const IPod: React.FC<IPodProps> = ({
   };
 
   const handleMyFiveAuthSignIn = () => {
-    window.open('/signin', '_blank');
+    window.open('/signin?mode=signin', '_blank');
   };
 
   const handleMyFiveAuthSignUp = () => {
