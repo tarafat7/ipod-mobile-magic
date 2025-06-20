@@ -162,14 +162,14 @@ export const useIPodNavigation = (props: NavigationProps) => {
     
     if (currentScreen === 'menu') {
       if (isInMyFiveAuthView) {
-        const authOptionsCount = 2; // Sign In, Sign Up
+        const authOptionsCount = 2;
         const newSelection = isClockwise 
           ? (selectedMyFiveAuthOption + 1) % authOptionsCount
           : (selectedMyFiveAuthOption - 1 + authOptionsCount) % authOptionsCount;
         
         setSelectedMyFiveAuthOption(newSelection);
       } else if (isInDailyDropView) {
-        const dailyDropItemsCount = 3; // Today's Prompt, Add My Track, View Playlist
+        const dailyDropItemsCount = 3;
         const newSelection = isClockwise 
           ? (selectedDailyDropItem + 1) % dailyDropItemsCount
           : (selectedDailyDropItem - 1 + dailyDropItemsCount) % dailyDropItemsCount;

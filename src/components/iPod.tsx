@@ -6,6 +6,7 @@ import { useIPodState } from '../hooks/useIPodState';
 import { useIPodAuth } from '../hooks/useIPodAuth';
 import { useIPodFriends } from '../hooks/useIPodFriends';
 import { useIPodNavigation } from '../hooks/useIPodNavigation';
+import { useDailyDropState } from '../hooks/useDailyDropState';
 
 interface SpotifyTrackInfo {
   name: string;
@@ -31,12 +32,17 @@ const IPod: React.FC<IPodProps> = ({
   const state = useIPodState();
   const { currentUser, handleLogout, handleDeleteAccount, handleShareProfile } = useIPodAuth();
   const friends = useIPodFriends();
+  const dailyDropState = useDailyDropState();
   
   const navigation = useIPodNavigation({
     ...state,
     currentUser,
     ...friends,
     sharedUserSongs,
+    isInDailyDropView: dailyDropState.isInDailyDropView,
+    setIsInDailyDropView: dailyDropState.setIsInDailyDropView,
+    selectedDailyDropItem: dailyDropState.selectedDailyDropItem,
+    setSelectedDailyDropItem: dailyDropState.setSelectedDailyDropItem,
   });
 
   // Handle route-based shared view detection
@@ -134,10 +140,8 @@ const IPod: React.FC<IPodProps> = ({
       if (state.isInMyFiveAuthView) {
         console.log('My Five Auth option selected:', state.selectedMyFiveAuthOption);
         if (state.selectedMyFiveAuthOption === 0) {
-          // Sign In - add signin mode parameter
           window.open('/signin?mode=signin', '_blank');
         } else {
-          // Sign Up
           window.open('/signin', '_blank');
         }
       } else if (state.isInMyFiveView) {
@@ -172,23 +176,20 @@ const IPod: React.FC<IPodProps> = ({
           const event = new CustomEvent('myFiveSongSelect', { detail: { songIndex } });
           window.dispatchEvent(event);
         }
-      } else if (state.isInDailyDropView) {
+      } else if (dailyDropState.isInDailyDropView) {
         const dailyDropItems = ["Today's Prompt", 'Add a Song', 'View Today\'s Playlist'];
-        const selectedDailyDropAction = dailyDropItems[state.selectedDailyDropItem];
+        const selectedDailyDropAction = dailyDropItems[dailyDropState.selectedDailyDropItem];
         console.log('Daily Drop action selected:', selectedDailyDropAction);
         
         switch (selectedDailyDropAction) {
           case "Today's Prompt":
             console.log('Today\'s Prompt selected');
-            // TODO: Implement Today's Prompt functionality
             break;
           case 'Add a Song':
             console.log('Add a Song selected');
-            // TODO: Implement Add a Song functionality
             break;
           case 'View Today\'s Playlist':
             console.log('View Today\'s Playlist selected');
-            // TODO: Implement View Today's Playlist functionality
             break;
           default:
             console.log('Daily Drop action not implemented:', selectedDailyDropAction);
@@ -259,8 +260,7 @@ const IPod: React.FC<IPodProps> = ({
         const selectedItem = state.menuItems[state.selectedMenuItem];
         if (selectedItem === 'The Daily Drop') {
           console.log('Entering Daily Drop view');
-          state.setIsInDailyDropView(true);
-          state.setSelectedDailyDropItem(0);
+          dailyDropState.enterDailyDropView();
         } else if (selectedItem === 'Sign In') {
           console.log('Attempting to open sign-in page...');
           const newWindow = window.open('/signin?mode=signin', '_blank');
@@ -319,7 +319,7 @@ const IPod: React.FC<IPodProps> = ({
   };
 
   const handleDailyDropItemChange = (index: number) => {
-    state.setSelectedDailyDropItem(index);
+    dailyDropState.handleDailyDropItemChange(index);
   };
 
   const handleMyFiveAuthSignIn = () => {
@@ -363,8 +363,8 @@ const IPod: React.FC<IPodProps> = ({
             selectedMyFiveAuthOption={state.selectedMyFiveAuthOption}
             onMyFiveAuthSignIn={handleMyFiveAuthSignIn}
             onMyFiveAuthSignUp={handleMyFiveAuthSignUp}
-            isInDailyDropView={state.isInDailyDropView}
-            selectedDailyDropItem={state.selectedDailyDropItem}
+            isInDailyDropView={dailyDropState.isInDailyDropView}
+            selectedDailyDropItem={dailyDropState.selectedDailyDropItem}
             onDailyDropItemChange={handleDailyDropItemChange}
           />
 
