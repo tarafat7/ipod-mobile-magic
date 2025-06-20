@@ -12,6 +12,10 @@ interface SpotifyTrackInfo {
   addedDate: string;
 }
 
+interface UserProfile {
+  full_name: string | null;
+}
+
 interface MenuScreenProps {
   selectedMenuItem: number;
   selectedSettingsItem: number;
@@ -64,8 +68,8 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
   const [hoveredFriendsListItem, setHoveredFriendsListItem] = useState<any>(null);
   const [hoveredDailyDropItem, setHoveredDailyDropItem] = useState<string | null>(null);
 
-  // Show Daily Drop menu when The Daily Drop is selected
-  const showDailyDropMenu = menuItems[selectedMenuItem] === 'The Daily Drop' && !isInSettingsView && !isInFriendsView && !isInMyFiveView;
+  // Show Daily Drop menu only when actually in Daily Drop view
+  const showDailyDropMenu = isInDailyDropView;
 
   useEffect(() => {
     const loadMenuItems = async () => {
@@ -266,7 +270,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
           onFriendsListItemClick={handleFriendsListItemClick}
           onFriendsListItemHover={handleFriendsListItemHover}
           friendsList={friendsList}
-          isInDailyDropView={isInDailyDropView || showDailyDropMenu}
+          isInDailyDropView={isInDailyDropView}
           selectedDailyDropItem={selectedDailyDropItem}
           onDailyDropClick={handleDailyDropClick}
           onDailyDropItemClick={handleDailyDropItemClick}
@@ -291,7 +295,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
         selectedFriendsListItem={selectedFriendsListItem}
         hoveredFriendsListItem={hoveredFriendsListItem}
         friendsList={friendsList}
-        isInDailyDropView={isInDailyDropView || showDailyDropMenu}
+        isInDailyDropView={isInDailyDropView}
         selectedDailyDropItem={selectedDailyDropItem}
         hoveredDailyDropItem={hoveredDailyDropItem}
       />
