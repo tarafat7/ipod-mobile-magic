@@ -230,19 +230,23 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
         onFriendsAction(item);
       }
     } else {
-      onMenuItemClick(index);
-      if (item === 'Settings' && isSignedIn) {
-        onSettingsClick();
-      } else if (item === 'The Daily Drop') {
+      // Handle main menu clicks
+      if (item === 'The Daily Drop') {
+        console.log('Daily Drop clicked in MenuPanel');
         if (onDailyDropClick) {
           onDailyDropClick();
         }
-      } else if (item === 'Friends' && isSignedIn && onFriendsClick) {
-        onFriendsClick();
-      } else if (item === 'Edit My Five') {
-        window.location.href = '/edit-my-five';
-      } else if (item === 'Share Profile') {
-        handleShareProfile();
+      } else {
+        onMenuItemClick(index);
+        if (item === 'Settings' && isSignedIn) {
+          onSettingsClick();
+        } else if (item === 'Friends' && isSignedIn && onFriendsClick) {
+          onFriendsClick();
+        } else if (item === 'Edit My Five') {
+          window.location.href = '/edit-my-five';
+        } else if (item === 'Share Profile') {
+          handleShareProfile();
+        }
       }
     }
   };
