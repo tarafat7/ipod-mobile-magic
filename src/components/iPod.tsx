@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Screen from './Screen';
 import ClickWheel from './ClickWheel';
@@ -233,7 +234,14 @@ const IPod: React.FC<IPodProps> = ({
             state.setSelectedMyFiveSong(0);
           }
         } else if (selectedItem === 'Edit My Five') {
-          handleEditMyFive();
+          // Check if user is signed in
+          if (!currentUser) {
+            console.log('User not signed in, showing auth options for Edit My Five');
+            state.setIsInMyFiveAuthView(true);
+            state.setSelectedMyFiveAuthOption(0);
+          } else {
+            handleEditMyFive();
+          }
         } else if (selectedItem === 'Friends') {
           console.log('Entering Friends view');
           state.setIsInFriendsView(true);
