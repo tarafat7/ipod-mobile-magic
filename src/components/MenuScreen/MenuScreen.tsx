@@ -120,7 +120,9 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
   };
 
   const handleDailyDropClick = () => {
-    console.log('Daily Drop clicked');
+    console.log('Daily Drop clicked - this should not be called from MenuScreen');
+    // This function should not be responsible for changing the Daily Drop view state
+    // That's handled by the iPod component's center click handler
   };
 
   const handleMenuItemClick = (index: number) => {
