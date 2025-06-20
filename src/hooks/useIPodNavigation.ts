@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { getMenuItems } from '../data/iPodData';
 import { supabase } from '../integrations/supabase/client';
@@ -39,6 +40,8 @@ interface NavigationProps {
   loadFriendsList: (user: any) => void;
   isInAboutView: boolean;
   setIsInAboutView: (value: boolean) => void;
+  isInPrivacyPolicyView: boolean;
+  setIsInPrivacyPolicyView: (value: boolean) => void;
 }
 
 export const useIPodNavigation = (props: NavigationProps) => {
@@ -155,7 +158,7 @@ export const useIPodNavigation = (props: NavigationProps) => {
         
         setSelectedFriendsItem(newSelection);
       } else if (isInSettingsView) {
-        const settingsItemsCount = 4; // Updated from 6 to 4 (removed Share Profile and Edit My Five)
+        const settingsItemsCount = 5; // Updated from 4 to 5 (added Privacy Policy)
         const newSelection = isClockwise 
           ? (selectedSettingsItem + 1) % settingsItemsCount
           : (selectedSettingsItem - 1 + settingsItemsCount) % settingsItemsCount;
@@ -199,6 +202,12 @@ export const useIPodNavigation = (props: NavigationProps) => {
     if (props.isInAboutView) {
       console.log('Exiting About view');
       props.setIsInAboutView(false);
+      return;
+    }
+
+    if (props.isInPrivacyPolicyView) {
+      console.log('Exiting Privacy Policy view');
+      props.setIsInPrivacyPolicyView(false);
       return;
     }
     

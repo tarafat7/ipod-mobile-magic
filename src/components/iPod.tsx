@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Screen from './Screen';
 import ClickWheel from './ClickWheel';
@@ -169,13 +170,17 @@ const IPod: React.FC<IPodProps> = ({
             break;
         }
       } else if (state.isInSettingsView) {
-        const settingsItems = ['Edit Account', 'Product Feedback', 'Logout', 'Delete Account'];
+        const settingsItems = ['Edit Account', 'Privacy Policy', 'Product Feedback', 'Logout', 'Delete Account'];
         const selectedSettingsAction = settingsItems[state.selectedSettingsItem];
         console.log('Settings action selected:', selectedSettingsAction);
         
         switch (selectedSettingsAction) {
           case 'Edit Account':
             handleEditAccount();
+            break;
+          case 'Privacy Policy':
+            console.log('Entering Privacy Policy view');
+            state.setIsInPrivacyPolicyView(true);
             break;
           case 'Product Feedback':
             window.open('https://app.formbricks.com/s/cmc2iwfd7d33uu2017tjqmhji', '_blank');
@@ -279,6 +284,7 @@ const IPod: React.FC<IPodProps> = ({
             onFriendsListItemChange={handleFriendsListItemChange}
             friendsList={friends.friendsList}
             isInAboutView={state.isInAboutView}
+            isInPrivacyPolicyView={state.isInPrivacyPolicyView}
           />
 
           <div className="flex-1 flex items-center justify-center md:items-center" style={{ alignItems: 'center', paddingBottom: '2rem' }}>
