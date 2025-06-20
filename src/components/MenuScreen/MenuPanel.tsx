@@ -114,6 +114,63 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
     window.open('https://app.formbricks.com/s/cmc2iwfd7d33uu2017tjqmhji', '_blank');
   };
 
+  const handleDeleteAccount = async () => {
+    if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          console.log('Deleting account for user:', user.id);
+          
+          // Delete from user_five_songs table
+          const { error: songsError } = await supabase
+            .from('user_five_songs')
+            .delete()
+            .eq('user_id', user.id);
+          
+          if (songsError) {
+            console.error('Error deleting user songs:', songsError);
+          }
+          
+          // Delete from friends table (both as user and as friend)
+          const { error: friendsError1 } = await supabase
+            .from('friends')
+            .delete()
+            .eq('user_id', user.id);
+            
+          if (friendsError1) {
+            console.error('Error deleting user friends:', friendsError1);
+          }
+          
+          const { error: friendsError2 } = await supabase
+            .from('friends')
+            .delete()
+            .eq('friend_user_id', user.id);
+            
+          if (friendsError2) {
+            console.error('Error deleting friend relationships:', friendsError2);
+          }
+          
+          // Delete from profiles table
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .delete()
+            .eq('id', user.id);
+            
+          if (profileError) {
+            console.error('Error deleting user profile:', profileError);
+          }
+          
+          // Finally sign out the user
+          await supabase.auth.signOut();
+          
+          console.log('Account deletion completed');
+        }
+      } catch (error) {
+        console.error('Error deleting account:', error);
+      }
+    }
+  };
+
   const handleItemClick = (item: string, index: number) => {
     // Clear any touched state first
     setTouchedItem(null);
@@ -135,6 +192,8 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
       onSettingsItemClick(index);
       if (item === 'Product Feedback') {
         handleProductFeedback();
+      } else if (item === 'Delete Account') {
+        handleDeleteAccount();
       } else {
         onSettingsAction(item);
       }
