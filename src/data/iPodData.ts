@@ -2,25 +2,16 @@ import { Song } from '../types/iPod';
 import { supabase } from '../integrations/supabase/client';
 
 export const getMenuItems = async (): Promise<string[]> => {
-  const { data: { session } } = await supabase.auth.getSession();
-  
-  if (session) {
-    // User is signed in
-    return [
-      'My Five',
-      'Edit My Five', 
-      'Friends',
-      'Share Profile',
-      'Settings',
-      'About'
-    ];
-  } else {
-    // User is not signed in
-    return [
-      'Sign In',
-      'About'
-    ];
-  }
+  // Always show all menu items regardless of sign-in status
+  return [
+    'My Five',
+    'Edit My Five', 
+    'Friends',
+    'Share Profile',
+    'Settings',
+    'Sign In',
+    'About'
+  ];
 };
 
 export const menuItems = [
