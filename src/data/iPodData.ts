@@ -1,21 +1,20 @@
+
 import { Song } from '../types/iPod';
 import { supabase } from '../integrations/supabase/client';
 
 export const getMenuItems = async (): Promise<string[]> => {
-  // Always show all menu items regardless of sign-in status
+  // Remove 'Sign In' from menu items since it's now accessible through My Five and Edit My Five
   return [
     'My Five',
     'Edit My Five', 
     'Friends',
     'Share Profile',
     'Settings',
-    'Sign In',
     'About'
   ];
 };
 
 export const menuItems = [
-  'Sign In',
   'Friends', 
   'Settings'
 ];
