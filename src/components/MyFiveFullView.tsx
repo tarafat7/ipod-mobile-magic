@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { searchSpotifyTracks } from '../utils/spotifySearch';
 import { extractSpotifyTrackId, formatDate } from '../utils/spotifyUtils';
-import { Music, ExternalLink } from 'lucide-react';
+import { Music, ExternalLink, Edit } from 'lucide-react';
 
 interface SpotifyTrackInfo {
   name: string;
@@ -29,6 +28,23 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
   const [songs, setSongs] = useState<SpotifyTrackInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadedUserId, setLoadedUserId] = useState<string>('');
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  // Check auth status
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUser(user);
+    };
+    
+    checkAuth();
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setCurrentUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const fetchSpotifyTrackInfo = useCallback(async (trackId: string, addedDate: string): Promise<SpotifyTrackInfo | null> => {
     try {
@@ -163,6 +179,10 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
     };
   }, [songs]);
 
+  const handleEditMyFive = () => {
+    window.location.href = '/edit-my-five';
+  };
+
   const handleSongClick = (spotifyUrl: string) => {
     window.open(spotifyUrl, '_blank');
   };
@@ -177,20 +197,8 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
     );
   }
 
-  if (songs.length === 0) {
-    const displayName = isSharedView && sharedUserProfile ? sharedUserProfile.full_name : 'My';
-    return (
-      <div className="h-full flex flex-col items-center justify-center p-4 text-center">
-        <Music size={32} className="text-blue-600 mb-3" />
-        <h3 className="font-bold text-lg mb-1">{displayName} Five</h3>
-        <p className="text-sm text-gray-600 leading-tight">
-          {isSharedView ? 'No songs shared yet' : 'Add the 5 songs that are on repeat for you right now'}
-        </p>
-      </div>
-    );
-  }
-
   const displayName = isSharedView && sharedUserProfile ? `${sharedUserProfile.full_name}'s` : 'My';
+  const showEditButton = !isSharedView && currentUser;
 
   return (
     <div className="h-full bg-white">
@@ -202,47 +210,95 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
         </div>
       </div>
 
-      {/* Song List */}
-      <div className="bg-white px-2">
-        {songs.map((song, index) => (
-          <div 
-            key={`${isSharedView ? 'shared' : 'own'}-${index}-${song.name}`}
-            className={`flex items-center p-1.5 border-b border-gray-200 transition-colors ${
-              selectedSongIndex === index 
+      {/* Edit My Five Button - only show for signed-in users viewing their own five */}
+      {showEditButton && (
+        <div className="px-2 mb-2">
+          <button
+            onClick={handleEditMyFive}
+            className={`w-full flex items-center justify-between p-1.5 border-b border-gray-200 transition-colors ${
+              selectedSongIndex === 0 
                 ? 'bg-blue-500 text-white' 
-                : 'bg-white hover:bg-gray-50'
+                : 'bg-gray-50 hover:bg-gray-100 text-black'
             }`}
           >
-            <div className="w-8 h-8 bg-gray-200 rounded flex-shrink-0 overflow-hidden mr-2">
-              {song.albumArt ? (
-                <img 
-                  src={song.albumArt} 
-                  alt={`${song.name} album art`}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <Music size={14} className="text-gray-400" />
-                </div>
-              )}
+            <div className="flex items-center">
+              <div className="w-8 h-8 bg-blue-100 rounded flex-shrink-0 overflow-hidden mr-2 flex items-center justify-center">
+                <Edit size={16} className="text-blue-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className={`font-semibold text-sm ${
+                  selectedSongIndex === 0 ? 'text-white' : 'text-black'
+                }`}>
+                  Edit My Five
+                </h3>
+                <p className={`text-xs ${
+                  selectedSongIndex === 0 ? 'text-blue-100' : 'text-gray-600'
+                }`}>
+                  Add or change your songs
+                </p>
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <h3 className={`font-semibold text-sm truncate ${
-                selectedSongIndex === index ? 'text-white' : 'text-black'
-              }`}>
-                {song.name}
-              </h3>
-              <p className={`text-xs truncate ${
-                selectedSongIndex === index ? 'text-blue-100' : 'text-gray-600'
-              }`}>
-                {song.artist}
-              </p>
-            </div>
-            {selectedSongIndex === index && (
+            {selectedSongIndex === 0 && (
               <div className="text-white text-sm">▶</div>
             )}
+          </button>
+        </div>
+      )}
+
+      {/* Song List or Empty State */}
+      <div className="bg-white px-2">
+        {songs.length === 0 ? (
+          <div className="h-32 flex flex-col items-center justify-center text-center">
+            <Music size={24} className="text-gray-400 mb-2" />
+            <p className="text-sm text-gray-600 leading-tight">
+              {isSharedView ? 'No songs shared yet' : 'Add the 5 songs that are on repeat for you right now'}
+            </p>
           </div>
-        ))}
+        ) : (
+          songs.map((song, index) => {
+            // Adjust the comparison index to account for Edit button
+            const adjustedIndex = showEditButton ? index + 1 : index;
+            return (
+              <div 
+                key={`${isSharedView ? 'shared' : 'own'}-${index}-${song.name}`}
+                className={`flex items-center p-1.5 border-b border-gray-200 transition-colors ${
+                  selectedSongIndex === adjustedIndex 
+                    ? 'bg-blue-500 text-white' 
+                    : 'bg-white hover:bg-gray-50'
+                }`}
+              >
+                <div className="w-8 h-8 bg-gray-200 rounded flex-shrink-0 overflow-hidden mr-2">
+                  {song.albumArt ? (
+                    <img 
+                      src={song.albumArt} 
+                      alt={`${song.name} album art`}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Music size={14} className="text-gray-400" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className={`font-semibold text-sm truncate ${
+                    selectedSongIndex === adjustedIndex ? 'text-white' : 'text-black'
+                  }`}>
+                    {song.name}
+                  </h3>
+                  <p className={`text-xs truncate ${
+                    selectedSongIndex === adjustedIndex ? 'text-blue-100' : 'text-gray-600'
+                  }`}>
+                    {song.artist}
+                  </p>
+                </div>
+                {selectedSongIndex === adjustedIndex && (
+                  <div className="text-white text-sm">▶</div>
+                )}
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import SettingsScreen from './SettingsScreen';
 import AboutScreen from './AboutScreen';
 import PrivacyPolicyScreen from './PrivacyPolicyScreen';
 import MyFiveAuthScreen from './MyFiveAuthScreen';
+import DailyDropScreen from './DailyDropScreen';
 import { Song } from '../types/iPod';
 import { songs } from '../data/iPodData';
 
@@ -88,7 +89,12 @@ const Screen: React.FC<ScreenProps> = ({
   onDailyDropItemChange
 }) => {
   const renderScreen = () => {
-    // Handle About view first
+    // Handle Daily Drop view first
+    if (isInDailyDropView) {
+      return <DailyDropScreen />;
+    }
+
+    // Handle About view
     if (isInAboutView) {
       return <AboutScreen />;
     }
@@ -130,9 +136,6 @@ const Screen: React.FC<ScreenProps> = ({
             selectedFriendsListItem={selectedFriendsListItem}
             onFriendsListItemChange={onFriendsListItemChange}
             friendsList={friendsList}
-            isInDailyDropView={isInDailyDropView}
-            selectedDailyDropItem={selectedDailyDropItem}
-            onDailyDropItemChange={onDailyDropItemChange}
           />
         );
       case 'friends':

@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { getMenuItems } from '../data/iPodData';
 import { supabase } from '../integrations/supabase/client';
@@ -26,10 +25,6 @@ interface NavigationProps {
   setIsInSettingsView: (value: boolean) => void;
   selectedSettingsItem: number;
   setSelectedSettingsItem: (value: number) => void;
-  isInDailyDropView: boolean;
-  setIsInDailyDropView: (value: boolean) => void;
-  selectedDailyDropItem: number;
-  setSelectedDailyDropItem: (value: number) => void;
   selectedMenuItem: number;
   setSelectedMenuItem: (value: number) => void;
   selectedSong: number;
@@ -50,6 +45,10 @@ interface NavigationProps {
   setIsInMyFiveAuthView: (value: boolean) => void;
   selectedMyFiveAuthOption: number;
   setSelectedMyFiveAuthOption: (value: number) => void;
+  isInDailyDropView: boolean;
+  setIsInDailyDropView: (value: boolean) => void;
+  selectedDailyDropItem: number;
+  setSelectedDailyDropItem: (value: number) => void;
 }
 
 export const useIPodNavigation = (props: NavigationProps) => {
@@ -76,10 +75,6 @@ export const useIPodNavigation = (props: NavigationProps) => {
     setIsInSettingsView,
     selectedSettingsItem,
     setSelectedSettingsItem,
-    isInDailyDropView,
-    setIsInDailyDropView,
-    selectedDailyDropItem,
-    setSelectedDailyDropItem,
     selectedMenuItem,
     setSelectedMenuItem,
     selectedSong,
@@ -100,6 +95,10 @@ export const useIPodNavigation = (props: NavigationProps) => {
     setIsInMyFiveAuthView,
     selectedMyFiveAuthOption,
     setSelectedMyFiveAuthOption,
+    isInDailyDropView,
+    setIsInDailyDropView,
+    selectedDailyDropItem,
+    setSelectedDailyDropItem,
   } = props;
 
   useEffect(() => {
@@ -169,6 +168,13 @@ export const useIPodNavigation = (props: NavigationProps) => {
           : (selectedMyFiveAuthOption - 1 + authOptionsCount) % authOptionsCount;
         
         setSelectedMyFiveAuthOption(newSelection);
+      } else if (isInDailyDropView) {
+        const dailyDropItemsCount = 3; // Today's Prompt, Add My Track, View Playlist
+        const newSelection = isClockwise 
+          ? (selectedDailyDropItem + 1) % dailyDropItemsCount
+          : (selectedDailyDropItem - 1 + dailyDropItemsCount) % dailyDropItemsCount;
+        
+        setSelectedDailyDropItem(newSelection);
       } else if (isInMyFiveView) {
         let songsCount;
         if (viewingFriendSongs.length > 0) {
@@ -179,9 +185,14 @@ export const useIPodNavigation = (props: NavigationProps) => {
           songsCount = myFiveSongsCount;
         }
         
+        // Include Edit My Five button in navigation for signed-in users viewing their own songs
+        const hasEditButton = !isSharedView && viewingFriendSongs.length === 0 && currentUser;
+        const totalItems = hasEditButton ? songsCount + 1 : songsCount;
+        const maxItems = Math.max(totalItems, 1);
+        
         const newSelection = isClockwise 
-          ? (selectedMyFiveSong + 1) % Math.max(songsCount, 1)
-          : (selectedMyFiveSong - 1 + Math.max(songsCount, 1)) % Math.max(songsCount, 1);
+          ? (selectedMyFiveSong + 1) % maxItems
+          : (selectedMyFiveSong - 1 + maxItems) % maxItems;
         
         setSelectedMyFiveSong(newSelection);
       } else if (isInFriendsListView) {
@@ -197,13 +208,6 @@ export const useIPodNavigation = (props: NavigationProps) => {
           : (selectedFriendsItem - 1 + friendsItemsCount) % friendsItemsCount;
         
         setSelectedFriendsItem(newSelection);
-      } else if (isInDailyDropView) {
-        const dailyDropItemsCount = 3;
-        const newSelection = isClockwise 
-          ? (selectedDailyDropItem + 1) % dailyDropItemsCount
-          : (selectedDailyDropItem - 1 + dailyDropItemsCount) % dailyDropItemsCount;
-        
-        setSelectedDailyDropItem(newSelection);
       } else if (isInSettingsView) {
         const settingsItemsCount = 5; // Updated from 4 to 5 (added Privacy Policy)
         const newSelection = isClockwise 
@@ -234,6 +238,13 @@ export const useIPodNavigation = (props: NavigationProps) => {
       console.log('Exiting My Five Auth view');
       setIsInMyFiveAuthView(false);
       setSelectedMyFiveAuthOption(0);
+      return;
+    }
+    
+    if (isInDailyDropView) {
+      console.log('Exiting Daily Drop view');
+      setIsInDailyDropView(false);
+      setSelectedDailyDropItem(0);
       return;
     }
     
@@ -273,10 +284,6 @@ export const useIPodNavigation = (props: NavigationProps) => {
       console.log('Exiting Friends view');
       setIsInFriendsView(false);
       setSelectedFriendsItem(0);
-    } else if (isInDailyDropView) {
-      console.log('Exiting Daily Drop view');
-      setIsInDailyDropView(false);
-      setSelectedDailyDropItem(0);
     } else if (isInSettingsView) {
       console.log('Exiting settings view');
       setIsInSettingsView(false);

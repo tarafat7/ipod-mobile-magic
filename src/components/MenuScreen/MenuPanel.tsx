@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { supabase } from '../../integrations/supabase/client';
 
@@ -28,7 +27,6 @@ interface MenuPanelProps {
   isInDailyDropView?: boolean;
   selectedDailyDropItem?: number;
   onDailyDropClick?: () => void;
-  onDailyDropAction?: (action: string) => void;
   onDailyDropItemClick?: (index: number) => void;
   onDailyDropItemHover?: (item: string | null) => void;
 }
@@ -47,9 +45,9 @@ const friendsMenuItems = [
 ];
 
 const dailyDropMenuItems = [
-  'Today\'s Prompt',
+  "Today's Prompt",
   'Add a Song',
-  'View Playlist'
+  'View Today\'s Playlist'
 ];
 
 const MenuPanel: React.FC<MenuPanelProps> = ({
@@ -78,7 +76,6 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   isInDailyDropView = false,
   selectedDailyDropItem = 0,
   onDailyDropClick,
-  onDailyDropAction,
   onDailyDropItemClick,
   onDailyDropItemHover
 }) => {
@@ -216,9 +213,6 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
       if (onDailyDropItemClick) {
         onDailyDropItemClick(index);
       }
-      if (onDailyDropAction) {
-        onDailyDropAction(item);
-      }
     } else if (isInSettingsView) {
       onSettingsItemClick(index);
       if (item === 'Product Feedback') {
@@ -237,10 +231,12 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
       }
     } else {
       onMenuItemClick(index);
-      if (item === 'The Daily Drop' && onDailyDropClick) {
-        onDailyDropClick();
-      } else if (item === 'Settings' && isSignedIn) {
+      if (item === 'Settings' && isSignedIn) {
         onSettingsClick();
+      } else if (item === 'The Daily Drop') {
+        if (onDailyDropClick) {
+          onDailyDropClick();
+        }
       } else if (item === 'Friends' && isSignedIn && onFriendsClick) {
         onFriendsClick();
       } else if (item === 'Edit My Five') {
@@ -329,7 +325,7 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
       <div className="p-2">
         <div className="flex items-center justify-between mb-3 text-xs">
           <span className="font-bold">{getHeaderTitle()}</span>
-          {/* Battery indicator for Settings, Friends, Daily Drop, and Friends List view */}
+          {/* Battery indicator for Settings, Friends, Friends List, and Daily Drop view */}
           {(isInSettingsView || isInFriendsView || isInFriendsListView || isInDailyDropView) && (
             <div className="w-6 h-3 bg-green-500 rounded-sm"></div>
           )}
@@ -358,7 +354,7 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
                 <span className="text-white">▶</span>
               )}
               {currentSelectedIndex === index && !isInSettingsView && !isInFriendsView && !isInFriendsListView && !isInDailyDropView && 
-               ((item === 'The Daily Drop') || (item === 'Settings' && isSignedIn) || (item === 'Friends' && isSignedIn)) && (
+               ((item === 'Settings' && isSignedIn) || (item === 'Friends' && isSignedIn) || item === 'The Daily Drop') && (
                 <span className="text-white">▶</span>
               )}
             </div>

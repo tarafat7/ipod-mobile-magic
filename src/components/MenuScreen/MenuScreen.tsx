@@ -64,6 +64,9 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
   const [hoveredFriendsListItem, setHoveredFriendsListItem] = useState<any>(null);
   const [hoveredDailyDropItem, setHoveredDailyDropItem] = useState<string | null>(null);
 
+  // Show Daily Drop menu when The Daily Drop is selected
+  const showDailyDropMenu = menuItems[selectedMenuItem] === 'The Daily Drop' && !isInSettingsView && !isInFriendsView && !isInMyFiveView;
+
   useEffect(() => {
     const loadMenuItems = async () => {
       const items = await getMenuItems();
@@ -237,25 +240,6 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
     }
   };
 
-  const handleDailyDropAction = async (action: string) => {
-    switch (action) {
-      case 'Today\'s Prompt':
-        console.log('Today\'s Prompt clicked');
-        // TODO: Implement prompt functionality
-        break;
-      case 'Add a Song':
-        console.log('Add a Song clicked');
-        // TODO: Implement add song functionality
-        break;
-      case 'View Playlist':
-        console.log('View Playlist clicked');
-        // TODO: Implement view playlist functionality
-        break;
-      default:
-        break;
-    }
-  };
-
   return (
     <div className="h-full flex">
       {!isInMyFiveView && (
@@ -282,10 +266,9 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
           onFriendsListItemClick={handleFriendsListItemClick}
           onFriendsListItemHover={handleFriendsListItemHover}
           friendsList={friendsList}
-          isInDailyDropView={isInDailyDropView}
+          isInDailyDropView={isInDailyDropView || showDailyDropMenu}
           selectedDailyDropItem={selectedDailyDropItem}
           onDailyDropClick={handleDailyDropClick}
-          onDailyDropAction={handleDailyDropAction}
           onDailyDropItemClick={handleDailyDropItemClick}
           onDailyDropItemHover={handleDailyDropItemHover}
         />
@@ -308,7 +291,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
         selectedFriendsListItem={selectedFriendsListItem}
         hoveredFriendsListItem={hoveredFriendsListItem}
         friendsList={friendsList}
-        isInDailyDropView={isInDailyDropView}
+        isInDailyDropView={isInDailyDropView || showDailyDropMenu}
         selectedDailyDropItem={selectedDailyDropItem}
         hoveredDailyDropItem={hoveredDailyDropItem}
       />

@@ -11,8 +11,6 @@ export const useIPodState = () => {
   const [menuItems, setMenuItems] = useState<string[]>([]);
   const [isInSettingsView, setIsInSettingsView] = useState(false);
   const [selectedSettingsItem, setSelectedSettingsItem] = useState(0);
-  const [isInDailyDropView, setIsInDailyDropView] = useState(false);
-  const [selectedDailyDropItem, setSelectedDailyDropItem] = useState(0);
   const [isInMyFiveView, setIsInMyFiveView] = useState(false);
   const [selectedMyFiveSong, setSelectedMyFiveSong] = useState(0);
   const [myFiveSongsCount, setMyFiveSongsCount] = useState(0);
@@ -25,6 +23,8 @@ export const useIPodState = () => {
   const [isInPrivacyPolicyView, setIsInPrivacyPolicyView] = useState(false);
   const [isInMyFiveAuthView, setIsInMyFiveAuthView] = useState(false);
   const [selectedMyFiveAuthOption, setSelectedMyFiveAuthOption] = useState(0);
+  const [isInDailyDropView, setIsInDailyDropView] = useState(false);
+  const [selectedDailyDropItem, setSelectedDailyDropItem] = useState(0);
 
   return {
     isPlaying,
@@ -45,10 +45,6 @@ export const useIPodState = () => {
     setIsInSettingsView,
     selectedSettingsItem,
     setSelectedSettingsItem,
-    isInDailyDropView,
-    setIsInDailyDropView,
-    selectedDailyDropItem,
-    setSelectedDailyDropItem,
     isInMyFiveView,
     setIsInMyFiveView,
     selectedMyFiveSong,
@@ -73,5 +69,9 @@ export const useIPodState = () => {
     setIsInMyFiveAuthView,
     selectedMyFiveAuthOption,
     setSelectedMyFiveAuthOption,
+    isInDailyDropView,
+    setIsInDailyDropView,
+    selectedDailyDropItem,
+    setSelectedDailyDropItem,
   };
 };
