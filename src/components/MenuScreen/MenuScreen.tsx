@@ -3,7 +3,6 @@ import { getMenuItems } from '../../data/iPodData';
 import { supabase } from '../../integrations/supabase/client';
 import MenuPanel from './MenuPanel';
 import ContentPanel from './ContentPanel';
-import { useDailyDropState } from '../../hooks/useDailyDropState';
 import { useSettingsState } from '../../hooks/useSettingsState';
 import { useMyFiveState } from '../../hooks/useMyFiveState';
 
@@ -106,6 +105,8 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
       console.error('Error loading shared profile:', error);
     }
   };
+
+  console.log('MenuScreen render - isInDailyDropView:', isInDailyDropView, 'selectedDailyDropItem:', selectedDailyDropItem);
 
   const handleSettingsClick = () => {
     console.log('Settings clicked');
