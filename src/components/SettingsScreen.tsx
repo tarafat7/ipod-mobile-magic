@@ -8,8 +8,8 @@ const SettingsScreen: React.FC = () => {
       <Settings size={32} className="text-gray-600 mb-3" />
       <h3 className="font-bold text-lg mb-2">Settings</h3>
       <p className="text-sm text-gray-600 leading-tight">
-        Customize your<br />
-        iPod experience
+        Configure your<br />
+        FivePod settings
       </p>
     </div>
   );
