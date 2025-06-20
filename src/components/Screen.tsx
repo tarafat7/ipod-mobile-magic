@@ -91,11 +91,6 @@ const Screen: React.FC<ScreenProps> = ({
   onDailyDropEnter
 }) => {
   const renderScreen = () => {
-    // Handle Daily Drop view first
-    if (isInDailyDropView) {
-      return <DailyDropScreen />;
-    }
-
     // Handle About view
     if (isInAboutView) {
       return <AboutScreen />;
