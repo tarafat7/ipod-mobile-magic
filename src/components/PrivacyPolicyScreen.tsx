@@ -21,32 +21,32 @@ const PrivacyPolicyScreen: React.FC = () => {
               <h3 className="font-bold mb-2">What We Collect</h3>
               
               <div className="mb-3">
-                <h4 className="font-semibold">Usernames</h4>
-                <p>Just the name you choose when creating your profile.</p>
+                <h4 className="font-semibold">Real Name & Username</h4>
+                <p>For display purposes in app when creating your profile.</p>
               </div>
               
               <div className="mb-3">
                 <h4 className="font-semibold">Your Five Songs</h4>
-                <p>The links you paste in (Spotify, Apple Music, YouTube, etc.) to display on your profile.</p>
+                <p>The songs you choose to display on your profile. We use the Spotify Web API for this so you do not log in with your own Spotify account.</p>
               </div>
               
               <div className="mb-3">
                 <h4 className="font-semibold">Optional Friends List</h4>
-                <p>If you choose to add other users to your sidebar, we store those usernames so you can see their five songs.</p>
+                <p>If you choose to add other users to your sidebar, we store those names and usernames so you can see their five songs.</p>
               </div>
             </div>
             
             <div>
               <h3 className="font-bold mb-2">What We Don't Collect</h3>
-              <p className="mb-2">We don't collect your email, real name, IP address, or any sensitive personal info.</p>
+              <p className="mb-2">We don't collect your IP address or any sensitive contact information.</p>
               <p className="mb-2">We don't use cookies to track you around the web.</p>
               <p>We don't sell or share your data with advertisers or third parties. Ever.</p>
             </div>
             
             <div>
               <h3 className="font-bold mb-2">How We Use Your Data</h3>
-              <p className="mb-2">Your username and songs are used to generate your public profile page.</p>
-              <p>If you add friends, their usernames are stored so you can easily access their profiles.</p>
+              <p className="mb-2">Your name, username, and songs are used to generate your profile page.</p>
+              <p>If you add friends, their names, usernames, and songs are stored so you can easily access their profiles.</p>
             </div>
             
             <div>
