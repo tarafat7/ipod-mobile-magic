@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { supabase } from '../../integrations/supabase/client';
 
@@ -92,6 +91,7 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   let currentMenuItems = displayMenuItems;
   let currentSelectedIndex = selectedMenuItem;
   
+  // EXACT SAME LOGIC AS SETTINGS - just for Daily Drop
   if (isInDailyDropView) {
     console.log('MenuPanel: Setting Daily Drop menu items');
     currentMenuItems = dailyDropMenuItems;
@@ -194,8 +194,6 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   };
 
   const handleItemClick = (item: string, index: number) => {
-    console.log('MenuPanel item clicked:', item, 'index:', index, 'isInDailyDropView:', isInDailyDropView);
-    
     // Clear any touched state first
     setTouchedItem(null);
     if (onSettingsItemHover) {
@@ -211,8 +209,8 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
       onDailyDropItemHover(null);
     }
     
+    // EXACT SAME LOGIC AS SETTINGS - just for Daily Drop
     if (isInDailyDropView) {
-      console.log('Daily Drop item clicked:', item);
       if (onDailyDropItemClick) {
         onDailyDropItemClick(index);
       }
