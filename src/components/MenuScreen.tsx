@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getMenuItems } from '../data/iPodData';
 import FriendsScreen from './FriendsScreen';
 import SettingsScreen from './SettingsScreen';
+import DailyDropScreen from './DailyDropScreen';
 import { User, Music } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
 
@@ -15,6 +16,9 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const [isInSettingsView, setIsInSettingsView] = useState(false);
   const [selectedSettingsItem, setSelectedSettingsItem] = useState(0);
+  const [showDailyDropMenu, setShowDailyDropMenu] = useState(false);
+  const [isInDailyDropView, setIsInDailyDropView] = useState(false);
+  const [selectedDailyDropItem, setSelectedDailyDropItem] = useState(0);
 
   const settingsMenuItems = [
     'Share Profile',
@@ -22,6 +26,12 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
     'Edit My Five',
     'Logout',
     'Delete Account'
+  ];
+
+  const dailyDropMenuItems = [
+    "Today's Prompt",
+    'Add a Song',
+    'View Today\'s Playlist'
   ];
 
   useEffect(() => {
@@ -49,9 +59,15 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
     const selectedItem = menuItems[selectedMenuItem];
     if (selectedItem === 'Settings' && isSignedIn) {
       setShowSettingsMenu(true);
+      setShowDailyDropMenu(false);
+    } else if (selectedItem === 'The Daily Drop') {
+      setShowDailyDropMenu(true);
+      setShowSettingsMenu(false);
     } else {
       setShowSettingsMenu(false);
+      setShowDailyDropMenu(false);
       setIsInSettingsView(false);
+      setIsInDailyDropView(false);
     }
   }, [selectedMenuItem, menuItems, isSignedIn]);
 
@@ -61,9 +77,17 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
     }
   };
 
+  const handleDailyDropClick = () => {
+    if (showDailyDropMenu) {
+      setIsInDailyDropView(true);
+    }
+  };
+
   const handleBackToMain = () => {
     setIsInSettingsView(false);
     setSelectedSettingsItem(0);
+    setIsInDailyDropView(false);
+    setSelectedDailyDropItem(0);
   };
 
   const handleLogout = async () => {
@@ -116,7 +140,43 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
     }
   };
 
+  const handleDailyDropAction = (item: string) => {
+    switch (item) {
+      case "Today's Prompt":
+        console.log('Today\'s Prompt selected');
+        // TODO: Implement Today's Prompt functionality
+        break;
+      case 'Add a Song':
+        console.log('Add a Song selected');
+        // TODO: Implement Add a Song functionality
+        break;
+      case 'View Today\'s Playlist':
+        console.log('View Today\'s Playlist selected');
+        // TODO: Implement View Today's Playlist functionality
+        break;
+      default:
+        break;
+    }
+  };
+
   const renderRightPanel = () => {
+    if (isInDailyDropView) {
+      return (
+        <div className="h-full flex flex-col items-center justify-center p-4 text-center">
+          <div className="w-16 h-16 bg-black rounded-xl flex items-center justify-center mb-3">
+            <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
+              <div className="w-6 h-6 bg-orange-600 rounded-md"></div>
+            </div>
+          </div>
+          <h3 className="font-bold text-lg mb-1">The Daily Drop</h3>
+          <p className="text-sm text-gray-600 text-center leading-tight">
+            A global playlist built<br />
+            daily around a prompt
+          </p>
+        </div>
+      );
+    }
+
     if (isInSettingsView) {
       return (
         <div className="h-full flex flex-col items-center justify-center p-4 text-center">
@@ -138,6 +198,11 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
     switch (selectedItem) {
       case 'Friends':
         return <FriendsScreen />;
+      case 'The Daily Drop':
+        if (showDailyDropMenu) {
+          return <DailyDropScreen />;
+        }
+        return <DailyDropScreen />;
       case 'Settings':
         if (showSettingsMenu && isSignedIn) {
           return (
@@ -194,15 +259,15 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
     }
   };
 
-  const currentMenuItems = isInSettingsView ? settingsMenuItems : menuItems;
-  const currentSelectedIndex = isInSettingsView ? selectedSettingsItem : selectedMenuItem;
+  const currentMenuItems = isInDailyDropView ? dailyDropMenuItems : isInSettingsView ? settingsMenuItems : menuItems;
+  const currentSelectedIndex = isInDailyDropView ? selectedDailyDropItem : isInSettingsView ? selectedSettingsItem : selectedMenuItem;
 
   return (
     <div className="h-full flex">
       {/* Left menu panel */}
-      <div className={`w-1/2 bg-white border-r border-gray-300 transition-all duration-300 relative ${isInSettingsView ? 'transform translate-x-0' : ''}`}>
+      <div className={`w-1/2 bg-white border-r border-gray-300 transition-all duration-300 relative ${isInSettingsView || isInDailyDropView ? 'transform translate-x-0' : ''}`}>
         {/* Battery indicator - only show in main menu */}
-        {!isInSettingsView && (
+        {!isInSettingsView && !isInDailyDropView && (
           <div className="absolute top-2 right-2">
             <div className="w-6 h-3 bg-green-500 rounded-sm"></div>
           </div>
@@ -210,9 +275,9 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
         
         <div className="p-2">
           <div className="flex items-center justify-between mb-3 text-xs">
-            <span className="font-bold">{isInSettingsView ? 'Settings' : 'FivePod'}</span>
-            {/* Battery indicator for Settings view */}
-            {isInSettingsView && (
+            <span className="font-bold">{isInDailyDropView ? 'The Daily Drop' : isInSettingsView ? 'Settings' : 'FivePod'}</span>
+            {/* Battery indicator for Settings and Daily Drop view */}
+            {(isInSettingsView || isInDailyDropView) && (
               <div className="w-6 h-3 bg-green-500 rounded-sm"></div>
             )}
           </div>
@@ -221,25 +286,30 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ selectedMenuItem }) => {
               <div
                 key={item}
                 className={`px-2 py-1 text-sm flex items-center justify-between cursor-pointer ${
-                  currentSelectedIndex === index && isInSettingsView
+                  currentSelectedIndex === index && (isInSettingsView || isInDailyDropView)
                     ? 'bg-blue-500 text-white'
-                    : currentSelectedIndex === index && !isInSettingsView
+                    : currentSelectedIndex === index && !isInSettingsView && !isInDailyDropView
                     ? 'bg-gray-200 text-black'
                     : 'text-black hover:bg-gray-100'
                 } ${item === 'Delete Account' ? 'text-red-600' : ''}`}
                 onClick={() => {
-                  if (isInSettingsView) {
+                  if (isInDailyDropView) {
+                    handleDailyDropAction(item);
+                  } else if (isInSettingsView) {
                     handleSettingsAction(item);
                   } else if (item === 'Settings' && isSignedIn) {
                     handleSettingsClick();
+                  } else if (item === 'The Daily Drop') {
+                    handleDailyDropClick();
                   }
                 }}
               >
                 <span>{item}</span>
-                {currentSelectedIndex === index && isInSettingsView && (
+                {currentSelectedIndex === index && (isInSettingsView || isInDailyDropView) && (
                   <span className="text-white">▶</span>
                 )}
-                {currentSelectedIndex === index && !isInSettingsView && item === 'Settings' && isSignedIn && (
+                {currentSelectedIndex === index && !isInSettingsView && !isInDailyDropView && 
+                 ((item === 'Settings' && isSignedIn) || item === 'The Daily Drop') && (
                   <span className="text-black">▶</span>
                 )}
               </div>
