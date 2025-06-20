@@ -14,14 +14,14 @@ export const getMenuItems = async (): Promise<string[]> => {
     const { data: { session } } = await supabase.auth.getSession();
     
     if (session) {
-      // Signed in menu - removed 'Edit My Five'
+      // Signed in menu
       return ['My Five', 'Friends', 'Share Profile', 'Settings', 'About'];
     } else {
-      // Not signed in menu
-      return ['Sign In', 'My Five', 'About'];
+      // Not signed in menu - show all options but they'll handle auth appropriately
+      return ['Sign In', 'My Five', 'Friends', 'Share Profile', 'Settings', 'About'];
     }
   } catch (error) {
     console.error('Error checking auth session:', error);
-    return ['Sign In', 'My Five', 'About'];
+    return ['Sign In', 'My Five', 'Friends', 'Share Profile', 'Settings', 'About'];
   }
 };
