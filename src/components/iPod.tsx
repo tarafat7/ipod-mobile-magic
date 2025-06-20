@@ -173,7 +173,7 @@ const IPod: React.FC<IPodProps> = ({
           window.dispatchEvent(event);
         }
       } else if (state.isInDailyDropView) {
-        const dailyDropItems = ["Today's Prompt", 'Add My Track', 'View Playlist'];
+        const dailyDropItems = ["Today's Prompt", 'Add a Song', 'View Today\'s Playlist'];
         const selectedDailyDropAction = dailyDropItems[state.selectedDailyDropItem];
         console.log('Daily Drop action selected:', selectedDailyDropAction);
         
@@ -182,13 +182,13 @@ const IPod: React.FC<IPodProps> = ({
             console.log('Today\'s Prompt selected');
             // TODO: Implement Today's Prompt functionality
             break;
-          case 'Add My Track':
-            console.log('Add My Track selected');
-            // TODO: Implement Add My Track functionality
+          case 'Add a Song':
+            console.log('Add a Song selected');
+            // TODO: Implement Add a Song functionality
             break;
-          case 'View Playlist':
-            console.log('View Playlist selected');
-            // TODO: Implement View Playlist functionality
+          case 'View Today\'s Playlist':
+            console.log('View Today\'s Playlist selected');
+            // TODO: Implement View Today's Playlist functionality
             break;
           default:
             console.log('Daily Drop action not implemented:', selectedDailyDropAction);

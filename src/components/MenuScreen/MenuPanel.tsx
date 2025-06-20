@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { supabase } from '../../integrations/supabase/client';
 
@@ -47,8 +46,8 @@ const friendsMenuItems = [
 
 const dailyDropMenuItems = [
   "Today's Prompt",
-  'Add My Track',
-  'View Playlist'
+  'Add a Song',
+  'View Today\'s Playlist'
 ];
 
 const MenuPanel: React.FC<MenuPanelProps> = ({
