@@ -1,54 +1,10 @@
+
 import React, { useState } from 'react';
-import { supabase } from '../../integrations/supabase/client';
-
-interface MenuPanelProps {
-  menuItems: string[];
-  selectedMenuItem: number;
-  isInSettingsView: boolean;
-  isSignedIn: boolean;
-  selectedSettingsItem: number;
-  onSettingsClick: () => void;
-  onSettingsAction: (action: string) => void;
-  onMenuItemClick: (index: number) => void;
-  onSettingsItemClick: (index: number) => void;
-  onSettingsItemHover?: (item: string | null) => void;
-  isSharedView?: boolean;
-  isInFriendsView?: boolean;
-  selectedFriendsItem?: number;
-  onFriendsClick?: () => void;
-  onFriendsAction?: (action: string) => void;
-  onFriendsItemClick?: (index: number) => void;
-  onFriendsItemHover?: (item: string | null) => void;
-  isInFriendsListView?: boolean;
-  selectedFriendsListItem?: number;
-  onFriendsListItemClick?: (index: number) => void;
-  onFriendsListItemHover?: (friend: any) => void;
-  friendsList?: any[];
-  isInDailyDropView?: boolean;
-  selectedDailyDropItem?: number;
-  onDailyDropClick?: () => void;
-  onDailyDropItemClick?: (index: number) => void;
-  onDailyDropItemHover?: (item: string | null) => void;
-}
-
-const settingsMenuItems = [
-  'Edit Account',
-  'Privacy Policy',
-  'Product Feedback',
-  'Logout',
-  'Delete Account'
-];
-
-const friendsMenuItems = [
-  'Add a friend',
-  'My Friends'
-];
-
-const dailyDropMenuItems = [
-  "Today's Prompt",
-  'Add a Song',
-  'View Today\'s Playlist'
-];
+import { MenuPanelProps } from './types';
+import { settingsMenuItems, friendsMenuItems, dailyDropMenuItems } from './constants';
+import { MenuActions } from './MenuActions';
+import MenuHeader from './MenuHeader';
+import MenuItem from './MenuItem';
 
 const MenuPanel: React.FC<MenuPanelProps> = ({
   menuItems,
@@ -104,91 +60,6 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
     currentSelectedIndex = selectedFriendsItem;
   }
 
-  const handleShareProfile = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const shareUrl = `${window.location.origin}/my-five/${user.id}`;
-      const shareData = {
-        title: 'Check out my Five!',
-        text: 'Here are the 5 songs on repeat for me right now',
-        url: shareUrl
-      };
-
-      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
-        await navigator.share(shareData);
-      } else {
-        // Fallback: copy to clipboard
-        await navigator.clipboard.writeText(shareUrl);
-        alert('Link copied to clipboard!');
-      }
-    } catch (error) {
-      console.error('Error sharing profile:', error);
-    }
-  };
-
-  const handleProductFeedback = () => {
-    window.open('https://app.formbricks.com/s/cmc2iwfd7d33uu2017tjqmhji', '_blank');
-  };
-
-  const handleDeleteAccount = async () => {
-    if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          console.log('Deleting account for user:', user.id);
-          
-          // Delete from user_five_songs table
-          const { error: songsError } = await supabase
-            .from('user_five_songs')
-            .delete()
-            .eq('user_id', user.id);
-          
-          if (songsError) {
-            console.error('Error deleting user songs:', songsError);
-          }
-          
-          // Delete from friends table (both as user and as friend)
-          const { error: friendsError1 } = await supabase
-            .from('friends')
-            .delete()
-            .eq('user_id', user.id);
-            
-          if (friendsError1) {
-            console.error('Error deleting user friends:', friendsError1);
-          }
-          
-          const { error: friendsError2 } = await supabase
-            .from('friends')
-            .delete()
-            .eq('friend_user_id', user.id);
-            
-          if (friendsError2) {
-            console.error('Error deleting friend relationships:', friendsError2);
-          }
-          
-          // Delete from profiles table
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .delete()
-            .eq('id', user.id);
-            
-          if (profileError) {
-            console.error('Error deleting user profile:', profileError);
-          }
-          
-          // Finally sign out the user
-          await supabase.auth.signOut();
-          
-          console.log('Account deletion completed');
-        }
-      } catch (error) {
-        console.error('Error deleting account:', error);
-      }
-    }
-  };
-
   const handleItemClick = (item: string, index: number) => {
     // Clear any touched state first
     setTouchedItem(null);
@@ -216,9 +87,9 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
     } else if (isInSettingsView) {
       onSettingsItemClick(index);
       if (item === 'Product Feedback') {
-        handleProductFeedback();
+        MenuActions.handleProductFeedback();
       } else if (item === 'Delete Account') {
-        handleDeleteAccount();
+        MenuActions.handleDeleteAccount();
       } else {
         onSettingsAction(item);
       }
@@ -245,7 +116,7 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
         } else if (item === 'Edit My Five') {
           window.location.href = '/edit-my-five';
         } else if (item === 'Share Profile') {
-          handleShareProfile();
+          MenuActions.handleShareProfile();
         }
       }
     }
@@ -307,14 +178,6 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
     }, 100);
   };
 
-  const getHeaderTitle = () => {
-    if (isInFriendsListView) return 'My Friends';
-    if (isInDailyDropView) return 'The Daily Drop';
-    if (isInSettingsView) return 'Settings';
-    if (isInFriendsView) return 'Friends';
-    return 'FivePod';
-  };
-
   return (
     <div className={`w-1/2 bg-white border-r border-gray-300 transition-transform duration-300 relative ${
       (isInSettingsView || isInFriendsView || isInFriendsListView || isInDailyDropView) ? 'transform translate-x-0' : 'transform translate-x-0'
@@ -327,41 +190,31 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
       )}
       
       <div className="p-2">
-        <div className="flex items-center justify-between mb-3 text-xs">
-          <span className="font-bold">{getHeaderTitle()}</span>
-          {/* Battery indicator for Settings, Friends, Friends List, and Daily Drop view */}
-          {(isInSettingsView || isInFriendsView || isInFriendsListView || isInDailyDropView) && (
-            <div className="w-6 h-3 bg-green-500 rounded-sm"></div>
-          )}
-        </div>
+        <MenuHeader
+          isInSettingsView={isInSettingsView}
+          isInFriendsView={isInFriendsView}
+          isInFriendsListView={isInFriendsListView}
+          isInDailyDropView={isInDailyDropView}
+        />
         
         <div className="space-y-0">
           {currentMenuItems.map((item, index) => (
-            <div
+            <MenuItem
               key={item}
-              className={`px-2 py-1 text-sm flex items-center justify-between cursor-pointer ${
-                currentSelectedIndex === index
-                  ? 'text-white'
-                  : 'text-black hover:bg-gray-100'
-              } ${item === 'Delete Account' ? 'text-red-600' : ''}`}
-              style={{
-                backgroundColor: currentSelectedIndex === index ? '#3398d8' : 'transparent'
-              }}
-              onClick={() => handleItemClick(item, index)}
-              onMouseEnter={() => handleItemHover(item, index)}
-              onMouseLeave={handleItemLeave}
-              onTouchStart={() => handleTouchStart(item, index)}
+              item={item}
+              index={index}
+              isSelected={currentSelectedIndex === index}
+              isInSettingsView={isInSettingsView}
+              isInFriendsView={isInFriendsView}
+              isInFriendsListView={isInFriendsListView}
+              isInDailyDropView={isInDailyDropView}
+              isSignedIn={isSignedIn}
+              onClick={handleItemClick}
+              onHover={handleItemHover}
+              onLeave={handleItemLeave}
+              onTouchStart={handleTouchStart}
               onTouchEnd={handleTouchEnd}
-            >
-              <span>{item}</span>
-              {currentSelectedIndex === index && (isInSettingsView || isInFriendsView || isInFriendsListView || isInDailyDropView) && (
-                <span className="text-white">▶</span>
-              )}
-              {currentSelectedIndex === index && !isInSettingsView && !isInFriendsView && !isInFriendsListView && !isInDailyDropView && 
-               ((item === 'Settings' && isSignedIn) || (item === 'Friends' && isSignedIn) || item === 'The Daily Drop') && (
-                <span className="text-white">▶</span>
-              )}
-            </div>
+            />
           ))}
         </div>
       </div>
