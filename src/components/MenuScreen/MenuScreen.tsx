@@ -124,7 +124,8 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
   };
 
   const handleDailyDropClick = () => {
-    console.log('Daily Drop clicked');
+    console.log('Daily Drop clicked - this should trigger state change in iPod');
+    // This is just a placeholder - the actual state change happens in iPod.tsx
   };
 
   const handleMenuItemClick = (index: number) => {

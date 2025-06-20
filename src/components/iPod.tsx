@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Screen from './Screen';
 import ClickWheel from './ClickWheel';
@@ -6,6 +7,9 @@ import { useIPodState } from '../hooks/useIPodState';
 import { useIPodAuth } from '../hooks/useIPodAuth';
 import { useIPodFriends } from '../hooks/useIPodFriends';
 import { useIPodNavigation } from '../hooks/useIPodNavigation';
+import { useIPodEvents } from '../hooks/useIPodEvents';
+import { useIPodClickHandlers } from '../hooks/useIPodClickHandlers';
+import { useIPodWheelHandlers } from '../hooks/useIPodWheelHandlers';
 
 interface SpotifyTrackInfo {
   name: string;
@@ -78,47 +82,6 @@ const IPod: React.FC<IPodProps> = ({
     }
   }, [sharedUserSongs, state.isSharedView]);
 
-  const handleWheelMove = (e: React.MouseEvent) => {
-    const wheelElement = e.currentTarget as HTMLElement;
-    const rect = wheelElement.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
-    
-    const normalizedAngle = ((angle * 180) / Math.PI + 360) % 360;
-    
-    if (state.lastAngle !== null) {
-      let angleDiff = normalizedAngle - state.lastAngle;
-      
-      if (angleDiff > 180) angleDiff -= 360;
-      if (angleDiff < -180) angleDiff += 360;
-      
-      const threshold = 25;
-      if (Math.abs(angleDiff) < threshold) {
-        return;
-      }
-      
-      const isClockwise = angleDiff > 0;
-      navigation.handleWheelNavigation(isClockwise);
-    }
-    
-    state.setLastAngle(normalizedAngle);
-  };
-
-  const handleWheelLeave = () => {
-    state.setLastAngle(null);
-  };
-
-  const handleBackClick = () => {
-    console.log('Back button clicked - same as menu');
-    navigation.handleMenuClick();
-  };
-
-  const handleForwardClick = () => {
-    console.log('Forward button clicked - same as center');
-    handleCenterClick();
-  };
-
   const handleEditAccount = () => {
     window.location.href = '/signin?mode=edit';
   };
@@ -127,180 +90,32 @@ const IPod: React.FC<IPodProps> = ({
     window.location.href = '/edit-my-five';
   };
 
-  const handleCenterClick = async () => {
-    console.log('Center button clicked!');
-    
-    if (state.currentScreen === 'menu') {
-      if (state.isInMyFiveAuthView) {
-        console.log('My Five Auth option selected:', state.selectedMyFiveAuthOption);
-        if (state.selectedMyFiveAuthOption === 0) {
-          // Sign In - add signin mode parameter
-          window.open('/signin?mode=signin', '_blank');
-        } else {
-          // Sign Up
-          window.open('/signin', '_blank');
-        }
-      } else if (state.isInMyFiveView) {
-        console.log('My Five song selected:', state.selectedMyFiveSong);
-        
-        // Check if Edit My Five button is selected (index -1 or 0 when it's the first item)
-        const hasEditButton = !state.isSharedView && friends.viewingFriendSongs.length === 0 && currentUser;
-        
-        if (hasEditButton && state.selectedMyFiveSong === 0 && state.myFiveSongsCount === 0) {
-          // Edit My Five selected when no songs exist
-          handleEditMyFive();
-          return;
-        } else if (hasEditButton && state.selectedMyFiveSong === 0) {
-          // Edit My Five selected when songs exist
-          handleEditMyFive();
-          return;
-        }
-        
-        // Adjust song index if Edit button exists
-        const songIndex = hasEditButton ? state.selectedMyFiveSong - 1 : state.selectedMyFiveSong;
-        
-        let songToPlay = null;
-        if (friends.viewingFriendSongs.length > 0) {
-          songToPlay = friends.viewingFriendSongs[songIndex];
-        } else if (state.isSharedView && sharedUserSongs[songIndex]) {
-          songToPlay = sharedUserSongs[songIndex];
-        }
-        
-        if (songToPlay) {
-          window.open(songToPlay.spotifyUrl, '_blank');
-        } else if (songIndex >= 0) {
-          const event = new CustomEvent('myFiveSongSelect', { detail: { songIndex } });
-          window.dispatchEvent(event);
-        }
-      } else if (state.isInDailyDropView) {
-        const dailyDropItems = ["Today's Prompt", 'Add a Song', 'View Today\'s Playlist'];
-        const selectedDailyDropAction = dailyDropItems[state.selectedDailyDropItem];
-        console.log('Daily Drop action selected:', selectedDailyDropAction);
-        
-        switch (selectedDailyDropAction) {
-          case "Today's Prompt":
-            console.log('Today\'s Prompt selected');
-            // TODO: Implement Today's Prompt functionality
-            break;
-          case 'Add a Song':
-            console.log('Add a Song selected');
-            // TODO: Implement Add a Song functionality
-            break;
-          case 'View Today\'s Playlist':
-            console.log('View Today\'s Playlist selected');
-            // TODO: Implement View Today's Playlist functionality
-            break;
-          default:
-            console.log('Daily Drop action not implemented:', selectedDailyDropAction);
-            break;
-        }
-      } else if (state.isInFriendsListView) {
-        const selectedFriend = friends.friendsList[state.selectedFriendsListItem];
-        if (selectedFriend) {
-          console.log('Loading friend\'s songs:', selectedFriend);
-          friends.loadFriendSongs(selectedFriend.id, selectedFriend.full_name);
-          state.setIsInMyFiveView(true);
-          state.setSelectedMyFiveSong(0);
-          state.setIsSharedView(false);
-        }
-      } else if (state.isInFriendsView) {
-        const friendsItems = ['Add a friend', 'My Friends'];
-        const selectedFriendsAction = friendsItems[state.selectedFriendsItem];
-        console.log('Friends action selected:', selectedFriendsAction);
-        
-        switch (selectedFriendsAction) {
-          case 'Add a friend':
-            window.location.href = '/search-friends';
-            break;
-          case 'My Friends':
-            state.setIsInFriendsListView(true);
-            state.setSelectedFriendsListItem(0);
-            friends.loadFriendsList(currentUser);
-            break;
-          default:
-            console.log('Friends action not implemented:', selectedFriendsAction);
-            break;
-        }
-      } else if (state.isInSettingsView) {
-        const settingsItems = ['Edit Account', 'Privacy Policy', 'Product Feedback', 'Logout', 'Delete Account'];
-        const selectedSettingsAction = settingsItems[state.selectedSettingsItem];
-        console.log('Settings action selected:', selectedSettingsAction);
-        
-        switch (selectedSettingsAction) {
-          case 'Edit Account':
-            handleEditAccount();
-            break;
-          case 'Privacy Policy':
-            console.log('Entering Privacy Policy view');
-            state.setIsInPrivacyPolicyView(true);
-            break;
-          case 'Product Feedback':
-            window.open('https://app.formbricks.com/s/cmc2iwfd7d33uu2017tjqmhji', '_blank');
-            break;
-          case 'Logout':
-            await handleLogout();
-            state.setIsInSettingsView(false);
-            state.setSelectedSettingsItem(0);
-            state.setCurrentScreen('menu');
-            state.setSelectedMenuItem(0);
-            break;
-          case 'Delete Account':
-            await handleDeleteAccount();
-            state.setIsInSettingsView(false);
-            state.setSelectedSettingsItem(0);
-            state.setCurrentScreen('menu');
-            state.setSelectedMenuItem(0);
-            break;
-          default:
-            console.log('Settings action not implemented:', selectedSettingsAction);
-            break;
-        }
-      } else {
-        const selectedItem = state.menuItems[state.selectedMenuItem];
-        if (selectedItem === 'The Daily Drop') {
-          console.log('Entering Daily Drop view');
-          state.setIsInDailyDropView(true);
-          state.setSelectedDailyDropItem(0);
-        } else if (selectedItem === 'Sign In') {
-          console.log('Attempting to open sign-in page...');
-          const newWindow = window.open('/signin?mode=signin', '_blank');
-          console.log('Window opened:', newWindow);
-        } else if (selectedItem === 'My Five') {
-          console.log('Entering My Five view');
-          
-          // Check if user is signed in
-          if (!currentUser) {
-            console.log('User not signed in, showing auth options');
-            state.setIsInMyFiveAuthView(true);
-            state.setSelectedMyFiveAuthOption(0);
-          } else {
-            state.setIsSharedView(false);
-            friends.setViewingFriendProfile(null);
-            friends.setViewingFriendSongs([]);
-            state.setIsInMyFiveView(true);
-            state.setSelectedMyFiveSong(0);
-          }
-        } else if (selectedItem === 'Friends') {
-          console.log('Entering Friends view');
-          state.setIsInFriendsView(true);
-          state.setSelectedFriendsItem(0);
-        } else if (selectedItem === 'Share Profile') {
-          handleShareProfile();
-        } else if (selectedItem === 'Settings') {
-          console.log('Entering settings view');
-          state.setIsInSettingsView(true);
-          state.setSelectedSettingsItem(0);
-        } else if (selectedItem === 'About') {
-          console.log('Entering About view');
-          state.setIsInAboutView(true);
-        } else {
-          state.setIsPlaying(!state.isPlaying);
-        }
-      }
-    } else if (state.currentScreen === 'music') {
-      state.setIsPlaying(!state.isPlaying);
-    }
-  };
+  const { handleSongPlay } = useIPodEvents({
+    currentUser,
+    myFiveSongsCount: state.myFiveSongsCount,
+    setMyFiveSongsCount: state.setMyFiveSongsCount,
+    selectedMyFiveSong: state.selectedMyFiveSong,
+    isSharedView: state.isSharedView,
+    sharedUserSongs,
+    viewingFriendSongs: friends.viewingFriendSongs,
+    handleEditMyFive
+  });
+
+  const { handleCenterClick, handleBackClick, handleForwardClick } = useIPodClickHandlers({
+    currentUser,
+    state,
+    friends,
+    navigation,
+    handleEditAccount,
+    handleEditMyFive,
+    handleLogout,
+    handleDeleteAccount,
+    handleShareProfile,
+    handleSongPlay,
+    sharedUserSongs
+  });
+
+  const { handleWheelMove, handleWheelLeave } = useIPodWheelHandlers({ navigation });
 
   const handleSettingsItemChange = (index: number) => {
     state.setSelectedSettingsItem(index);

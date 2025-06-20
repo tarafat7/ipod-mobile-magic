@@ -1,4 +1,3 @@
-
 import React from 'react';
 import MenuScreen from './MenuScreen/MenuScreen';
 import MusicScreen from './MusicScreen';
@@ -136,6 +135,9 @@ const Screen: React.FC<ScreenProps> = ({
             selectedFriendsListItem={selectedFriendsListItem}
             onFriendsListItemChange={onFriendsListItemChange}
             friendsList={friendsList}
+            isInDailyDropView={isInDailyDropView}
+            selectedDailyDropItem={selectedDailyDropItem}
+            onDailyDropItemChange={onDailyDropItemChange}
           />
         );
       case 'friends':
