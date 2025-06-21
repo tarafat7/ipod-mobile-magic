@@ -62,6 +62,11 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
   hoveredDailyDropItem = null
 }) => {
   if (isInDailyDropView) {
+    // Show specific prompt when hovering over "Today's Prompt"
+    const promptText = hoveredDailyDropItem === "Today's Prompt" 
+      ? "Songs that played during\nthe best week of your life"
+      : "A global playlist built\ndaily around a prompt";
+    
     return (
       <div className="w-1/2 bg-gray-50">
         <div className="h-full flex flex-col items-center justify-center p-4 text-center">
@@ -71,9 +76,8 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
             </div>
           </div>
           <h3 className="font-bold text-lg mb-1">The Daily Drop</h3>
-          <p className="text-sm text-gray-600 text-center leading-tight">
-            Songs that played during<br />
-            the best week of your life
+          <p className="text-sm text-gray-600 text-center leading-tight whitespace-pre-line">
+            {promptText}
           </p>
         </div>
       </div>
@@ -155,8 +159,8 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
             </div>
             <h3 className="font-bold text-lg mb-1">The Daily Drop</h3>
             <p className="text-sm text-gray-600 text-center leading-tight">
-              Songs that played during<br />
-              the best week of your life
+              A global playlist built<br />
+              daily around a prompt
             </p>
           </div>
         );
