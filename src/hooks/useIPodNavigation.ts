@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { getMenuItems } from '../data/iPodData';
 import { supabase } from '../integrations/supabase/client';
@@ -150,26 +151,26 @@ export const useIPodNavigation = (props: NavigationProps) => {
     }
   };
 
+  const scrollSelectedItemIntoView = () => {
+    // Auto-scroll the selected item into view for My Five
+    if (isInMyFiveView) {
+      setTimeout(() => {
+        const selectedElement = document.querySelector('[data-selected="true"]');
+        if (selectedElement) {
+          selectedElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest'
+          });
+        }
+      }, 50);
+    }
+  };
+
   const handleWheelNavigation = (isClockwise: boolean) => {
     triggerHapticFeedback();
     
     // Handle Privacy Policy scrolling
     if (props.isInPrivacyPolicyView) {
-      const scrollContainer = document.querySelector('[data-radix-scroll-area-viewport]');
-      if (scrollContainer) {
-        const scrollAmount = 50;
-        const currentScrollTop = scrollContainer.scrollTop;
-        const newScrollTop = isClockwise 
-          ? currentScrollTop + scrollAmount 
-          : Math.max(0, currentScrollTop - scrollAmount);
-        
-        scrollContainer.scrollTop = newScrollTop;
-      }
-      return;
-    }
-    
-    // Handle My Five scrolling
-    if (isInMyFiveView) {
       const scrollContainer = document.querySelector('[data-radix-scroll-area-viewport]');
       if (scrollContainer) {
         const scrollAmount = 50;
@@ -230,6 +231,9 @@ export const useIPodNavigation = (props: NavigationProps) => {
           : (selectedMyFiveSong - 1 + maxItems) % maxItems;
         
         setSelectedMyFiveSong(newSelection);
+        
+        // Auto-scroll the selected item into view
+        scrollSelectedItemIntoView();
       } else if (isInFriendsListView) {
         const newSelection = isClockwise 
           ? (selectedFriendsListItem + 1) % Math.max(friendsList.length, 1)

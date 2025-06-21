@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { searchSpotifyTracks } from '../utils/spotifySearch';
@@ -216,6 +217,7 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
         <div className="px-2 mb-2">
           <button
             onClick={handleEditMyFive}
+            data-selected={selectedSongIndex === 0 ? "true" : "false"}
             className={`w-full flex items-center justify-between p-1.5 border-b border-gray-200 transition-colors ${
               selectedSongIndex === 0 
                 ? 'bg-blue-500 text-white' 
@@ -262,6 +264,7 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
             return (
               <div 
                 key={`${isSharedView ? 'shared' : 'own'}-${index}-${song.name}`}
+                data-selected={selectedSongIndex === adjustedIndex ? "true" : "false"}
                 className={`flex items-center p-1.5 border-b border-gray-200 transition-colors ${
                   selectedSongIndex === adjustedIndex 
                     ? 'bg-blue-500 text-white' 
