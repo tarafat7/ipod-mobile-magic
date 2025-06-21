@@ -101,10 +101,14 @@ const TodaysPlaylistView: React.FC<TodaysPlaylistViewProps> = ({ selectedItemInd
   return (
     <div className="h-full bg-white">
       {/* Header - matching My Five style */}
-      <div className="p-2">
+      <div className="p-2 relative">
         <div className="flex items-center justify-between mb-2 text-xs">
           <span className="font-bold">Today's Playlist</span>
-          <div className="w-6 h-3 bg-green-500 rounded-sm"></div>
+          {/* Contributor count indicator */}
+          <div className="flex items-center space-x-1 bg-gray-100 rounded-full px-2 py-1">
+            <Users size={12} className="text-gray-500" />
+            <span className="text-gray-500">{submissions.length}</span>
+          </div>
         </div>
       </div>
 

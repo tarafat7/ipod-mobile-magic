@@ -84,7 +84,15 @@ const TodaysPlaylistPreview: React.FC = () => {
   }
 
   return (
-    <div className="h-full flex flex-col items-center justify-center p-4 text-center">
+    <div className="h-full flex flex-col items-center justify-center p-4 text-center relative">
+      {/* Contributor count indicator in top right */}
+      {submissions.length > 0 && (
+        <div className="absolute top-2 right-2 flex items-center space-x-1 bg-gray-100 rounded-full px-2 py-1">
+          <Users size={12} className="text-gray-500" />
+          <span className="text-xs text-gray-500">{submissions.length}</span>
+        </div>
+      )}
+      
       <Music size={32} className="text-blue-600 mb-3" />
       <h3 className="font-bold text-lg mb-1">Today's Playlist</h3>
       <p className="text-sm text-gray-600 text-center leading-tight mb-2">
@@ -93,12 +101,6 @@ const TodaysPlaylistPreview: React.FC = () => {
           : "No songs submitted yet\nBe the first to add one!"
         }
       </p>
-      {submissions.length > 0 && (
-        <div className="flex items-center space-x-1 text-xs text-gray-500">
-          <Users size={12} />
-          <span>{submissions.length} contributors</span>
-        </div>
-      )}
     </div>
   );
 };
