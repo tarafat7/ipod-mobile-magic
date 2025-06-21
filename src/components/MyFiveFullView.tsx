@@ -3,6 +3,7 @@ import { supabase } from '../integrations/supabase/client';
 import { searchSpotifyTracks } from '../utils/spotifySearch';
 import { extractSpotifyTrackId, formatDate } from '../utils/spotifyUtils';
 import { Music, ExternalLink, Edit } from 'lucide-react';
+import { ScrollArea } from './ui/scroll-area';
 
 interface SpotifyTrackInfo {
   name: string;
@@ -201,7 +202,7 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
   const showEditButton = !isSharedView && currentUser;
 
   return (
-    <div className="h-full bg-white">
+    <ScrollArea className="h-full bg-white">
       {/* Header */}
       <div className="p-2">
         <div className="flex items-center justify-between mb-2 text-xs">
@@ -246,7 +247,7 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
       )}
 
       {/* Song List or Empty State */}
-      <div className="bg-white px-2">
+      <div className="bg-white px-2 pb-4">
         {songs.length === 0 ? (
           <div className="h-32 flex flex-col items-center justify-center text-center">
             <Music size={24} className="text-gray-400 mb-2" />
@@ -300,7 +301,7 @@ const MyFiveFullView: React.FC<MyFiveFullViewProps> = ({
           })
         )}
       </div>
-    </div>
+    </ScrollArea>
   );
 };
 
