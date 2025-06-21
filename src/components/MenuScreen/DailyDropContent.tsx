@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Music, Users } from 'lucide-react';
 import { supabase } from '../../integrations/supabase/client';
@@ -75,7 +76,7 @@ const DailyDropContent: React.FC<DailyDropContentProps> = ({
     fetchDailyDropData();
   }, [isSignedIn]);
 
-  const dailyDropItems = ["Today's Prompt", 'Add a Song', "Today's Playlist"];
+  const dailyDropItems = ["Today's Prompt", 'Add a Song', 'View Today\'s Playlist'];
   const selectedDailyDropAction = dailyDropItems[selectedDailyDropItem];
   
   // Show specific content based on selection
@@ -116,7 +117,7 @@ const DailyDropContent: React.FC<DailyDropContentProps> = ({
     );
   }
 
-  if (selectedDailyDropAction === "Today's Playlist" || hoveredDailyDropItem === "Today's Playlist") {
+  if (selectedDailyDropAction === "View Today's Playlist" || hoveredDailyDropItem === "View Today's Playlist") {
     return (
       <div className="w-1/2 bg-gray-50">
         <div className="h-full flex flex-col items-center justify-center p-4 text-center">
