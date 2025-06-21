@@ -10,7 +10,7 @@ interface PlaylistSubmission {
   album_art: string | null;
   spotify_url: string;
   profiles: {
-    full_name: string;
+    username: string;
   };
 }
 
@@ -45,7 +45,7 @@ const TodaysPlaylistHoverPreview: React.FC = () => {
         const userIds = data.map(submission => submission.user_id);
         const { data: profilesData, error: profilesError } = await supabase
           .from('profiles')
-          .select('id, full_name')
+          .select('id, username')
           .in('id', userIds);
 
         if (profilesError) {
@@ -57,7 +57,7 @@ const TodaysPlaylistHoverPreview: React.FC = () => {
             return {
               ...submission,
               profiles: {
-                full_name: profile?.full_name || 'Unknown User'
+                username: profile?.username || 'unknown'
               }
             };
           });
@@ -125,7 +125,7 @@ const TodaysPlaylistHoverPreview: React.FC = () => {
                 {submission.artist_name}
               </p>
               <p className="text-xs text-gray-400 truncate">
-                by {submission.profiles.full_name}
+                @{submission.profiles.username}
               </p>
             </div>
           </div>

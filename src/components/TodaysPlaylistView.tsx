@@ -10,7 +10,7 @@ interface PlaylistSubmission {
   album_art: string | null;
   spotify_url: string;
   profiles: {
-    full_name: string;
+    username: string;
   };
 }
 
@@ -50,7 +50,7 @@ const TodaysPlaylistView: React.FC<TodaysPlaylistViewProps> = ({ selectedItemInd
         const userIds = data.map(submission => submission.user_id);
         const { data: profilesData, error: profilesError } = await supabase
           .from('profiles')
-          .select('id, full_name')
+          .select('id, username')
           .in('id', userIds);
 
         if (profilesError) {
@@ -62,7 +62,7 @@ const TodaysPlaylistView: React.FC<TodaysPlaylistViewProps> = ({ selectedItemInd
             return {
               ...submission,
               profiles: {
-                full_name: profile?.full_name || 'Unknown User'
+                username: profile?.username || 'unknown'
               }
             };
           });
@@ -109,7 +109,7 @@ const TodaysPlaylistView: React.FC<TodaysPlaylistViewProps> = ({ selectedItemInd
       </div>
 
       {/* Song List */}
-      <div className="bg-white px-2">
+      <div className="bg-white px-2" data-playlist-items>
         {submissions.map((submission, index) => (
           <div 
             key={submission.id}
@@ -146,7 +146,7 @@ const TodaysPlaylistView: React.FC<TodaysPlaylistViewProps> = ({ selectedItemInd
               <p className={`text-xs truncate ${
                 selectedItemIndex === index ? 'text-blue-100' : 'text-gray-500'
               }`}>
-                by {submission.profiles.full_name}
+                @{submission.profiles.username}
               </p>
             </div>
             {selectedItemIndex === index && (
