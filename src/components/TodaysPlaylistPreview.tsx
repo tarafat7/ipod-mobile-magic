@@ -24,7 +24,10 @@ const TodaysPlaylistPreview: React.FC = () => {
 
   const fetchTodaysSubmissions = async () => {
     try {
+      console.log('Fetching today\'s submissions...');
       const today = new Date().toISOString().split('T')[0];
+      console.log('Today\'s date:', today);
+      
       const { data, error } = await supabase
         .from('daily_submissions')
         .select(`
@@ -37,16 +40,23 @@ const TodaysPlaylistPreview: React.FC = () => {
         `)
         .eq('date', today);
 
+      console.log('Submissions query result:', { data, error });
+
       if (error) {
         console.error('Error fetching submissions:', error);
         setSubmissions([]);
       } else if (data) {
+        console.log('Found submissions:', data.length);
         // Fetch profile data separately
         const userIds = data.map(submission => submission.user_id);
+        console.log('Fetching profiles for user IDs:', userIds);
+        
         const { data: profilesData, error: profilesError } = await supabase
           .from('profiles')
           .select('id, full_name')
           .in('id', userIds);
+
+        console.log('Profiles query result:', { profilesData, profilesError });
 
         if (profilesError) {
           console.error('Error fetching profiles:', profilesError);
@@ -62,9 +72,11 @@ const TodaysPlaylistPreview: React.FC = () => {
               }
             };
           });
+          console.log('Combined submissions with profiles:', combined);
           setSubmissions(combined);
         }
       } else {
+        console.log('No data returned from submissions query');
         setSubmissions([]);
       }
     } catch (error) {

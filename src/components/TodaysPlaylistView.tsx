@@ -28,7 +28,10 @@ const TodaysPlaylistView: React.FC<TodaysPlaylistViewProps> = ({ selectedItemInd
 
   const fetchTodaysSubmissions = async () => {
     try {
+      console.log('TodaysPlaylistView: Fetching today\'s submissions...');
       const today = new Date().toISOString().split('T')[0];
+      console.log('TodaysPlaylistView: Today\'s date:', today);
+      
       const { data, error } = await supabase
         .from('daily_submissions')
         .select(`
@@ -41,16 +44,23 @@ const TodaysPlaylistView: React.FC<TodaysPlaylistViewProps> = ({ selectedItemInd
         `)
         .eq('date', today);
 
+      console.log('TodaysPlaylistView: Submissions query result:', { data, error });
+
       if (error) {
         console.error('Error fetching submissions:', error);
         setSubmissions([]);
       } else if (data) {
+        console.log('TodaysPlaylistView: Found submissions:', data.length);
         // Fetch profile data separately
         const userIds = data.map(submission => submission.user_id);
+        console.log('TodaysPlaylistView: Fetching profiles for user IDs:', userIds);
+        
         const { data: profilesData, error: profilesError } = await supabase
           .from('profiles')
           .select('id, full_name')
           .in('id', userIds);
+
+        console.log('TodaysPlaylistView: Profiles query result:', { profilesData, profilesError });
 
         if (profilesError) {
           console.error('Error fetching profiles:', profilesError);
@@ -66,9 +76,11 @@ const TodaysPlaylistView: React.FC<TodaysPlaylistViewProps> = ({ selectedItemInd
               }
             };
           });
+          console.log('TodaysPlaylistView: Combined submissions with profiles:', combined);
           setSubmissions(combined);
         }
       } else {
+        console.log('TodaysPlaylistView: No data returned from submissions query');
         setSubmissions([]);
       }
     } catch (error) {
