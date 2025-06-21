@@ -37,17 +37,43 @@ const TodaysPlaylistView: React.FC<TodaysPlaylistViewProps> = ({ selectedItemInd
           artist_name,
           album_art,
           spotify_url,
-          profiles!user_id(full_name)
+          user_id
         `)
         .eq('date', today);
 
       if (error) {
         console.error('Error fetching submissions:', error);
+        setSubmissions([]);
+      } else if (data) {
+        // Fetch profile data separately
+        const userIds = data.map(submission => submission.user_id);
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, full_name')
+          .in('id', userIds);
+
+        if (profilesError) {
+          console.error('Error fetching profiles:', profilesError);
+          setSubmissions([]);
+        } else {
+          // Combine the data
+          const combined = data.map(submission => {
+            const profile = profilesData?.find(p => p.id === submission.user_id);
+            return {
+              ...submission,
+              profiles: {
+                full_name: profile?.full_name || 'Unknown User'
+              }
+            };
+          });
+          setSubmissions(combined);
+        }
       } else {
-        setSubmissions(data || []);
+        setSubmissions([]);
       }
     } catch (error) {
       console.error('Error:', error);
+      setSubmissions([]);
     } finally {
       setIsLoading(false);
     }
