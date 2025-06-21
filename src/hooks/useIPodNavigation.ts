@@ -152,8 +152,8 @@ export const useIPodNavigation = (props: NavigationProps) => {
   };
 
   const scrollSelectedItemIntoView = () => {
-    // Auto-scroll the selected item into view for My Five
-    if (isInMyFiveView) {
+    // Auto-scroll the selected item into view for My Five and Today's Playlist
+    if (isInMyFiveView || props.isInTodaysPlaylistView) {
       setTimeout(() => {
         const selectedElement = document.querySelector('[data-selected="true"]');
         if (selectedElement) {
@@ -197,6 +197,9 @@ export const useIPodNavigation = (props: NavigationProps) => {
           : (props.selectedTodaysPlaylistItem - 1 + Math.max(playlistItemsCount, 1)) % Math.max(playlistItemsCount, 1);
         
         props.setSelectedTodaysPlaylistItem(newSelection);
+        
+        // Auto-scroll the selected item into view
+        scrollSelectedItemIntoView();
       } else if (isInMyFiveAuthView) {
         const authOptionsCount = 2; // Sign In, Sign Up
         const newSelection = isClockwise 

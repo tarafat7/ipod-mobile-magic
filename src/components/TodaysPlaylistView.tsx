@@ -136,6 +136,7 @@ const TodaysPlaylistView: React.FC<TodaysPlaylistViewProps> = ({ selectedItemInd
         {submissions.map((submission, index) => (
           <div 
             key={submission.id}
+            data-selected={selectedItemIndex === index ? "true" : "false"}
             className={`flex items-center p-1.5 border-b border-gray-200 transition-colors ${
               selectedItemIndex === index 
                 ? 'bg-blue-500 text-white' 
