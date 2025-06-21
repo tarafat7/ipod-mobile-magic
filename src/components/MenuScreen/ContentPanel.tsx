@@ -1,4 +1,3 @@
-
 import React from 'react';
 import FriendsScreen from '../FriendsScreen';
 import SettingsScreen from '../SettingsScreen';
@@ -63,12 +62,17 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
   hoveredDailyDropItem = null
 }) => {
   if (isInDailyDropView) {
-    // Show specific prompt when hovering over "Today's Prompt"
-    const promptText = hoveredDailyDropItem === "Today's Prompt" 
+    // Get the selected item in Daily Drop menu
+    const dailyDropItems = ["Today's Prompt", 'Add a Song', 'View Today\'s Playlist'];
+    const selectedDailyDropAction = dailyDropItems[selectedDailyDropItem];
+    
+    // Show specific prompt when "Today's Prompt" is selected OR hovered
+    const shouldShowPrompt = selectedDailyDropAction === "Today's Prompt" || hoveredDailyDropItem === "Today's Prompt";
+    const promptText = shouldShowPrompt
       ? "Songs that played during\nthe best week of your life"
       : "A global playlist built\ndaily around a prompt";
     
-    console.log('Daily Drop view - hoveredDailyDropItem:', hoveredDailyDropItem, 'promptText:', promptText);
+    console.log('Daily Drop view - selectedDailyDropAction:', selectedDailyDropAction, 'hoveredDailyDropItem:', hoveredDailyDropItem, 'promptText:', promptText);
     
     return (
       <div className="w-1/2 bg-gray-50">
