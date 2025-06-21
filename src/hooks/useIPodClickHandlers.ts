@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 
 interface ClickHandlersProps {
@@ -52,7 +51,8 @@ export const useIPodClickHandlers = ({
             console.log('Today\'s Prompt selected');
             break;
           case 'Add a Song':
-            console.log('Add a Song selected');
+            console.log('Add a Song selected - navigating to add page');
+            window.location.href = '/add-daily-drop';
             break;
           case 'View Today\'s Playlist':
             console.log('View Today\'s Playlist selected');

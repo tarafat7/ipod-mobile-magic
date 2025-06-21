@@ -9,6 +9,7 @@ import EditMyFive from "./pages/EditMyFive";
 import MyFive from "./pages/MyFive";
 import SearchFriends from "./pages/SearchFriends";
 import MyFriends from "./pages/MyFriends";
+import AddDailyDrop from "./pages/AddDailyDrop";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/my-five/:userId" element={<MyFive />} />
           <Route path="/search-friends" element={<SearchFriends />} />
           <Route path="/my-friends" element={<MyFriends />} />
+          <Route path="/add-daily-drop" element={<AddDailyDrop />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
