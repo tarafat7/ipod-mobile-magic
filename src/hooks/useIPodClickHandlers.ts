@@ -1,3 +1,4 @@
+
 import { useIPodNavigation } from './useIPodNavigation';
 import { useIPodFriends } from './useIPodFriends';
 import { Music } from 'lucide-react';
@@ -60,8 +61,7 @@ export const useIPodClickHandlers = ({
           const selectedFriend = friends.friendsList[state.selectedFriendsListItem];
           if (selectedFriend) {
             friends.setViewingFriendProfile({ full_name: selectedFriend.full_name });
-            friends.setViewingFriendId(selectedFriend.id);
-            friends.fetchFriendSongs(selectedFriend.id);
+            friends.loadFriendSongs(selectedFriend.id, selectedFriend.full_name);
             state.setIsInMyFiveView(true);
             state.setIsInFriendsListView(false);
             state.setIsInFriendsView(false);
@@ -171,7 +171,6 @@ export const useIPodClickHandlers = ({
       state.setCurrentScreen('menu');
       friends.setViewingFriendProfile(null);
       friends.setViewingFriendSongs([]);
-      friends.setViewingFriendId(null);
     } else if (state.isInFriendsView) {
       state.setIsInFriendsView(false);
       state.setCurrentScreen('menu');
