@@ -1,12 +1,12 @@
-import { UseIPodNavigationProps } from './useIPodNavigation';
-import { UseIPodFriendsProps } from './useIPodFriends';
+import { useIPodNavigation } from './useIPodNavigation';
+import { useIPodFriends } from './useIPodFriends';
 import { Music } from 'lucide-react';
 
 interface UseIPodClickHandlersProps {
   currentUser: any;
   state: any;
-  friends: UseIPodFriendsProps;
-  navigation: UseIPodNavigationProps;
+  friends: ReturnType<typeof useIPodFriends>;
+  navigation: ReturnType<typeof useIPodNavigation>;
   handleEditAccount: () => void;
   handleEditMyFive: () => void;
   handleLogout: () => void;
@@ -98,10 +98,10 @@ export const useIPodClickHandlers = ({
 
     // Handle Daily Drop view
     if (state.isInDailyDropView) {
-      const dailyDropItems = ["Today's Prompt", 'Add a Song', "Today's Playlist"];
+      const dailyDropItems = ["Today's Prompt", 'Manage Songs', "Today's Playlist"];
       const selectedAction = dailyDropItems[state.selectedDailyDropItem];
       
-      if (selectedAction === 'Add a Song') {
+      if (selectedAction === 'Manage Songs') {
         if (currentUser) {
           window.location.href = '/manage-daily-drop';
         } else {
