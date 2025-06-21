@@ -13,6 +13,8 @@ const AddDailyDrop = () => {
   const [message, setMessage] = useState('');
   const [todaysPrompt, setTodaysPrompt] = useState("A global playlist built daily around a prompt");
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [existingSubmission, setExistingSubmission] = useState<any>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     checkAuthAndLoadPrompt();
@@ -40,7 +42,7 @@ const AddDailyDrop = () => {
 
       // Check if user has already submitted today
       const today = new Date().toISOString().split('T')[0];
-      const { data: existingSubmission, error: submissionError } = await supabase
+      const { data: submission, error: submissionError } = await supabase
         .from('daily_submissions')
         .select('*')
         .eq('user_id', user.id)
@@ -49,8 +51,9 @@ const AddDailyDrop = () => {
 
       if (submissionError && submissionError.code !== 'PGRST116') {
         console.error('Error checking existing submission:', submissionError);
-      } else if (existingSubmission) {
-        setMessage('You have already submitted a song for today!');
+      } else if (submission) {
+        setExistingSubmission(submission);
+        setSelectedSongUrl(submission.spotify_url);
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -61,6 +64,19 @@ const AddDailyDrop = () => {
 
   const handleSongChange = (url: string) => {
     setSelectedSongUrl(url);
+    setMessage('');
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+    setMessage('');
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    if (existingSubmission) {
+      setSelectedSongUrl(existingSubmission.spotify_url);
+    }
     setMessage('');
   };
 
@@ -98,29 +114,61 @@ const AddDailyDrop = () => {
         return;
       }
 
-      // Submit to daily submissions
-      const { error } = await supabase
-        .from('daily_submissions')
-        .insert({
-          user_id: user.id,
-          spotify_track_id: trackId,
-          track_name: trackInfo.name,
-          artist_name: trackInfo.artist,
-          album_art: trackInfo.albumArt,
-          spotify_url: selectedSongUrl
-        });
+      if (existingSubmission) {
+        // Update existing submission
+        const { error } = await supabase
+          .from('daily_submissions')
+          .update({
+            spotify_track_id: trackId,
+            track_name: trackInfo.name,
+            artist_name: trackInfo.artist,
+            album_art: trackInfo.albumArt,
+            spotify_url: selectedSongUrl
+          })
+          .eq('id', existingSubmission.id);
 
-      if (error) {
-        if (error.code === '23505') { // Unique constraint violation
-          setMessage('You have already submitted a song for today!');
-        } else {
+        if (error) {
           throw error;
+        } else {
+          setMessage('Your song has been updated!');
+          setExistingSubmission({
+            ...existingSubmission,
+            spotify_track_id: trackId,
+            track_name: trackInfo.name,
+            artist_name: trackInfo.artist,
+            album_art: trackInfo.albumArt,
+            spotify_url: selectedSongUrl
+          });
+          setIsEditing(false);
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 2000);
         }
       } else {
-        setMessage('Your song has been added to today\'s playlist!');
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 2000);
+        // Submit new submission
+        const { error } = await supabase
+          .from('daily_submissions')
+          .insert({
+            user_id: user.id,
+            spotify_track_id: trackId,
+            track_name: trackInfo.name,
+            artist_name: trackInfo.artist,
+            album_art: trackInfo.albumArt,
+            spotify_url: selectedSongUrl
+          });
+
+        if (error) {
+          if (error.code === '23505') { // Unique constraint violation
+            setMessage('You have already submitted a song for today!');
+          } else {
+            throw error;
+          }
+        } else {
+          setMessage('Your song has been added to today\'s playlist!');
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 2000);
+        }
       }
     } catch (error) {
       console.error('Error submitting song:', error);
@@ -152,12 +200,40 @@ const AddDailyDrop = () => {
                 <div className="w-3 h-3 bg-orange-600 rounded-sm"></div>
               </div>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">Add</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {existingSubmission ? (isEditing ? 'Edit Your Song' : 'Your Song for Today') : 'Add'}
+            </h1>
           </div>
           <p className="text-gray-600 text-center leading-tight whitespace-pre-line">
             "{todaysPrompt}"
           </p>
         </div>
+
+        {/* Show existing submission when not editing */}
+        {existingSubmission && !isEditing && (
+          <div className="mb-6 p-4 bg-gray-50 rounded-lg border">
+            <div className="flex items-center space-x-3">
+              {existingSubmission.album_art && (
+                <img 
+                  src={existingSubmission.album_art} 
+                  alt="Album art"
+                  className="w-12 h-12 rounded object-cover"
+                />
+              )}
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900">{existingSubmission.track_name}</h3>
+                <p className="text-gray-600">{existingSubmission.artist_name}</p>
+              </div>
+              <Button 
+                onClick={handleEdit}
+                variant="outline"
+                size="sm"
+              >
+                Edit
+              </Button>
+            </div>
+          </div>
+        )}
 
         {message && (
           <div className={`mb-4 p-3 rounded-md text-sm ${
@@ -169,33 +245,52 @@ const AddDailyDrop = () => {
           </div>
         )}
 
-        <div className="space-y-6">
-          <SpotifySearchInput
-            label="Song for Today's Prompt"
-            value={selectedSongUrl}
-            onChange={handleSongChange}
-            placeholder="Search for a song that fits today's prompt..."
-          />
-        </div>
+        {/* Show search input when adding new song or editing */}
+        {(!existingSubmission || isEditing) && (
+          <div className="space-y-6">
+            <SpotifySearchInput
+              label="Song for Today's Prompt"
+              value={selectedSongUrl}
+              onChange={handleSongChange}
+              placeholder="Search for a song that fits today's prompt..."
+            />
+          </div>
+        )}
 
         <div className="flex space-x-3 mt-8">
-          <Button 
-            onClick={handleSubmit}
-            className="flex-1 bg-orange-600 hover:bg-orange-700"
-            disabled={isSaving || !selectedSongUrl.trim()}
-          >
-            {isSaving ? 'Adding...' : 'Add to Playlist'}
-          </Button>
+          {(!existingSubmission || isEditing) && (
+            <Button 
+              onClick={handleSubmit}
+              className="flex-1 bg-orange-600 hover:bg-orange-700"
+              disabled={isSaving || !selectedSongUrl.trim()}
+            >
+              {isSaving ? (existingSubmission ? 'Updating...' : 'Adding...') : (existingSubmission ? 'Update Song' : 'Add to Playlist')}
+            </Button>
+          )}
           
-          <Button 
-            type="button" 
-            variant="outline"
-            onClick={handleCancel}
-            className="flex-1"
-            disabled={isSaving}
-          >
-            Back
-          </Button>
+          {isEditing && (
+            <Button 
+              type="button" 
+              variant="outline"
+              onClick={handleCancelEdit}
+              className="flex-1"
+              disabled={isSaving}
+            >
+              Cancel
+            </Button>
+          )}
+          
+          {!isEditing && (
+            <Button 
+              type="button" 
+              variant="outline"
+              onClick={handleCancel}
+              className="flex-1"
+              disabled={isSaving}
+            >
+              Back
+            </Button>
+          )}
         </div>
       </div>
     </div>
