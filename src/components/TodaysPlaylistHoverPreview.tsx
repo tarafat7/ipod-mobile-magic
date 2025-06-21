@@ -76,8 +76,9 @@ const TodaysPlaylistHoverPreview: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      <div className="h-full flex flex-col items-center justify-center p-4 text-center">
+        <Music size={32} className="text-blue-600 mb-3 animate-pulse" />
+        <p className="text-sm text-gray-600">Loading playlist...</p>
       </div>
     );
   }
@@ -85,47 +86,47 @@ const TodaysPlaylistHoverPreview: React.FC = () => {
   if (submissions.length === 0) {
     return (
       <div className="h-full flex flex-col items-center justify-center p-4 text-center">
-        <Music size={32} className="text-gray-400 mb-3" />
-        <h3 className="font-bold text-lg mb-1">No submissions yet</h3>
-        <p className="text-sm text-gray-600">Be the first to add a song for today!</p>
+        <Music size={32} className="text-blue-600 mb-3" />
+        <h3 className="font-bold text-lg mb-1">Today's Playlist</h3>
+        <p className="text-sm text-gray-600 leading-tight">
+          No songs submitted yet<br />
+          Be the first to add one!
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="h-full bg-white flex flex-col">
-      <div className="p-3 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-orange-500 rounded"></div>
-            <span className="font-bold text-sm">Today's Playlist</span>
-          </div>
-          <div className="flex items-center space-x-1 text-xs text-gray-500">
-            <Users size={12} />
-            <span>{submissions.length}</span>
-          </div>
-        </div>
+    <div className="h-full p-2 overflow-y-auto">
+      <div className="text-center mb-2">
+        <h3 className="font-bold text-sm mb-1">Today's Playlist</h3>
       </div>
-
-      <div className="flex-1 overflow-y-auto p-2">
+      <div className="space-y-2">
         {submissions.map((submission, index) => (
-          <div
-            key={submission.id}
-            className="p-2 rounded-lg mb-1 hover:bg-gray-50"
-          >
-            <div className="flex items-center space-x-2">
-              {submission.album_art && (
+          <div key={submission.id} className="flex items-center space-x-2 p-1 bg-white rounded border">
+            <div className="w-8 h-8 bg-gray-200 rounded flex-shrink-0 overflow-hidden">
+              {submission.album_art ? (
                 <img 
                   src={submission.album_art} 
-                  alt="Album Art" 
-                  className="w-8 h-8 rounded"
+                  alt={`${submission.track_name} album art`}
+                  className="w-full h-full object-cover"
                 />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Music size={12} className="text-gray-400" />
+                </div>
               )}
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium truncate">{submission.track_name}</p>
-                <p className="text-xs text-gray-500 truncate">{submission.artist_name}</p>
-                <p className="text-xs text-gray-400 truncate">by {submission.profiles.full_name}</p>
-              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-gray-900 truncate">
+                {submission.track_name}
+              </p>
+              <p className="text-xs text-gray-500 truncate">
+                {submission.artist_name}
+              </p>
+              <p className="text-xs text-gray-400 truncate">
+                by {submission.profiles.full_name}
+              </p>
             </div>
           </div>
         ))}

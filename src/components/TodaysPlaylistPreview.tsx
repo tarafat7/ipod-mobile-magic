@@ -76,19 +76,16 @@ const TodaysPlaylistPreview: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      <div className="h-full flex flex-col items-center justify-center p-4 text-center">
+        <Music size={32} className="text-blue-600 mb-3 animate-pulse" />
+        <p className="text-sm text-gray-600">Loading playlist...</p>
       </div>
     );
   }
 
   return (
     <div className="h-full flex flex-col items-center justify-center p-4 text-center">
-      <div className="w-16 h-16 bg-black rounded-xl flex items-center justify-center mb-3">
-        <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
-          <div className="w-6 h-6 bg-orange-600 rounded-md"></div>
-        </div>
-      </div>
+      <Music size={32} className="text-blue-600 mb-3" />
       <h3 className="font-bold text-lg mb-1">Today's Playlist</h3>
       <p className="text-sm text-gray-600 text-center leading-tight mb-2">
         {submissions.length > 0 

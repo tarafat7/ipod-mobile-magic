@@ -81,11 +81,9 @@ const TodaysPlaylistView: React.FC<TodaysPlaylistViewProps> = ({ selectedItemInd
 
   if (isLoading) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-2"></div>
-          <p className="text-sm text-gray-600">Loading playlist...</p>
-        </div>
+      <div className="h-full flex flex-col items-center justify-center p-4 text-center">
+        <Music size={32} className="text-blue-600 mb-3 animate-pulse" />
+        <p className="text-sm text-gray-600">Loading playlist...</p>
       </div>
     );
   }
@@ -93,83 +91,69 @@ const TodaysPlaylistView: React.FC<TodaysPlaylistViewProps> = ({ selectedItemInd
   if (submissions.length === 0) {
     return (
       <div className="h-full flex flex-col p-4 text-center overflow-y-auto">
-        <Music size={32} className="text-gray-400 mb-3 mx-auto" />
-        <h3 className="font-bold text-lg mb-1">No submissions found</h3>
+        <Music size={32} className="text-blue-600 mb-3 mx-auto" />
+        <h3 className="font-bold text-lg mb-1">Today's Playlist</h3>
         <p className="text-sm text-gray-600">Be the first to add a song for today's prompt!</p>
       </div>
     );
   }
 
-  const selectedSubmission = submissions[selectedItemIndex] || submissions[0];
-
   return (
     <div className="h-full bg-white">
-      {/* Header */}
-      <div className="p-3 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-orange-500 rounded"></div>
-            <span className="font-bold text-sm">Today's Playlist</span>
-          </div>
-          <div className="flex items-center space-x-1 text-xs text-gray-500">
-            <Users size={12} />
-            <span>{submissions.length}</span>
-          </div>
+      {/* Header - matching My Five style */}
+      <div className="p-2">
+        <div className="flex items-center justify-between mb-2 text-xs">
+          <span className="font-bold">Today's Playlist</span>
+          <div className="w-6 h-3 bg-green-500 rounded-sm"></div>
         </div>
       </div>
 
-      {/* Current Selection Display */}
-      <div className="p-4 border-b border-gray-200 bg-gray-50">
-        <div className="flex items-center space-x-3">
-          {selectedSubmission.album_art && (
-            <img 
-              src={selectedSubmission.album_art} 
-              alt="Album Art" 
-              className="w-12 h-12 rounded-lg"
-            />
-          )}
-          <div className="flex-1 min-w-0">
-            <p className="font-medium text-sm truncate">{selectedSubmission.track_name}</p>
-            <p className="text-xs text-gray-600 truncate">{selectedSubmission.artist_name}</p>
-            <p className="text-xs text-gray-500 truncate">by {selectedSubmission.profiles.full_name}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Submissions List */}
-      <div className="flex-1 overflow-hidden">
-        <div className="p-2" data-playlist-items>
-          {submissions.map((submission, index) => (
-            <div
-              key={submission.id}
-              className={`p-2 rounded-lg mb-1 transition-colors ${
-                index === selectedItemIndex 
-                  ? 'bg-blue-100 border border-blue-200' 
-                  : 'hover:bg-gray-50'
-              }`}
-            >
-              <div className="flex items-center space-x-2">
-                {submission.album_art && (
-                  <img 
-                    src={submission.album_art} 
-                    alt="Album Art" 
-                    className="w-8 h-8 rounded"
-                  />
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium truncate">{submission.track_name}</p>
-                  <p className="text-xs text-gray-500 truncate">{submission.artist_name}</p>
-                  <p className="text-xs text-gray-400 truncate">by {submission.profiles.full_name}</p>
+      {/* Song List */}
+      <div className="bg-white px-2">
+        {submissions.map((submission, index) => (
+          <div 
+            key={submission.id}
+            className={`flex items-center p-1.5 border-b border-gray-200 transition-colors ${
+              selectedItemIndex === index 
+                ? 'bg-blue-500 text-white' 
+                : 'bg-white hover:bg-gray-50'
+            }`}
+          >
+            <div className="w-8 h-8 bg-gray-200 rounded flex-shrink-0 overflow-hidden mr-2">
+              {submission.album_art ? (
+                <img 
+                  src={submission.album_art} 
+                  alt={`${submission.track_name} album art`}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Music size={14} className="text-gray-400" />
                 </div>
-                {index === selectedItemIndex && (
-                  <div className="text-blue-500">
-                    <Music size={12} />
-                  </div>
-                )}
-              </div>
+              )}
             </div>
-          ))}
-        </div>
+            <div className="flex-1 min-w-0">
+              <h3 className={`font-semibold text-sm truncate ${
+                selectedItemIndex === index ? 'text-white' : 'text-black'
+              }`}>
+                {submission.track_name}
+              </h3>
+              <p className={`text-xs truncate ${
+                selectedItemIndex === index ? 'text-blue-100' : 'text-gray-600'
+              }`}>
+                {submission.artist_name}
+              </p>
+              <p className={`text-xs truncate ${
+                selectedItemIndex === index ? 'text-blue-100' : 'text-gray-500'
+              }`}>
+                by {submission.profiles.full_name}
+              </p>
+            </div>
+            {selectedItemIndex === index && (
+              <div className="text-white text-sm">▶</div>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );
