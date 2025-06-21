@@ -1,3 +1,4 @@
+
 import React from 'react';
 import FriendsScreen from '../FriendsScreen';
 import SettingsScreen from '../SettingsScreen';
@@ -66,6 +67,8 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
     const promptText = hoveredDailyDropItem === "Today's Prompt" 
       ? "Songs that played during\nthe best week of your life"
       : "A global playlist built\ndaily around a prompt";
+    
+    console.log('Daily Drop view - hoveredDailyDropItem:', hoveredDailyDropItem, 'promptText:', promptText);
     
     return (
       <div className="w-1/2 bg-gray-50">
