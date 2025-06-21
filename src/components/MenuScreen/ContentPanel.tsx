@@ -8,6 +8,7 @@ import AccountPreview from '../AccountPreview';
 import FriendsListPreview from '../FriendsListPreview';
 import DailyDropContent from './DailyDropContent';
 import MenuContentRenderer from './MenuContentRenderer';
+import TodaysPlaylistView from '../TodaysPlaylistView';
 import { Settings, Users } from 'lucide-react';
 
 interface SpotifyTrackInfo {
@@ -39,6 +40,8 @@ interface ContentPanelProps {
   isInDailyDropView?: boolean;
   selectedDailyDropItem?: number;
   hoveredDailyDropItem?: string | null;
+  isInTodaysPlaylistView?: boolean;
+  selectedTodaysPlaylistItem?: number;
 }
 
 const ContentPanel: React.FC<ContentPanelProps> = ({
@@ -57,8 +60,18 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
   hoveredFriendsListItem = null,
   isInDailyDropView = false,
   selectedDailyDropItem = 0,
-  hoveredDailyDropItem = null
+  hoveredDailyDropItem = null,
+  isInTodaysPlaylistView = false,
+  selectedTodaysPlaylistItem = 0
 }) => {
+  if (isInTodaysPlaylistView) {
+    return (
+      <div className="w-full bg-gray-50">
+        <TodaysPlaylistView selectedItemIndex={selectedTodaysPlaylistItem} />
+      </div>
+    );
+  }
+
   if (isInDailyDropView) {
     return (
       <DailyDropContent

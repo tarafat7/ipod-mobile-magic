@@ -25,6 +25,8 @@ export const useIPodState = () => {
   const [selectedMyFiveAuthOption, setSelectedMyFiveAuthOption] = useState(0);
   const [isInDailyDropView, setIsInDailyDropView] = useState(false);
   const [selectedDailyDropItem, setSelectedDailyDropItem] = useState(0);
+  const [isInTodaysPlaylistView, setIsInTodaysPlaylistView] = useState(false);
+  const [selectedTodaysPlaylistItem, setSelectedTodaysPlaylistItem] = useState(0);
 
   return {
     isPlaying,
@@ -73,5 +75,9 @@ export const useIPodState = () => {
     setIsInDailyDropView,
     selectedDailyDropItem,
     setSelectedDailyDropItem,
+    isInTodaysPlaylistView,
+    setIsInTodaysPlaylistView,
+    selectedTodaysPlaylistItem,
+    setSelectedTodaysPlaylistItem,
   };
 };

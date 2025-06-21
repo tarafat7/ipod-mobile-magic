@@ -15,5 +15,5 @@ export const friendsMenuItems = [
 export const dailyDropMenuItems = [
   "Today's Prompt",
   'Add a Song',
-  'View Today\'s Playlist'
+  "Today's Playlist"
 ];

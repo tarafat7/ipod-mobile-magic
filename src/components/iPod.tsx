@@ -136,6 +136,10 @@ const IPod: React.FC<IPodProps> = ({
     state.setSelectedDailyDropItem(index);
   };
 
+  const handleTodaysPlaylistItemChange = (index: number) => {
+    state.setSelectedTodaysPlaylistItem(index);
+  };
+
   const handleMyFiveAuthSignIn = () => {
     window.open('/signin?mode=signin', '_blank');
   };
@@ -187,6 +191,9 @@ const IPod: React.FC<IPodProps> = ({
             selectedDailyDropItem={state.selectedDailyDropItem}
             onDailyDropItemChange={handleDailyDropItemChange}
             onDailyDropEnter={handleDailyDropEnter}
+            isInTodaysPlaylistView={state.isInTodaysPlaylistView}
+            selectedTodaysPlaylistItem={state.selectedTodaysPlaylistItem}
+            onTodaysPlaylistItemChange={handleTodaysPlaylistItemChange}
           />
 
           <div className="flex-1 flex items-center justify-center md:items-center" style={{ alignItems: 'center', paddingBottom: '2rem' }}>

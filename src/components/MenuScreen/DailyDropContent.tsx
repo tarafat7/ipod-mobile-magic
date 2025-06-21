@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Music, Users } from 'lucide-react';
 import { supabase } from '../../integrations/supabase/client';
+import TodaysPlaylistPreview from '../TodaysPlaylistPreview';
 
 interface DailyDropContentProps {
   selectedDailyDropItem: number;
@@ -16,7 +17,6 @@ const DailyDropContent: React.FC<DailyDropContentProps> = ({
 }) => {
   const [todaysPrompt, setTodaysPrompt] = useState<string>("A global playlist built\ndaily around a prompt");
   const [hasSubmittedToday, setHasSubmittedToday] = useState<boolean>(false);
-  const [todaysSubmissions, setTodaysSubmissions] = useState<any[]>([]);
 
   // Fetch today's prompt and user's participation status
   useEffect(() => {
@@ -49,23 +49,6 @@ const DailyDropContent: React.FC<DailyDropContentProps> = ({
             } else {
               setHasSubmittedToday(!!userSubmission);
             }
-
-            // If user has submitted, fetch today's submissions
-            if (userSubmission) {
-              const { data: submissions, error: submissionsError } = await supabase
-                .from('daily_submissions')
-                .select(`
-                  *,
-                  profiles!inner(full_name)
-                `)
-                .eq('date', today);
-
-              if (submissionsError) {
-                console.error('Error fetching submissions:', submissionsError);
-              } else {
-                setTodaysSubmissions(submissions || []);
-              }
-            }
           }
         }
       } catch (error) {
@@ -76,7 +59,7 @@ const DailyDropContent: React.FC<DailyDropContentProps> = ({
     fetchDailyDropData();
   }, [isSignedIn]);
 
-  const dailyDropItems = ["Today's Prompt", 'Add a Song', 'View Today\'s Playlist'];
+  const dailyDropItems = ["Today's Prompt", 'Add a Song', "Today's Playlist"];
   const selectedDailyDropAction = dailyDropItems[selectedDailyDropItem];
   
   // Show specific content based on selection
@@ -117,21 +100,10 @@ const DailyDropContent: React.FC<DailyDropContentProps> = ({
     );
   }
 
-  if (selectedDailyDropAction === "View Today's Playlist" || hoveredDailyDropItem === "View Today's Playlist") {
+  if (selectedDailyDropAction === "Today's Playlist" || hoveredDailyDropItem === "Today's Playlist") {
     return (
       <div className="w-1/2 bg-gray-50">
-        <div className="h-full flex flex-col items-center justify-center p-4 text-center">
-          <Users size={32} className="text-orange-600 mb-3" />
-          <h3 className="font-bold text-lg mb-1">Today's Playlist</h3>
-          <p className="text-sm text-gray-600 text-center leading-tight">
-            {!isSignedIn 
-              ? "Sign in and submit a song\nto view today's playlist"
-              : !hasSubmittedToday 
-                ? "Submit your song first to\nview today's playlist"
-                : `${todaysSubmissions.length} songs submitted\nClick to view the playlist`
-            }
-          </p>
-        </div>
+        <TodaysPlaylistPreview />
       </div>
     );
   }

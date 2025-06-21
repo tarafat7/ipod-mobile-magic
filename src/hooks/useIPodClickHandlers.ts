@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 
 interface ClickHandlersProps {
@@ -31,7 +32,11 @@ export const useIPodClickHandlers = ({
     console.log('Center button clicked!');
     
     if (state.currentScreen === 'menu') {
-      if (state.isInMyFiveAuthView) {
+      if (state.isInTodaysPlaylistView) {
+        console.log('Today\'s Playlist song selected:', state.selectedTodaysPlaylistItem);
+        // Handle opening the selected song in Spotify
+        // This will be implemented similar to handleSongPlay
+      } else if (state.isInMyFiveAuthView) {
         console.log('My Five Auth option selected:', state.selectedMyFiveAuthOption);
         if (state.selectedMyFiveAuthOption === 0) {
           window.open('/signin?mode=signin', '_blank');
@@ -42,7 +47,7 @@ export const useIPodClickHandlers = ({
         console.log('My Five song selected:', state.selectedMyFiveSong);
         handleSongPlay();
       } else if (state.isInDailyDropView) {
-        const dailyDropItems = ["Today's Prompt", 'Add a Song', 'View Today\'s Playlist'];
+        const dailyDropItems = ["Today's Prompt", 'Add a Song', "Today's Playlist"];
         const selectedDailyDropAction = dailyDropItems[state.selectedDailyDropItem];
         console.log('Daily Drop action selected:', selectedDailyDropAction);
         
@@ -54,8 +59,10 @@ export const useIPodClickHandlers = ({
             console.log('Add a Song selected - navigating to add page');
             window.location.href = '/add-daily-drop';
             break;
-          case 'View Today\'s Playlist':
-            console.log('View Today\'s Playlist selected');
+          case "Today's Playlist":
+            console.log('Today\'s Playlist selected - entering playlist view');
+            state.setIsInTodaysPlaylistView(true);
+            state.setSelectedTodaysPlaylistItem(0);
             break;
           default:
             console.log('Daily Drop action not implemented:', selectedDailyDropAction);

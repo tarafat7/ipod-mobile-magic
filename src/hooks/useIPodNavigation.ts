@@ -49,6 +49,10 @@ interface NavigationProps {
   setIsInDailyDropView: (value: boolean) => void;
   selectedDailyDropItem: number;
   setSelectedDailyDropItem: (value: number) => void;
+  isInTodaysPlaylistView: boolean;
+  setIsInTodaysPlaylistView: (value: boolean) => void;
+  selectedTodaysPlaylistItem: number;
+  setSelectedTodaysPlaylistItem: (value: number) => void;
 }
 
 export const useIPodNavigation = (props: NavigationProps) => {
@@ -99,6 +103,10 @@ export const useIPodNavigation = (props: NavigationProps) => {
     setIsInDailyDropView,
     selectedDailyDropItem,
     setSelectedDailyDropItem,
+    isInTodaysPlaylistView,
+    setIsInTodaysPlaylistView,
+    selectedTodaysPlaylistItem,
+    setSelectedTodaysPlaylistItem,
   } = props;
 
   useEffect(() => {
@@ -161,7 +169,15 @@ export const useIPodNavigation = (props: NavigationProps) => {
     }
     
     if (currentScreen === 'menu') {
-      if (isInMyFiveAuthView) {
+      if (props.isInTodaysPlaylistView) {
+        // Handle Today's Playlist navigation - will be implemented with dynamic count
+        const playlistItemsCount = 10; // This will be dynamic based on actual submissions
+        const newSelection = isClockwise 
+          ? (props.selectedTodaysPlaylistItem + 1) % Math.max(playlistItemsCount, 1)
+          : (props.selectedTodaysPlaylistItem - 1 + Math.max(playlistItemsCount, 1)) % Math.max(playlistItemsCount, 1);
+        
+        props.setSelectedTodaysPlaylistItem(newSelection);
+      } else if (isInMyFiveAuthView) {
         const authOptionsCount = 2; // Sign In, Sign Up
         const newSelection = isClockwise 
           ? (selectedMyFiveAuthOption + 1) % authOptionsCount
@@ -169,7 +185,7 @@ export const useIPodNavigation = (props: NavigationProps) => {
         
         setSelectedMyFiveAuthOption(newSelection);
       } else if (isInDailyDropView) {
-        const dailyDropItemsCount = 3; // Today's Prompt, Add My Track, View Playlist
+        const dailyDropItemsCount = 3; // Today's Prompt, Add My Track, Today's Playlist
         const newSelection = isClockwise 
           ? (selectedDailyDropItem + 1) % dailyDropItemsCount
           : (selectedDailyDropItem - 1 + dailyDropItemsCount) % dailyDropItemsCount;
@@ -233,6 +249,13 @@ export const useIPodNavigation = (props: NavigationProps) => {
 
   const handleMenuClick = () => {
     console.log('Menu button clicked');
+    
+    if (props.isInTodaysPlaylistView) {
+      console.log('Exiting Today\'s Playlist view');
+      props.setIsInTodaysPlaylistView(false);
+      props.setSelectedTodaysPlaylistItem(0);
+      return;
+    }
     
     if (isInMyFiveAuthView) {
       console.log('Exiting My Five Auth view');
