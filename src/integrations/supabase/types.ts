@@ -37,7 +37,6 @@ export type Database = {
           created_at: string
           date: string
           id: string
-          position: number | null
           spotify_track_id: string
           spotify_url: string
           track_name: string
@@ -49,7 +48,6 @@ export type Database = {
           created_at?: string
           date?: string
           id?: string
-          position?: number | null
           spotify_track_id: string
           spotify_url: string
           track_name: string
@@ -61,7 +59,6 @@ export type Database = {
           created_at?: string
           date?: string
           id?: string
-          position?: number | null
           spotify_track_id?: string
           spotify_url?: string
           track_name?: string

@@ -16,7 +16,7 @@ const DailyDropContent: React.FC<DailyDropContentProps> = ({
   isSignedIn
 }) => {
   const [todaysPrompt, setTodaysPrompt] = useState<string>("A global playlist built\ndaily around a prompt");
-  const [userSubmissionCount, setUserSubmissionCount] = useState<number>(0);
+  const [hasSubmittedToday, setHasSubmittedToday] = useState<boolean>(false);
 
   // Fetch today's prompt and user's participation status
   useEffect(() => {
@@ -32,21 +32,22 @@ const DailyDropContent: React.FC<DailyDropContentProps> = ({
           setTodaysPrompt(promptData[0].prompt_text);
         }
 
-        // Check user's submissions count (only if signed in)
+        // Check if user has submitted today (only if signed in)
         if (isSignedIn) {
           const { data: { user } } = await supabase.auth.getUser();
           if (user) {
             const today = new Date().toISOString().split('T')[0];
-            const { data: userSubmissions, error: submissionError } = await supabase
+            const { data: userSubmission, error: submissionError } = await supabase
               .from('daily_submissions')
               .select('*')
               .eq('user_id', user.id)
-              .eq('date', today);
+              .eq('date', today)
+              .single();
 
-            if (submissionError) {
-              console.error('Error checking submissions:', submissionError);
+            if (submissionError && submissionError.code !== 'PGRST116') {
+              console.error('Error checking submission:', submissionError);
             } else {
-              setUserSubmissionCount(userSubmissions?.length || 0);
+              setHasSubmittedToday(!!userSubmission);
             }
           }
         }
@@ -85,12 +86,12 @@ const DailyDropContent: React.FC<DailyDropContentProps> = ({
       <div className="w-1/2 bg-gray-50">
         <div className="h-full flex flex-col items-center justify-center p-4 text-center">
           <Music size={32} className="text-orange-600 mb-3" />
-          <h3 className="font-bold text-lg mb-1">Add Songs</h3>
+          <h3 className="font-bold text-lg mb-1">Add a Song</h3>
           <p className="text-sm text-gray-600 text-center leading-tight">
             {isSignedIn 
-              ? userSubmissionCount > 0
-                ? `You've added ${userSubmissionCount}/5 songs\nManage your submissions`
-                : "Add up to 5 songs that\nfit today's prompt"
+              ? hasSubmittedToday 
+                ? "You've already submitted\na song for today!"
+                : "Submit your song that\nfits today's prompt"
               : "Sign in to participate\nin the Daily Drop"
             }
           </p>
