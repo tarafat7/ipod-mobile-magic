@@ -9,6 +9,63 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      daily_prompts: {
+        Row: {
+          created_at: string
+          id: string
+          order_position: number
+          prompt_text: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_position: number
+          prompt_text: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_position?: number
+          prompt_text?: string
+        }
+        Relationships: []
+      }
+      daily_submissions: {
+        Row: {
+          album_art: string | null
+          artist_name: string
+          created_at: string
+          date: string
+          id: string
+          spotify_track_id: string
+          spotify_url: string
+          track_name: string
+          user_id: string
+        }
+        Insert: {
+          album_art?: string | null
+          artist_name: string
+          created_at?: string
+          date?: string
+          id?: string
+          spotify_track_id: string
+          spotify_url: string
+          track_name: string
+          user_id: string
+        }
+        Update: {
+          album_art?: string | null
+          artist_name?: string
+          created_at?: string
+          date?: string
+          id?: string
+          spotify_track_id?: string
+          spotify_url?: string
+          track_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       friends: {
         Row: {
           created_at: string
@@ -101,7 +158,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_todays_prompt: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          prompt_text: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
