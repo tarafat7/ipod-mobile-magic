@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Music, Users } from 'lucide-react';
@@ -28,9 +29,22 @@ const TodaysPlaylistView: React.FC<TodaysPlaylistViewProps> = ({ selectedItemInd
   const fetchTodaysSubmissions = async () => {
     try {
       console.log('TodaysPlaylistView: Fetching today\'s submissions...');
-      const today = new Date().toISOString().split('T')[0];
-      console.log('TodaysPlaylistView: Today\'s date:', today);
       
+      // First, let's see ALL submissions to debug
+      const { data: allData, error: allError } = await supabase
+        .from('daily_submissions')
+        .select('*');
+      
+      console.log('TodaysPlaylistView: ALL submissions in database:', allData);
+      console.log('TodaysPlaylistView: Error fetching all submissions:', allError);
+      
+      // Now try different date formats
+      const today = new Date().toISOString().split('T')[0];
+      const todayUTC = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD format
+      
+      console.log('TodaysPlaylistView: Trying dates:', { today, todayUTC });
+      
+      // Try with today's date
       const { data, error } = await supabase
         .from('daily_submissions')
         .select(`
@@ -39,16 +53,17 @@ const TodaysPlaylistView: React.FC<TodaysPlaylistViewProps> = ({ selectedItemInd
           artist_name,
           album_art,
           spotify_url,
-          user_id
+          user_id,
+          date
         `)
         .eq('date', today);
 
-      console.log('TodaysPlaylistView: Submissions query result:', { data, error });
+      console.log('TodaysPlaylistView: Today submissions query result:', { data, error });
 
       if (error) {
         console.error('Error fetching submissions:', error);
         setSubmissions([]);
-      } else if (data) {
+      } else if (data && data.length > 0) {
         console.log('TodaysPlaylistView: Found submissions:', data.length);
         // Fetch profile data separately
         const userIds = data.map(submission => submission.user_id);
@@ -79,8 +94,52 @@ const TodaysPlaylistView: React.FC<TodaysPlaylistViewProps> = ({ selectedItemInd
           setSubmissions(combined);
         }
       } else {
-        console.log('TodaysPlaylistView: No data returned from submissions query');
-        setSubmissions([]);
+        console.log('TodaysPlaylistView: No submissions found for today, trying different approach...');
+        
+        // Try getting recent submissions (last 2 days)
+        const twoDaysAgo = new Date();
+        twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+        const twoDaysAgoStr = twoDaysAgo.toISOString().split('T')[0];
+        
+        const { data: recentData, error: recentError } = await supabase
+          .from('daily_submissions')
+          .select(`
+            id,
+            track_name,
+            artist_name,
+            album_art,
+            spotify_url,
+            user_id,
+            date
+          `)
+          .gte('date', twoDaysAgoStr)
+          .order('date', { ascending: false });
+        
+        console.log('TodaysPlaylistView: Recent submissions (last 2 days):', recentData);
+        
+        if (recentData && recentData.length > 0) {
+          // Get profiles for recent submissions
+          const userIds = recentData.map(submission => submission.user_id);
+          const { data: profilesData } = await supabase
+            .from('profiles')
+            .select('id, full_name')
+            .in('id', userIds);
+
+          const combined = recentData.map(submission => {
+            const profile = profilesData?.find(p => p.id === submission.user_id);
+            return {
+              ...submission,
+              profiles: {
+                full_name: profile?.full_name || 'Unknown User'
+              }
+            };
+          });
+          
+          console.log('TodaysPlaylistView: Using recent submissions:', combined);
+          setSubmissions(combined);
+        } else {
+          setSubmissions([]);
+        }
       }
     } catch (error) {
       console.error('Error:', error);
@@ -105,9 +164,9 @@ const TodaysPlaylistView: React.FC<TodaysPlaylistViewProps> = ({ selectedItemInd
     return (
       <div className="h-full flex flex-col items-center justify-center p-4 text-center">
         <Music size={32} className="text-gray-400 mb-3" />
-        <h3 className="font-bold text-lg mb-1">No submissions yet</h3>
+        <h3 className="font-bold text-lg mb-1">No submissions found</h3>
         <p className="text-sm text-gray-600">
-          Be the first to add a song to today's playlist!
+          Check the console for debugging info
         </p>
       </div>
     );

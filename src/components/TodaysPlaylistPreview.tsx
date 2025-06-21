@@ -24,9 +24,19 @@ const TodaysPlaylistPreview: React.FC = () => {
 
   const fetchTodaysSubmissions = async () => {
     try {
-      console.log('Fetching today\'s submissions...');
-      const today = new Date().toISOString().split('T')[0];
-      console.log('Today\'s date:', today);
+      console.log('TodaysPlaylistPreview: Fetching submissions...');
+      
+      // First check all submissions
+      const { data: allData } = await supabase
+        .from('daily_submissions')
+        .select('*');
+      
+      console.log('TodaysPlaylistPreview: ALL submissions:', allData);
+      
+      // Try recent submissions (last 2 days) instead of just today
+      const twoDaysAgo = new Date();
+      twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+      const twoDaysAgoStr = twoDaysAgo.toISOString().split('T')[0];
       
       const { data, error } = await supabase
         .from('daily_submissions')
@@ -38,25 +48,25 @@ const TodaysPlaylistPreview: React.FC = () => {
           spotify_url,
           user_id
         `)
-        .eq('date', today);
+        .gte('date', twoDaysAgoStr);
 
-      console.log('Submissions query result:', { data, error });
+      console.log('TodaysPlaylistPreview: Recent submissions query result:', { data, error });
 
       if (error) {
         console.error('Error fetching submissions:', error);
         setSubmissions([]);
       } else if (data) {
-        console.log('Found submissions:', data.length);
+        console.log('TodaysPlaylistPreview: Found submissions:', data.length);
         // Fetch profile data separately
         const userIds = data.map(submission => submission.user_id);
-        console.log('Fetching profiles for user IDs:', userIds);
+        console.log('TodaysPlaylistPreview: Fetching profiles for user IDs:', userIds);
         
         const { data: profilesData, error: profilesError } = await supabase
           .from('profiles')
           .select('id, full_name')
           .in('id', userIds);
 
-        console.log('Profiles query result:', { profilesData, profilesError });
+        console.log('TodaysPlaylistPreview: Profiles query result:', { profilesData, profilesError });
 
         if (profilesError) {
           console.error('Error fetching profiles:', profilesError);
@@ -72,11 +82,11 @@ const TodaysPlaylistPreview: React.FC = () => {
               }
             };
           });
-          console.log('Combined submissions with profiles:', combined);
+          console.log('TodaysPlaylistPreview: Combined submissions with profiles:', combined);
           setSubmissions(combined);
         }
       } else {
-        console.log('No data returned from submissions query');
+        console.log('TodaysPlaylistPreview: No data returned from submissions query');
         setSubmissions([]);
       }
     } catch (error) {
