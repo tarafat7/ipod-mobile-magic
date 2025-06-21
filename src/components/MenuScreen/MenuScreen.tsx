@@ -38,6 +38,9 @@ interface MenuScreenProps {
   selectedDailyDropItem?: number;
   onDailyDropItemChange?: (index: number) => void;
   onDailyDropEnter?: () => void;
+  isInTodaysPlaylistView?: boolean;
+  selectedTodaysPlaylistItem?: number;
+  onTodaysPlaylistItemChange?: (index: number) => void;
 }
 
 const MenuScreen: React.FC<MenuScreenProps> = ({ 
@@ -61,7 +64,10 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
   isInDailyDropView = false,
   selectedDailyDropItem = 0,
   onDailyDropItemChange,
-  onDailyDropEnter
+  onDailyDropEnter,
+  isInTodaysPlaylistView = false,
+  selectedTodaysPlaylistItem = 0,
+  onTodaysPlaylistItemChange
 }) => {
   const [menuItems, setMenuItems] = useState<string[]>([]);
   const [isSignedIn, setIsSignedIn] = useState(false);
@@ -158,6 +164,12 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
     }
   };
 
+  const handleTodaysPlaylistItemClick = (index: number) => {
+    if (onTodaysPlaylistItemChange) {
+      onTodaysPlaylistItemChange(index);
+    }
+  };
+
   const handleSettingsItemHover = (item: string | null) => {
     setHoveredSettingsItem(item);
   };
@@ -251,7 +263,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
 
   return (
     <div className="h-full flex">
-      {!isInMyFiveView && (
+      {!isInMyFiveView && !isInTodaysPlaylistView && (
         <MenuPanel
           menuItems={menuItems}
           selectedMenuItem={selectedMenuItem}
@@ -303,6 +315,8 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
         isInDailyDropView={isInDailyDropView}
         selectedDailyDropItem={selectedDailyDropItem}
         hoveredDailyDropItem={hoveredDailyDropItem}
+        isInTodaysPlaylistView={isInTodaysPlaylistView}
+        selectedTodaysPlaylistItem={selectedTodaysPlaylistItem}
       />
     </div>
   );

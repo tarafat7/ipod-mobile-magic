@@ -1,3 +1,4 @@
+
 import React from 'react';
 import MenuScreen from './MenuScreen/MenuScreen';
 import MusicScreen from './MusicScreen';
@@ -53,6 +54,9 @@ interface ScreenProps {
   selectedDailyDropItem?: number;
   onDailyDropItemChange?: (index: number) => void;
   onDailyDropEnter?: () => void;
+  isInTodaysPlaylistView?: boolean;
+  selectedTodaysPlaylistItem?: number;
+  onTodaysPlaylistItemChange?: (index: number) => void;
 }
 
 const Screen: React.FC<ScreenProps> = ({ 
@@ -86,7 +90,10 @@ const Screen: React.FC<ScreenProps> = ({
   isInDailyDropView = false,
   selectedDailyDropItem = 0,
   onDailyDropItemChange,
-  onDailyDropEnter
+  onDailyDropEnter,
+  isInTodaysPlaylistView = false,
+  selectedTodaysPlaylistItem = 0,
+  onTodaysPlaylistItemChange
 }) => {
   const renderScreen = () => {
     // Handle About view
@@ -135,6 +142,9 @@ const Screen: React.FC<ScreenProps> = ({
             selectedDailyDropItem={selectedDailyDropItem}
             onDailyDropItemChange={onDailyDropItemChange}
             onDailyDropEnter={onDailyDropEnter}
+            isInTodaysPlaylistView={isInTodaysPlaylistView}
+            selectedTodaysPlaylistItem={selectedTodaysPlaylistItem}
+            onTodaysPlaylistItemChange={onTodaysPlaylistItemChange}
           />
         );
       case 'friends':
