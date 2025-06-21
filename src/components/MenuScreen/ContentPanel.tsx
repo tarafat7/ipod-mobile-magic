@@ -1,4 +1,3 @@
-
 import React from 'react';
 import FriendsScreen from '../FriendsScreen';
 import SettingsScreen from '../SettingsScreen';
@@ -9,6 +8,7 @@ import FriendsListPreview from '../FriendsListPreview';
 import DailyDropContent from './DailyDropContent';
 import MenuContentRenderer from './MenuContentRenderer';
 import TodaysPlaylistView from '../TodaysPlaylistView';
+import TodaysPlaylistHoverPreview from '../TodaysPlaylistHoverPreview';
 import { Settings, Users } from 'lucide-react';
 
 interface SpotifyTrackInfo {
@@ -73,6 +73,15 @@ const ContentPanel: React.FC<ContentPanelProps> = ({
   }
 
   if (isInDailyDropView) {
+    // Check if we're hovering over "Today's Playlist" in Daily Drop
+    if (hoveredDailyDropItem === "Today's Playlist") {
+      return (
+        <div className="w-1/2 bg-gray-50">
+          <TodaysPlaylistHoverPreview />
+        </div>
+      );
+    }
+    
     return (
       <DailyDropContent
         selectedDailyDropItem={selectedDailyDropItem}
