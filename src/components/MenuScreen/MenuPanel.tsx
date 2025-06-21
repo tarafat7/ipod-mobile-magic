@@ -52,6 +52,15 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   } else if (isInDailyDropView) {
     currentMenuItems = dailyDropMenuItems;
     currentSelectedIndex = selectedDailyDropItem;
+    
+    // Trigger hover effect for the currently selected Daily Drop item
+    const selectedDailyDropItemName = dailyDropMenuItems[selectedDailyDropItem];
+    if (onDailyDropItemHover && selectedDailyDropItemName) {
+      // Use setTimeout to ensure this runs after the component renders
+      setTimeout(() => {
+        onDailyDropItemHover(selectedDailyDropItemName);
+      }, 0);
+    }
   } else if (isInSettingsView) {
     currentMenuItems = settingsMenuItems;
     currentSelectedIndex = selectedSettingsItem;
