@@ -89,8 +89,8 @@ const TodaysPlaylistHoverPreview: React.FC = () => {
         <Music size={32} className="text-blue-600 mb-3" />
         <h3 className="font-bold text-lg mb-1">Today's Playlist</h3>
         <p className="text-sm text-gray-600 leading-tight">
-          No songs submitted yet<br />
-          Be the first to add one!
+          Submit a song to see<br />
+          today's playlist!
         </p>
       </div>
     );

@@ -93,7 +93,7 @@ const TodaysPlaylistView: React.FC<TodaysPlaylistViewProps> = ({ selectedItemInd
       <div className="h-full flex flex-col p-4 text-center overflow-y-auto">
         <Music size={32} className="text-blue-600 mb-3 mx-auto" />
         <h3 className="font-bold text-lg mb-1">Today's Playlist</h3>
-        <p className="text-sm text-gray-600">Be the first to add a song for today's prompt!</p>
+        <p className="text-sm text-gray-600">Submit a song to see today's playlist!</p>
       </div>
     );
   }

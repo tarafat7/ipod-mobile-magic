@@ -98,7 +98,7 @@ const TodaysPlaylistPreview: React.FC = () => {
       <p className="text-sm text-gray-600 text-center leading-tight mb-2">
         {submissions.length > 0 
           ? `${submissions.length} song${submissions.length !== 1 ? 's' : ''} submitted\nClick to view the playlist`
-          : "No songs submitted yet\nBe the first to add one!"
+          : "Submit a song to see\ntoday's playlist!"
         }
       </p>
     </div>
