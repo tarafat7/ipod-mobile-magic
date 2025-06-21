@@ -161,6 +161,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_old_daily_submissions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_todays_prompt: {
         Args: Record<PropertyKey, never>
         Returns: {
