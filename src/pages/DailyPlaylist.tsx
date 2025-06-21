@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '../components/ui/button';
 import { supabase } from '../integrations/supabase/client';
@@ -45,7 +44,7 @@ const DailyPlaylist = () => {
         setTodaysPrompt(promptData[0].prompt_text);
       }
 
-      // Get today's submissions with proper join
+      // Get today's submissions with proper join using user_id
       const today = new Date().toISOString().split('T')[0];
       const { data: submissionsData, error: submissionsError } = await supabase
         .from('daily_submissions')
@@ -55,7 +54,8 @@ const DailyPlaylist = () => {
           artist_name,
           album_art,
           spotify_url,
-          profiles!daily_submissions_user_id_fkey(full_name)
+          user_id,
+          profiles!user_id(full_name)
         `)
         .eq('date', today)
         .order('created_at', { ascending: true });
