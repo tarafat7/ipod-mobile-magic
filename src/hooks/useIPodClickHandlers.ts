@@ -1,16 +1,17 @@
+import { UseIPodNavigationProps } from './useIPodNavigation';
+import { UseIPodFriendsProps } from './useIPodFriends';
+import { Music } from 'lucide-react';
 
-import { useCallback } from 'react';
-
-interface ClickHandlersProps {
+interface UseIPodClickHandlersProps {
   currentUser: any;
   state: any;
-  friends: any;
-  navigation: any;
+  friends: UseIPodFriendsProps;
+  navigation: UseIPodNavigationProps;
   handleEditAccount: () => void;
   handleEditMyFive: () => void;
-  handleLogout: () => Promise<void>;
-  handleDeleteAccount: () => Promise<void>;
-  handleShareProfile: () => Promise<void>;
+  handleLogout: () => void;
+  handleDeleteAccount: () => void;
+  handleShareProfile: () => void;
   handleSongPlay: () => void;
   sharedUserSongs: any[];
 }
@@ -27,174 +28,177 @@ export const useIPodClickHandlers = ({
   handleShareProfile,
   handleSongPlay,
   sharedUserSongs
-}: ClickHandlersProps) => {
-  const handleCenterClick = useCallback(async () => {
-    console.log('Center button clicked!');
-    
-    if (state.currentScreen === 'menu') {
-      if (state.isInTodaysPlaylistView) {
-        console.log('Today\'s Playlist song selected:', state.selectedTodaysPlaylistItem);
-        // Handle opening the selected song in Spotify
-        // This will be implemented similar to handleSongPlay
-      } else if (state.isInMyFiveAuthView) {
-        console.log('My Five Auth option selected:', state.selectedMyFiveAuthOption);
-        if (state.selectedMyFiveAuthOption === 0) {
-          window.open('/signin?mode=signin', '_blank');
-        } else {  
-          window.open('/signin', '_blank');
-        }
-      } else if (state.isInMyFiveView) {
-        console.log('My Five song selected:', state.selectedMyFiveSong);
+}: UseIPodClickHandlersProps) => {
+  const handleCenterClick = () => {
+    console.log('Center button clicked', {
+      currentScreen: state.currentScreen,
+      selectedMenuItem: state.selectedMenuItem,
+      isInMyFiveView: state.isInMyFiveView,
+      isInSettingsView: state.isInSettingsView,
+      isInFriendsView: state.isInFriendsView,
+      isInFriendsListView: state.isInFriendsListView,
+      isInDailyDropView: state.isInDailyDropView,
+      isInTodaysPlaylistView: state.isInTodaysPlaylistView
+    });
+
+    // Handle My Five view
+    if (state.isInMyFiveView) {
+      if (state.isSharedView || friends.viewingFriendSongs.length > 0) {
         handleSongPlay();
-      } else if (state.isInDailyDropView) {
-        const dailyDropItems = ["Today's Prompt", 'Add a Song', "Today's Playlist"];
-        const selectedDailyDropAction = dailyDropItems[state.selectedDailyDropItem];
-        console.log('Daily Drop action selected:', selectedDailyDropAction);
-        
-        switch (selectedDailyDropAction) {
-          case "Today's Prompt":
-            console.log('Today\'s Prompt selected');
-            break;
-          case 'Add a Song':
-            console.log('Add a Song selected - navigating to add page');
-            window.location.href = '/add-daily-drop';
-            break;
-          case "Today's Playlist":
-            console.log('Today\'s Playlist selected - entering playlist view');
-            state.setIsInTodaysPlaylistView(true);
-            state.setSelectedTodaysPlaylistItem(0);
-            break;
-          default:
-            console.log('Daily Drop action not implemented:', selectedDailyDropAction);
-            break;
-        }
-      } else if (state.isInFriendsListView) {
-        const selectedFriend = friends.friendsList[state.selectedFriendsListItem];
-        if (selectedFriend) {
-          console.log('Loading friend\'s songs:', selectedFriend);
-          friends.loadFriendSongs(selectedFriend.id, selectedFriend.full_name);
-          state.setIsInMyFiveView(true);
-          state.setSelectedMyFiveSong(0);
-          state.setIsSharedView(false);
-        }
-      } else if (state.isInFriendsView) {
-        const friendsItems = ['Add a friend', 'My Friends'];
-        const selectedFriendsAction = friendsItems[state.selectedFriendsItem];
-        console.log('Friends action selected:', selectedFriendsAction);
-        
-        switch (selectedFriendsAction) {
-          case 'Add a friend':
-            window.location.href = '/search-friends';
-            break;
-          case 'My Friends':
-            state.setIsInFriendsListView(true);
-            state.setSelectedFriendsListItem(0);
-            friends.loadFriendsList(currentUser);
-            break;
-          default:
-            console.log('Friends action not implemented:', selectedFriendsAction);
-            break;
-        }
-      } else if (state.isInSettingsView) {
-        const settingsItems = ['Edit Account', 'Privacy Policy', 'Product Feedback', 'Logout', 'Delete Account'];
-        const selectedSettingsAction = settingsItems[state.selectedSettingsItem];
-        console.log('Settings action selected:', selectedSettingsAction);
-        
-        switch (selectedSettingsAction) {
-          case 'Edit Account':
-            handleEditAccount();
-            break;
-          case 'Privacy Policy':
-            console.log('Entering Privacy Policy view');
-            state.setIsInPrivacyPolicyView(true);
-            break;
-          case 'Product Feedback':
-            window.open('https://app.formbricks.com/s/cmc2iwfd7d33uu2017tjqmhji', '_blank');
-            break;
-          case 'Logout':
-            await handleLogout();
-            state.setIsInSettingsView(false);
-            state.setSelectedSettingsItem(0);
+      } else if (currentUser) {
+        handleSongPlay();
+      } else {
+        state.setIsInMyFiveAuthView(true);
+      }
+      return;
+    }
+
+    // Handle Friends view
+    if (state.isInFriendsView) {
+      if (currentUser) {
+        if (state.isInFriendsListView) {
+          const selectedFriend = friends.friendsList[state.selectedFriendsListItem];
+          if (selectedFriend) {
+            friends.setViewingFriendProfile({ full_name: selectedFriend.full_name });
+            friends.setViewingFriendId(selectedFriend.id);
+            friends.fetchFriendSongs(selectedFriend.id);
+            state.setIsInMyFiveView(true);
+            state.setIsInFriendsListView(false);
+            state.setIsInFriendsView(false);
             state.setCurrentScreen('menu');
             state.setSelectedMenuItem(0);
-            break;
-          case 'Delete Account':
-            await handleDeleteAccount();
-            state.setIsInSettingsView(false);
-            state.setSelectedSettingsItem(0);
-            state.setCurrentScreen('menu');
-            state.setSelectedMenuItem(0);
-            break;
-          default:
-            console.log('Settings action not implemented:', selectedSettingsAction);
-            break;
+          }
+        } else {
+          state.setIsInFriendsListView(true);
         }
       } else {
-        const selectedItem = state.menuItems[state.selectedMenuItem];
-        if (selectedItem === 'The Daily Drop') {
-          console.log('Entering Daily Drop view');
-          state.setIsInDailyDropView(true);
-          state.setSelectedDailyDropItem(0);
-        } else if (selectedItem === 'Sign In') {
-          console.log('Attempting to open sign-in page...');
-          const newWindow = window.open('/signin?mode=signin', '_blank');
-          console.log('Window opened:', newWindow);
-        } else if (selectedItem === 'My Five') {
-          console.log('Entering My Five view');
-          
-          if (!currentUser) {
-            console.log('User not signed in, showing auth options');
-            state.setIsInMyFiveAuthView(true);
-            state.setSelectedMyFiveAuthOption(0);
-          } else {
-            state.setIsSharedView(false);
-            friends.setViewingFriendProfile(null);
-            friends.setViewingFriendSongs([]);
+        window.location.href = '/signin';
+      }
+      return;
+    }
+
+    // Handle Settings view
+    if (state.isInSettingsView) {
+      const settingsItems = ['Edit Account', 'Edit My Five', 'Logout', 'Delete Account', 'Share Profile'];
+      const selectedAction = settingsItems[state.selectedSettingsItem];
+
+      if (selectedAction === 'Edit Account') {
+        handleEditAccount();
+      } else if (selectedAction === 'Edit My Five') {
+        handleEditMyFive();
+      } else if (selectedAction === 'Logout') {
+        handleLogout();
+      } else if (selectedAction === 'Delete Account') {
+        handleDeleteAccount();
+      } else if (selectedAction === 'Share Profile') {
+        handleShareProfile();
+      }
+      return;
+    }
+
+    // Handle Daily Drop view
+    if (state.isInDailyDropView) {
+      const dailyDropItems = ["Today's Prompt", 'Add a Song', "Today's Playlist"];
+      const selectedAction = dailyDropItems[state.selectedDailyDropItem];
+      
+      if (selectedAction === 'Add a Song') {
+        if (currentUser) {
+          window.location.href = '/manage-daily-drop';
+        } else {
+          window.location.href = '/signin';
+        }
+      } else if (selectedAction === "Today's Playlist") {
+        state.setIsInTodaysPlaylistView(true);
+        state.setSelectedTodaysPlaylistItem(0);
+      }
+      return;
+    }
+
+    // Handle menu item selection
+    switch (state.currentScreen) {
+      case 'menu':
+        const menuItems = ['My Five', 'Friends', 'Settings', 'Daily Drop', 'About', 'Privacy Policy'];
+        const selectedItem = menuItems[state.selectedMenuItem];
+
+        if (selectedItem === 'My Five') {
+          if (currentUser) {
             state.setIsInMyFiveView(true);
-            state.setSelectedMyFiveSong(0);
+            state.setCurrentScreen('menu');
+          } else {
+            state.setIsInMyFiveAuthView(true);
           }
         } else if (selectedItem === 'Friends') {
-          console.log('Entering Friends view');
           state.setIsInFriendsView(true);
-          state.setSelectedFriendsItem(0);
-        } else if (selectedItem === 'Share Profile') {
-          handleShareProfile();
+          state.setCurrentScreen('menu');
         } else if (selectedItem === 'Settings') {
-          console.log('Entering settings view');
           state.setIsInSettingsView(true);
-          state.setSelectedSettingsItem(0);
+          state.setCurrentScreen('menu');
+        } else if (selectedItem === 'Daily Drop') {
+          state.setIsInDailyDropView(true);
+          state.setCurrentScreen('menu');
         } else if (selectedItem === 'About') {
-          console.log('Entering About view');
           state.setIsInAboutView(true);
-        } else {
-          state.setIsPlaying(!state.isPlaying);
+          state.setCurrentScreen('menu');
+        } else if (selectedItem === 'Privacy Policy') {
+          state.setIsInPrivacyPolicyView(true);
+          state.setCurrentScreen('menu');
         }
-      }
-    } else if (state.currentScreen === 'music') {
-      state.setIsPlaying(!state.isPlaying);
+        break;
+      default:
+        break;
     }
-  }, [
-    currentUser,
-    state,
-    friends,
-    handleEditAccount,
-    handleEditMyFive,
-    handleLogout,
-    handleDeleteAccount,
-    handleShareProfile,
-    handleSongPlay,
-    sharedUserSongs
-  ]);
+  };
 
-  const handleBackClick = useCallback(() => {
-    console.log('Back button clicked - same as menu');
-    navigation.handleMenuClick();
-  }, [navigation]);
+  const handleBackClick = () => {
+    console.log('Back button clicked', {
+      currentScreen: state.currentScreen,
+      isInSettingsView: state.isInSettingsView,
+      isInMyFiveView: state.isInMyFiveView,
+      isInFriendsView: state.isInFriendsView,
+      isInFriendsListView: state.isInFriendsListView,
+      isInAboutView: state.isInAboutView,
+      isInPrivacyPolicyView: state.isInPrivacyPolicyView,
+      isInMyFiveAuthView: state.isInMyFiveAuthView,
+      isInDailyDropView: state.isInDailyDropView,
+      isInTodaysPlaylistView: state.isInTodaysPlaylistView
+    });
 
-  const handleForwardClick = useCallback(() => {
-    console.log('Forward button clicked - same as center');
-    handleCenterClick();
-  }, [handleCenterClick]);
+    if (state.isInSettingsView) {
+      state.setIsInSettingsView(false);
+      state.setCurrentScreen('menu');
+    } else if (state.isInMyFiveView) {
+      state.setIsInMyFiveView(false);
+      state.setCurrentScreen('menu');
+      friends.setViewingFriendProfile(null);
+      friends.setViewingFriendSongs([]);
+      friends.setViewingFriendId(null);
+    } else if (state.isInFriendsView) {
+      state.setIsInFriendsView(false);
+      state.setCurrentScreen('menu');
+    } else if (state.isInFriendsListView) {
+      state.setIsInFriendsListView(false);
+      state.setCurrentScreen('menu');
+    } else if (state.isInAboutView) {
+      state.setIsInAboutView(false);
+      state.setCurrentScreen('menu');
+    } else if (state.isInPrivacyPolicyView) {
+      state.setIsInPrivacyPolicyView(false);
+      state.setCurrentScreen('menu');
+    } else if (state.isInMyFiveAuthView) {
+      state.setIsInMyFiveAuthView(false);
+      state.setCurrentScreen('menu');
+    } else if (state.isInDailyDropView) {
+      state.setIsInDailyDropView(false);
+      state.setCurrentScreen('menu');
+    } else if (state.isInTodaysPlaylistView) {
+      state.setIsInTodaysPlaylistView(false);
+      state.setCurrentScreen('menu');
+    }
+  };
+
+  const handleForwardClick = () => {
+    console.log('Forward button clicked');
+  };
 
   return {
     handleCenterClick,
