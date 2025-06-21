@@ -164,6 +164,10 @@ export type Database = {
           prompt_text: string
         }[]
       }
+      user_has_submitted_today: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

@@ -21,7 +21,6 @@ interface TodaysPlaylistViewProps {
 const TodaysPlaylistView: React.FC<TodaysPlaylistViewProps> = ({ selectedItemIndex }) => {
   const [submissions, setSubmissions] = useState<PlaylistSubmission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [debugInfo, setDebugInfo] = useState<string>('');
 
   useEffect(() => {
     fetchTodaysSubmissions();
@@ -29,32 +28,7 @@ const TodaysPlaylistView: React.FC<TodaysPlaylistViewProps> = ({ selectedItemInd
 
   const fetchTodaysSubmissions = async () => {
     try {
-      const debugMessages: string[] = [];
-      
-      // Get current user info
-      const { data: { user } } = await supabase.auth.getUser();
-      debugMessages.push(`User ID: ${user?.id || 'Not logged in'}`);
-      
-      // First, let's see ALL submissions to debug
-      const { data: allData, error: allError } = await supabase
-        .from('daily_submissions')
-        .select('*');
-      
-      debugMessages.push(`Total submissions in DB: ${allData?.length || 0}`);
-      if (allError) debugMessages.push(`Error fetching all: ${allError.message}`);
-      
-      // Try with today's date in multiple formats
-      const today = new Date().toISOString().split('T')[0];
-      const todayLocal = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD format
-      debugMessages.push(`Today (ISO): ${today}`);
-      debugMessages.push(`Today (Local): ${todayLocal}`);
-      
-      // Try recent submissions (last 3 days)
-      const threeDaysAgo = new Date();
-      threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-      const threeDaysAgoStr = threeDaysAgo.toISOString().split('T')[0];
-      
-      const { data: recentData, error: recentError } = await supabase
+      const { data, error } = await supabase
         .from('daily_submissions')
         .select(`
           id,
@@ -63,51 +37,42 @@ const TodaysPlaylistView: React.FC<TodaysPlaylistViewProps> = ({ selectedItemInd
           album_art,
           spotify_url,
           user_id,
-          date,
           created_at
         `)
-        .gte('date', threeDaysAgoStr)
+        .eq('date', new Date().toISOString().split('T')[0])
         .order('created_at', { ascending: false });
-      
-      debugMessages.push(`Recent submissions (last 3 days): ${recentData?.length || 0}`);
-      if (recentError) debugMessages.push(`Recent error: ${recentError.message}`);
-      
-      if (recentData && recentData.length > 0) {
-        debugMessages.push('Recent submission dates:');
-        recentData.forEach((sub, idx) => {
-          debugMessages.push(`  ${idx + 1}. Date: ${sub.date}, User: ${sub.user_id}, Track: ${sub.track_name}`);
-        });
-        
-        // Get profiles for recent submissions
-        const userIds = recentData.map(submission => submission.user_id);
+
+      if (error) {
+        console.error('Error fetching submissions:', error);
+        setSubmissions([]);
+      } else if (data && data.length > 0) {
+        // Get profiles for submissions
+        const userIds = data.map(submission => submission.user_id);
         const { data: profilesData, error: profilesError } = await supabase
           .from('profiles')
           .select('id, full_name')
           .in('id', userIds);
 
-        debugMessages.push(`Profiles found: ${profilesData?.length || 0}`);
-        if (profilesError) debugMessages.push(`Profiles error: ${profilesError.message}`);
-
-        const combined = recentData.map(submission => {
-          const profile = profilesData?.find(p => p.id === submission.user_id);
-          return {
-            ...submission,
-            profiles: {
-              full_name: profile?.full_name || 'Unknown User'
-            }
-          };
-        });
-        
-        debugMessages.push(`Final combined submissions: ${combined.length}`);
-        setSubmissions(combined);
+        if (profilesError) {
+          console.error('Error fetching profiles:', profilesError);
+          setSubmissions([]);
+        } else {
+          const combined = data.map(submission => {
+            const profile = profilesData?.find(p => p.id === submission.user_id);
+            return {
+              ...submission,
+              profiles: {
+                full_name: profile?.full_name || 'Unknown User'
+              }
+            };
+          });
+          setSubmissions(combined);
+        }
       } else {
-        debugMessages.push('No recent submissions found');
         setSubmissions([]);
       }
-      
-      setDebugInfo(debugMessages.join('\n'));
     } catch (error) {
-      setDebugInfo(`Error: ${error}`);
+      console.error('Error fetching submissions:', error);
       setSubmissions([]);
     } finally {
       setIsLoading(false);
@@ -130,10 +95,7 @@ const TodaysPlaylistView: React.FC<TodaysPlaylistViewProps> = ({ selectedItemInd
       <div className="h-full flex flex-col p-4 text-center overflow-y-auto">
         <Music size={32} className="text-gray-400 mb-3 mx-auto" />
         <h3 className="font-bold text-lg mb-1">No submissions found</h3>
-        <div className="mt-4 p-2 bg-gray-100 rounded text-xs text-left">
-          <h4 className="font-bold mb-2">Debug Info:</h4>
-          <pre className="whitespace-pre-wrap text-xs">{debugInfo}</pre>
-        </div>
+        <p className="text-sm text-gray-600">Be the first to add a song for today's prompt!</p>
       </div>
     );
   }
@@ -154,14 +116,6 @@ const TodaysPlaylistView: React.FC<TodaysPlaylistViewProps> = ({ selectedItemInd
             <span>{submissions.length}</span>
           </div>
         </div>
-      </div>
-
-      {/* Debug Info Toggle */}
-      <div className="p-2 border-b border-gray-200 bg-yellow-50">
-        <details className="text-xs">
-          <summary className="cursor-pointer font-medium">Debug Info (tap to expand)</summary>
-          <pre className="mt-2 whitespace-pre-wrap text-xs bg-white p-2 rounded border">{debugInfo}</pre>
-        </details>
       </div>
 
       {/* Current Selection Display */}

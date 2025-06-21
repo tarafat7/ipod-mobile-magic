@@ -17,7 +17,6 @@ interface PlaylistSubmission {
 const TodaysPlaylistPreview: React.FC = () => {
   const [submissions, setSubmissions] = useState<PlaylistSubmission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [debugInfo, setDebugInfo] = useState<string>('');
 
   useEffect(() => {
     fetchTodaysSubmissions();
@@ -25,18 +24,6 @@ const TodaysPlaylistPreview: React.FC = () => {
 
   const fetchTodaysSubmissions = async () => {
     try {
-      const debugMessages: string[] = [];
-      
-      // Get current user info for debugging
-      const { data: { user } } = await supabase.auth.getUser();
-      debugMessages.push(`Preview - User: ${user?.id || 'Not logged in'}`);
-      
-      // Get recent submissions (last 3 days) for better chance of finding data
-      const threeDaysAgo = new Date();
-      threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-      const threeDaysAgoStr = threeDaysAgo.toISOString().split('T')[0];
-      debugMessages.push(`Looking for submissions since: ${threeDaysAgoStr}`);
-      
       const { data, error } = await supabase
         .from('daily_submissions')
         .select(`
@@ -45,17 +32,13 @@ const TodaysPlaylistPreview: React.FC = () => {
           artist_name,
           album_art,
           spotify_url,
-          user_id,
-          date
+          user_id
         `)
-        .gte('date', threeDaysAgoStr);
-
-      debugMessages.push(`Preview query result: ${data?.length || 0} submissions found`);
-      if (error) debugMessages.push(`Preview error: ${error.message}`);
+        .eq('date', new Date().toISOString().split('T')[0]);
 
       if (error) {
+        console.error('Error fetching submissions:', error);
         setSubmissions([]);
-        setDebugInfo(debugMessages.join('\n'));
       } else if (data && data.length > 0) {
         // Fetch profile data separately
         const userIds = data.map(submission => submission.user_id);
@@ -64,10 +47,8 @@ const TodaysPlaylistPreview: React.FC = () => {
           .select('id, full_name')
           .in('id', userIds);
 
-        debugMessages.push(`Preview profiles: ${profilesData?.length || 0} found`);
-        if (profilesError) debugMessages.push(`Preview profiles error: ${profilesError.message}`);
-
         if (profilesError) {
+          console.error('Error fetching profiles:', profilesError);
           setSubmissions([]);
         } else {
           // Combine the data
@@ -80,17 +61,13 @@ const TodaysPlaylistPreview: React.FC = () => {
               }
             };
           });
-          debugMessages.push(`Preview final: ${combined.length} submissions with profiles`);
           setSubmissions(combined);
         }
       } else {
-        debugMessages.push('Preview: No submissions found');
         setSubmissions([]);
       }
-      
-      setDebugInfo(debugMessages.join('\n'));
     } catch (error) {
-      setDebugInfo(`Preview error: ${error}`);
+      console.error('Error fetching submissions:', error);
       setSubmissions([]);
     } finally {
       setIsLoading(false);
@@ -120,19 +97,11 @@ const TodaysPlaylistPreview: React.FC = () => {
         }
       </p>
       {submissions.length > 0 && (
-        <div className="flex items-center space-x-1 text-xs text-gray-500 mb-2">
+        <div className="flex items-center space-x-1 text-xs text-gray-500">
           <Users size={12} />
           <span>{submissions.length} contributors</span>
         </div>
       )}
-      
-      {/* Debug info for mobile */}
-      <details className="text-xs mt-2 w-full">
-        <summary className="cursor-pointer text-gray-500">Debug (tap to see)</summary>
-        <div className="mt-1 p-2 bg-gray-100 rounded text-left">
-          <pre className="whitespace-pre-wrap text-xs">{debugInfo}</pre>
-        </div>
-      </details>
     </div>
   );
 };
