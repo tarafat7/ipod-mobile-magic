@@ -42,7 +42,7 @@ export const useIPodClickHandlers = ({
         console.log('My Five song selected:', state.selectedMyFiveSong);
         handleSongPlay();
       } else if (state.isInDailyDropView) {
-        const dailyDropItems = ["Today's Prompt", 'Add a Song', 'View Today\'s Playlist'];
+        const dailyDropItems = ["Today's Prompt", 'Add a Song', "Today's Playlist"];
         const selectedDailyDropAction = dailyDropItems[state.selectedDailyDropItem];
         console.log('Daily Drop action selected:', selectedDailyDropAction);
         
@@ -54,8 +54,9 @@ export const useIPodClickHandlers = ({
             console.log('Add a Song selected - navigating to add page');
             window.location.href = '/add-daily-drop';
             break;
-          case 'View Today\'s Playlist':
-            console.log('View Today\'s Playlist selected');
+          case "Today's Playlist":
+            console.log("Today's Playlist selected");
+            window.location.href = '/daily-playlist';
             break;
           default:
             console.log('Daily Drop action not implemented:', selectedDailyDropAction);
