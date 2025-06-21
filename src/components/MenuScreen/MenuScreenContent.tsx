@@ -2,7 +2,6 @@
 import React from 'react';
 import FriendsScreen from '../FriendsScreen';
 import SettingsScreen from '../SettingsScreen';
-import DailyDropScreen from '../DailyDropScreen';
 import { User, Music } from 'lucide-react';
 
 interface MenuScreenContentProps {
@@ -59,10 +58,20 @@ const MenuScreenContent: React.FC<MenuScreenContentProps> = ({
     case 'Friends':
       return <FriendsScreen />;
     case 'The Daily Drop':
-      if (showDailyDropMenu) {
-        return <DailyDropScreen />;
-      }
-      return <DailyDropScreen />;
+      return (
+        <div className="h-full flex flex-col items-center justify-center p-4 text-center">
+          <div className="w-16 h-16 bg-black rounded-xl flex items-center justify-center mb-3">
+            <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
+              <div className="w-6 h-6 bg-orange-600 rounded-md"></div>
+            </div>
+          </div>
+          <h3 className="font-bold text-lg mb-1">The Daily Drop</h3>
+          <p className="text-sm text-gray-600 text-center leading-tight">
+            A global playlist built<br />
+            daily around a prompt
+          </p>
+        </div>
+      );
     case 'Settings':
       if (showSettingsMenu && isSignedIn) {
         return (

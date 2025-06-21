@@ -1,4 +1,3 @@
-
 import React from 'react';
 import MenuScreen from './MenuScreen/MenuScreen';
 import MusicScreen from './MusicScreen';
@@ -7,7 +6,6 @@ import SettingsScreen from './SettingsScreen';
 import AboutScreen from './AboutScreen';
 import PrivacyPolicyScreen from './PrivacyPolicyScreen';
 import MyFiveAuthScreen from './MyFiveAuthScreen';
-import DailyDropScreen from './DailyDropScreen';
 import { Song } from '../types/iPod';
 import { songs } from '../data/iPodData';
 
