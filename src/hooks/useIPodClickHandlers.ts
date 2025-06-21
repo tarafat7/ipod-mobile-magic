@@ -34,8 +34,11 @@ export const useIPodClickHandlers = ({
     if (state.currentScreen === 'menu') {
       if (state.isInTodaysPlaylistView) {
         console.log('Today\'s Playlist song selected:', state.selectedTodaysPlaylistItem);
-        // Handle opening the selected song in Spotify
-        // This will be implemented similar to handleSongPlay
+        // Dispatch custom event for Today's Playlist song selection
+        const event = new CustomEvent('todaysPlaylistSongSelect', { 
+          detail: { songIndex: state.selectedTodaysPlaylistItem } 
+        });
+        window.dispatchEvent(event);
       } else if (state.isInMyFiveAuthView) {
         console.log('My Five Auth option selected:', state.selectedMyFiveAuthOption);
         if (state.selectedMyFiveAuthOption === 0) {

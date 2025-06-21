@@ -90,7 +90,7 @@ const TodaysPlaylistHoverPreview: React.FC = () => {
         <h3 className="font-bold text-lg mb-1">Today's Playlist</h3>
         <p className="text-sm text-gray-600 leading-tight">
           Submit a song to see<br />
-          today's playlist!
+          today's playlist
         </p>
       </div>
     );

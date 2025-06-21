@@ -26,6 +26,25 @@ const TodaysPlaylistView: React.FC<TodaysPlaylistViewProps> = ({ selectedItemInd
     fetchTodaysSubmissions();
   }, []);
 
+  useEffect(() => {
+    const handleTodaysPlaylistSongSelect = (event: CustomEvent) => {
+      const { songIndex } = event.detail;
+      console.log('Today\'s Playlist song selected:', songIndex);
+      
+      if (submissions[songIndex]) {
+        const selectedSong = submissions[songIndex];
+        console.log('Opening Spotify URL:', selectedSong.spotify_url);
+        window.open(selectedSong.spotify_url, '_blank');
+      }
+    };
+
+    window.addEventListener('todaysPlaylistSongSelect', handleTodaysPlaylistSongSelect as EventListener);
+    
+    return () => {
+      window.removeEventListener('todaysPlaylistSongSelect', handleTodaysPlaylistSongSelect as EventListener);
+    };
+  }, [submissions]);
+
   const fetchTodaysSubmissions = async () => {
     try {
       const { data, error } = await supabase
@@ -93,7 +112,7 @@ const TodaysPlaylistView: React.FC<TodaysPlaylistViewProps> = ({ selectedItemInd
       <div className="h-full flex flex-col p-4 text-center overflow-y-auto">
         <Music size={32} className="text-blue-600 mb-3 mx-auto" />
         <h3 className="font-bold text-lg mb-1">Today's Playlist</h3>
-        <p className="text-sm text-gray-600">Submit a song to see today's playlist!</p>
+        <p className="text-sm text-gray-600">Submit a song to see today's playlist</p>
       </div>
     );
   }
