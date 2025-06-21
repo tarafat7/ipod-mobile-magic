@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { getMenuItems } from '../data/iPodData';
 import { supabase } from '../integrations/supabase/client';
@@ -170,8 +171,12 @@ export const useIPodNavigation = (props: NavigationProps) => {
     
     if (currentScreen === 'menu') {
       if (props.isInTodaysPlaylistView) {
-        // Handle Today's Playlist navigation - will be implemented with dynamic count
-        const playlistItemsCount = 10; // This will be dynamic based on actual submissions
+        // Get the actual submissions count from the DOM or use a reasonable default
+        const playlistContainer = document.querySelector('[data-playlist-items]');
+        const playlistItemsCount = playlistContainer 
+          ? playlistContainer.children.length 
+          : 1; // Default to 1 to prevent division by zero
+        
         const newSelection = isClockwise 
           ? (props.selectedTodaysPlaylistItem + 1) % Math.max(playlistItemsCount, 1)
           : (props.selectedTodaysPlaylistItem - 1 + Math.max(playlistItemsCount, 1)) % Math.max(playlistItemsCount, 1);

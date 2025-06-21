@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { Music, Users } from 'lucide-react';
@@ -152,7 +151,7 @@ const TodaysPlaylistView: React.FC<TodaysPlaylistViewProps> = ({ selectedItemInd
 
       {/* Submissions List */}
       <div className="flex-1 overflow-hidden">
-        <div className="p-2">
+        <div className="p-2" data-playlist-items>
           {submissions.map((submission, index) => (
             <div
               key={submission.id}
